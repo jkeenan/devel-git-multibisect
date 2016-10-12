@@ -1,0 +1,14 @@
+#!/usr/bin/env perl
+# multisect:  command-line utility implementing Test::Multisect
+eval 'exec /usr/bin/env perl  -S $0 ${1+"$@"}'
+  if 0;    # not running under some shell
+use strict;
+use warnings;
+use Test::Multisect;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
