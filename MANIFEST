@@ -1,9 +1,10 @@
 Changes
 lib/Test/Multisect.pm
+lib/Test/Multisect/Opts.pm
 LICENSE
 Makefile.PL
 MANIFEST
 README
 scripts/multisect
-t/001_load.t
+t/001-opts.t
 Todo

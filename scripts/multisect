@@ -4,7 +4,12 @@ eval 'exec /usr/bin/env perl  -S $0 ${1+"$@"}'
   if 0;    # not running under some shell
 use strict;
 use warnings;
-use Test::Multisect;
+use Test::Multisect::Opts qw( process_options );
+use Carp;
+use Cwd;
+use Data::Dumper;
+use Data::Dump qw(pp);
+use Getopt::Long;
 
 =head1 NAME
 
@@ -54,26 +59,31 @@ who had been contributing smoke tests for FreeBSD-10.3 now began testing Perl 5
 blead on FreeBSD-11 as well.  Test failures quickly showed up in
 F<lib/locale.t>.  Use of F<git bisect> suggested that the first commit of that
 file to fail was made months earlier, in May 2016.  More surprisingly, the
-specific content of the test fialure in May was B<different> from the same
+specific content of the test failure in May was B<different> from the same
 file's failure content in October.  The inference:  Changes in locale-related
 code were failing at B<multiple> points on FreeBSD-11 over that six-month
 period.  But since no smoke test reports were being submitted from FreeBSD-11
 during that time, the failures were undetected.
 
 As an aid to diagnosing the problem, we identified the most recent commit at
-which F<lib/locale.t> tested successfuly on FreeBSD-11.  We tested the next commit -- the
-first failing commit -- and were surprised to find that its specific failure content was different
-from what we were observing at the HEAD of blead.  This raised the possibility of multiple locale-related
-problems emerging at different points during that six-month period.  We then built the
+which F<lib/locale.t> tested successfuly on FreeBSD-11.  We tested the next
+commit -- the first failing commit -- and were surprised to find that its
+specific failure content was different from what we were observing at the HEAD
+of blead.  This raised the possibility of multiple locale-related problems
+emerging at different points during that six-month period.  We then built the
 F<minor> versions of Perl 5 released during this time:  5.25.1, 5.25.2, etc.  We
-noted that at 5.25.1 all tests in F<lib/locale.t> were passing, but by 5.25.2 the same
-failures we were seeing at HEAD were already present.  We decided to capture the output
-of F<lib/locale.t> at B<every> commit from the first failing commit to the commit at which
-that file began to fail in the same way as at HEAD.
+noted that at 5.25.1 all tests in F<lib/locale.t> were passing, but by 5.25.2
+the same failures we were seeing at HEAD were already present.  We decided to
+capture the output of F<lib/locale.t> at B<every> commit from the first failing
+commit to the commit at which that file began to fail in the same way as at
+HEAD.
 
 That was the inspiration for F<multisect>.
 
 =cut
+
+my $params = process_options();
+pp($params);
 
 # Local Variables:
 #   mode: cperl
