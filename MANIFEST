@@ -7,4 +7,5 @@ MANIFEST
 README
 scripts/multisect
 t/001-opts.t
+t/002-new.t
 Todo

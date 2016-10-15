@@ -1,6 +1,7 @@
 package Test::Multisect::Opts;
 use strict;
 use warnings;
+our $VERSION = '0.01';
 use base qw( Exporter );
 our @EXPORT_OK = qw(
     process_options
@@ -135,10 +136,6 @@ sub process_options {
 
     # Should we test for presence of these directories in an
     # options-processing module or in the main module?  TODO
-#    for my $dir ( qw| gitdir workdir outputdir | ) {
-#        croak("Could not locate directory $params{dir}")
-#            unless (-d $params{dir});
-#    }
     return \%params;
 }
 

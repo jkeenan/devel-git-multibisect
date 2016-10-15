@@ -3,12 +3,12 @@ check_bin('git');
 
 use ExtUtils::MakeMaker;
 
-my %MakefileArgs = (
+my %WriteMakefileArgs = (
     NAME         => 'Test::Multisect',
     VERSION_FROM => 'lib/Test/Multisect.pm', # finds \$VERSION
     AUTHOR       => 'James E Keenan (jkeenan@cpan.org)',
     ABSTRACT     => 'Run test file(s) at consecutive git commits',
-    CONFIGURE_REQURES => {
+    CONFIGURE_REQUIRES => {
         'Devel::CheckBin' => 0,
         'ExtUtils::MakeMaker' => 0,
     },
@@ -26,8 +26,8 @@ my %MakefileArgs = (
 );
 
 my %FallbackPrereqs = (
-    %{$MakefileArgs{PREREQ_PM}},
-    %{$MakefileArgs{TEST_REQUIRES}},
+    %{$WriteMakefileArgs{PREREQ_PM}},
+    %{$WriteMakefileArgs{TEST_REQUIRES}},
 );
 
 unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
