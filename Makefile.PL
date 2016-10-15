@@ -1,14 +1,42 @@
-
+use Devel::CheckBin;
+check_bin('git');
 
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-WriteMakefile(
+
+my %MakefileArgs = (
     NAME         => 'Test::Multisect',
     VERSION_FROM => 'lib/Test/Multisect.pm', # finds \$VERSION
     AUTHOR       => 'James E Keenan (jkeenan@cpan.org)',
     ABSTRACT     => 'Run test file(s) at consecutive git commits',
+    CONFIGURE_REQURES => {
+        'Devel::CheckBin' => 0,
+        'ExtUtils::MakeMaker' => 0,
+    },
     PREREQ_PM    => {
-                     'Test::Simple' => 0.44,
-                    },
+        'Carp' => 0,
+        'Cwd' => 0,
+        'Data::Dumper' => 0,
+        'Getopt::Long' => 0,
+        'strict' => 0,
+        'warnings' => 0,
+    },
+    TEST_REQUIRES => {
+        'Test::Simple' => 0.44,
+    },
 );
+
+my %FallbackPrereqs = (
+    %{$MakefileArgs{PREREQ_PM}},
+    %{$MakefileArgs{TEST_REQUIRES}},
+);
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
+  delete $WriteMakefileArgs{TEST_REQUIRES};
+  delete $WriteMakefileArgs{BUILD_REQUIRES};
+  $WriteMakefileArgs{PREREQ_PM} = \%FallbackPrereqs;
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);

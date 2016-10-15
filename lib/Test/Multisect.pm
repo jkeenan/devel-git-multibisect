@@ -1,17 +1,23 @@
 package Test::Multisect;
 use strict;
+use warnings;
+use Test::Multisect::Opts qw( process_options );
+use Carp;
+use Cwd;
+use Data::Dumper;
+use Data::Dump qw( pp );
 
-BEGIN {
-    use Exporter ();
-    use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = '0.01';
-    @ISA         = qw(Exporter);
-    #Give a hoot don't pollute, do not export more than needed by default
-    @EXPORT      = qw();
-    @EXPORT_OK   = qw();
-    %EXPORT_TAGS = ();
+our $VERSION = '0.01';
+
+sub new {
+    my ($class, $params) = @_;
+    my %data;
+
+    while (my ($k,$v) = each %{$params}) {
+        $data{params}{$k} = $v;
+    }
+
 }
-
 
 1;
 # The preceding line will help the module return a true value
