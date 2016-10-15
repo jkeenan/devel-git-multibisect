@@ -5,6 +5,7 @@ use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
 use Test::More qw(no_plan); # tests => 18;
+use Data::Dump qw(pp);
 
 # Before releasing this to cpan I'll have to figure out how to embed a real
 # git repository within this repository.
@@ -64,9 +65,9 @@ my ($bad_gitdir, @bad_targets, $bad_last_before, $bad_last);
     $args{last_before} = $bad_last_before;
     $params = process_options(%args);
     eval { $self = Test::Multisect->new($params); };
-#    like($@, qr/Cannot find files to be tested: $params->{gitdir}\/$bad_last_before[1]/,
-#        "Got expected error: Cannot find test file: $bad_last_before[1]"
-#    );
+    like($@, qr/fatal:/s,
+        "Got expected error: bad last_before"
+    );
     $args{last_before} = $good_last_before;
 }
 
@@ -76,9 +77,9 @@ my ($bad_gitdir, @bad_targets, $bad_last_before, $bad_last);
     $args{last} = $bad_last;
     $params = process_options(%args);
     eval { $self = Test::Multisect->new($params); };
-#    like($@, qr/Cannot find files to be tested: $params->{gitdir}\/$bad_last[1]/,
-#        "Got expected error: Cannot find test file: $bad_last[1]"
-#    );
+    like($@, qr/fatal:/s,
+        "Got expected error: bad last"
+    );
     $args{last} = $good_last;
 }
 
