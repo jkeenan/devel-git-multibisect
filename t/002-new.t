@@ -83,3 +83,24 @@ my ($bad_gitdir, @bad_targets, $bad_last_before, $bad_last);
     $args{last} = $good_last;
 }
 
+my ($good_first, $bad_first);
+delete $args{last_before};
+$good_first = '2a2e54af709f17cc6186b42840549c46478b6467';
+$args{first} = $good_first;
+$params = process_options(%args);
+$self = Test::Multisect->new($params);
+ok($self, "new() returned true value");
+isa_ok($self, 'Test::Multisect');
+
+{
+    local $@;
+    $bad_first = 'yyyyy';
+    $args{first} = $bad_first;
+    $params = process_options(%args);
+    eval { $self = Test::Multisect->new($params); };
+    like($@, qr/fatal:/s,
+        "Got expected error: bad first"
+    );
+    $args{first} = $good_first;
+}
+

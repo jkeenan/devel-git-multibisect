@@ -55,20 +55,19 @@ sub new {
     if ($data{last_before}) {
         $data{last_before_short} = substr($data{last_before}, 0, $data{short});
         $older = '^' . $data{last_before_short};
-        #@commits = qx(git rev-list --reverse $older $data{last});
-        @commits = `git rev-list --reverse ^$data{last_before_short} $data{last} 2>$err`;
-        if (! -z $err) {
-            open my $FH, '<', $err or croak "Unable to open";
-            my $error = <$FH>;
-            chomp($error);
-            close $FH or croak "Unable to close";
-            croak $error;
-        }
+        @commits = `git rev-list --reverse $older $data{last} 2>$err`;
     }
     else {
         $data{first_short} = substr($data{first}, 0, $data{short});
         $older = $data{first_short} . '^';
-        @commits = qx(git rev-list --reverse $older..$data{last});
+        @commits = `git rev-list --reverse $older $data{last} 2>$err`;
+    }
+    if (! -z $err) {
+        open my $FH, '<', $err or croak "Unable to open";
+        my $error = <$FH>;
+        chomp($error);
+        close $FH or croak "Unable to close";
+        croak $error;
     }
     $data{commits} = [ @commits ];
 
