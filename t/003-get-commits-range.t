@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More qw(no_plan); # tests =>  9;
+use Test::More tests => 10;
 
 # Before releasing this to cpan I'll have to figure out how to embed a real
 # git repository within this repository.

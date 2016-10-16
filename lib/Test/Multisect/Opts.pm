@@ -128,14 +128,11 @@ sub process_options {
         outputdir
 
         gitdir
-        targets
         last
     | ) {
         croak "Undefined parameter: $p" unless defined $params{$p};
     }
 
-    # Should we test for presence of these directories in an
-    # options-processing module or in the main module?  TODO
     return \%params;
 }
 

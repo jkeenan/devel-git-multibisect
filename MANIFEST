@@ -8,4 +8,6 @@ README
 scripts/multisect
 t/001-opts.t
 t/002-new.t
+t/003-get-commits-range.t
+t/004-set-targets.t
 Todo

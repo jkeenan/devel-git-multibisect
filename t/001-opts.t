@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 18;
+use Test::More tests => 17;
 
 {
     local $@;
@@ -42,10 +42,6 @@ use Test::More tests => 18;
     );
 }
 
-#        gitdir
-#        targets
-#        last
-
 {
     local $@;
     eval {
@@ -58,21 +54,6 @@ use Test::More tests => 18;
     };
     like($@, qr/Undefined parameter: gitdir/,
         "Got expected error message: Lack 'gitdir'"
-    );
-}
-
-{
-    local $@;
-    eval {
-        process_options(
-            last_before => '12345ab',
-            gitdir => '/path/to/gitdir',
-            # targets => [ '/path/to/test/file' ],
-            last => '67890ab',
-        );
-    };
-    like($@, qr/Undefined parameter: targets/,
-        "Got expected error message: Lack 'targets'"
     );
 }
 

@@ -19,7 +19,6 @@ sub new {
     }
     # What do we have to test for before proceeding?
     # existence of directories workdir, outputdir, gitdir
-    # existence of each file in @{$data{targets}}
 
     my @missing_dirs = ();
     for my $dir ( qw| gitdir workdir outputdir | ) {
@@ -28,16 +27,6 @@ sub new {
     }
     if (@missing_dirs) {
         croak "Cannot find directory(ies): @missing_dirs";
-    }
-
-    my @missing_files = ();
-    for my $f (@{$data{targets}}) {
-        my $ff = "$data{gitdir}/$f";
-        push @missing_files, $ff
-            unless (-e $ff);
-    }
-    if (@missing_files) {
-        croak "Cannot find files to be tested: @missing_files";
     }
 
     # What will we eventually have to test for (or croak otherwise)?
@@ -56,13 +45,11 @@ sub new {
         $data{last_before_short} = substr($data{last_before}, 0, $data{short});
         $older = '^' . $data{last_before_short};
         $cmd = "git rev-list --reverse $older $data{last} 2>$err";
-        #print STDERR "AAA: last_before: <$cmd>\n";
     }
     else {
         $data{first_short} = substr($data{first}, 0, $data{short});
         $older = $data{first_short} . '^';
         $cmd = "git rev-list --reverse ${older}..$data{last} 2>$err";
-        #print STDERR "BBB: first:       <$cmd>\n";
     }
     chomp(@commits = `$cmd`);
     if (! -z $err) {
@@ -80,6 +67,28 @@ sub new {
 sub get_commits_range {
     my $self = shift;
     return $self->{commits};
+}
+
+sub set_targets {
+    my ($self, $targets) = @_;
+
+    # If set_targets() is provided with an appropriate argument, override
+    # whatever may have been stored in the object by new().
+
+    if (defined $targets and ref($targets) eq 'ARRAY') {
+        $self->{targets} = $targets;
+    }
+
+    my @missing_files = ();
+    my @full_targets = map { "$self->{gitdir}/$_" } @{$self->{targets}};
+    for my $f (@full_targets) {
+        push @missing_files, $f
+            unless (-e $f);
+    }
+    if (@missing_files) {
+        croak "Cannot find file(s) to be tested: @missing_files";
+    }
+    return \@full_targets;
 }
 
 sub run_one_file_on_one_commit {
@@ -106,5 +115,4 @@ sub run_one_file_on_one_commit {
 }
 
 1;
-# The preceding line will help the module return a true value
 
