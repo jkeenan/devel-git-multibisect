@@ -50,28 +50,59 @@ sub new {
 
     $data{last_short} = substr($data{last}, 0, $data{short});
     my @commits = ();
-    my $older;
+    my ($older, $cmd);
     my ($fh, $err) = File::Temp::tempfile();
     if ($data{last_before}) {
         $data{last_before_short} = substr($data{last_before}, 0, $data{short});
         $older = '^' . $data{last_before_short};
-        @commits = `git rev-list --reverse $older $data{last} 2>$err`;
+        $cmd = "git rev-list --reverse $older $data{last} 2>$err";
+        #print STDERR "AAA: last_before: <$cmd>\n";
     }
     else {
         $data{first_short} = substr($data{first}, 0, $data{short});
         $older = $data{first_short} . '^';
-        @commits = `git rev-list --reverse $older $data{last} 2>$err`;
+        $cmd = "git rev-list --reverse ${older}..$data{last} 2>$err";
+        #print STDERR "BBB: first:       <$cmd>\n";
     }
+    chomp(@commits = `$cmd`);
     if (! -z $err) {
-        open my $FH, '<', $err or croak "Unable to open";
+        open my $FH, '<', $err or croak "Unable to open $err for reading";
         my $error = <$FH>;
         chomp($error);
-        close $FH or croak "Unable to close";
+        close $FH or croak "Unable to close $err after reading";
         croak $error;
     }
     $data{commits} = [ @commits ];
 
     return bless \%data, $class;
+}
+
+sub get_commits_range {
+    my $self = shift;
+    return $self->{commits};
+}
+
+sub run_one_file_on_one_commit {
+    my ($self, $commit) = @_;
+
+    chdir $self->{workdir} or croak "Unable to change to $self->{workdir}";
+    system(qq|git clean -dfx|) and croak "Unable to 'git clean -dfx'";
+    system(qq|git checkout $commit|) and croak "Unable to 'git checkout $commit";
+    system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
+    system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
+    my $this_test = "$self->{gitdir}/$self->{targets}->[0]";
+    my $outputfile = join('/' => (
+        $self->{outputdir},
+        join('.' => (
+            $self->{targets}->[0],
+            'output',
+            'txt'
+        )),
+    ));
+    system(qq|$self->{test_command} $this_test >$outputfile 2>&1| )
+        and croak "Unable to run '$self->{test_command})'";
+    print "Creating $outputfile\n" if $self->{verbose};
+    return $outputfile;
 }
 
 1;
