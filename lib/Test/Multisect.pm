@@ -85,7 +85,7 @@ sub get_commits_range {
 sub run_one_file_on_one_commit {
     my ($self, $commit) = @_;
 
-    chdir $self->{workdir} or croak "Unable to change to $self->{workdir}";
+    chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
     system(qq|git clean -dfx|) and croak "Unable to 'git clean -dfx'";
     system(qq|git checkout $commit|) and croak "Unable to 'git checkout $commit";
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
