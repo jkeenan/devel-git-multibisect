@@ -1,6 +1,7 @@
 package Test::Multisect::Opts;
 use strict;
 use warnings;
+use v5.10.0;
 our $VERSION = '0.01';
 use base qw( Exporter );
 our @EXPORT_OK = qw(

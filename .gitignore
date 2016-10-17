@@ -20,3 +20,7 @@ nytprof.out
 Test-Multisect-*.tar.gz
 /nytprof/
 *.swp
+/test_outputs/
+/t/*.output.txt
+/t/*.output.txt.gz
+/t/*.output.txt.tar.gz

@@ -1,13 +1,15 @@
+.gitignore
 Changes
 lib/Test/Multisect.pm
 lib/Test/Multisect/Opts.pm
 LICENSE
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 README
 scripts/multisect
 t/001-opts.t
 t/002-new.t
 t/003-get-commits-range.t
 t/004-set-targets.t
-Todo
+t/005-run-one-file-on-one-commit.t

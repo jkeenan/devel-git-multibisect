@@ -1,3 +1,4 @@
+use v5.10.0;
 use Devel::CheckBin;
 check_bin('git');
 

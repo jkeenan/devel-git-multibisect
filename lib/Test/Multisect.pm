@@ -1,11 +1,13 @@
 package Test::Multisect;
 use strict;
 use warnings;
+use v5.10.0;
 use Test::Multisect::Opts qw( process_options );
 use Carp;
 use Cwd;
 use Data::Dumper;
 use File::Temp;
+use List::Util qw(first);
 use Data::Dump qw( pp );
 
 our $VERSION = '0.01';
@@ -91,27 +93,43 @@ sub set_targets {
     return \@full_targets;
 }
 
-sub run_one_file_on_one_commit {
+sub run_test_files_on_one_commit {
     my ($self, $commit) = @_;
+    $commit //= $self->{commits}->[0];
 
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
     system(qq|git clean -dfx|) and croak "Unable to 'git clean -dfx'";
+    my @branches = qx{git branch};
+    chomp(@branches);
+    #pp(\@branches);
+    my ($cb, $current_branch);
+    $cb = first { m/^\*\s+?/ } @branches;
+    ($current_branch) = $cb =~ m{^\*\s+?(.*)};
+    #say STDERR "RRR: <$current_branch>";
+
     system(qq|git checkout $commit|) and croak "Unable to 'git checkout $commit";
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
     system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
-    my $this_test = "$self->{gitdir}/$self->{targets}->[0]";
-    my $outputfile = join('/' => (
-        $self->{outputdir},
-        join('.' => (
-            $self->{targets}->[0],
-            'output',
-            'txt'
-        )),
-    ));
-    system(qq|$self->{test_command} $this_test >$outputfile 2>&1| )
-        and croak "Unable to run '$self->{test_command})'";
-    print "Creating $outputfile\n" if $self->{verbose};
-    return $outputfile;
+    my @outputs;
+    for my $test (@{$self->{targets}}) {
+        my $this_test = "$self->{gitdir}/$test";
+        my $outputfile = join('/' => (
+            $self->{outputdir},
+            join('.' => (
+                $test,
+                'output',
+                'txt'
+            )),
+        ));
+        my $cmd = qq|$self->{test_command} $this_test >$outputfile 2>&1|;
+        #say STDERR "SSS: <$cmd>";;
+        system($cmd) and croak "Unable to run test_command";
+        push @outputs, $outputfile;
+        print "Created $outputfile\n" if $self->{verbose};
+    }
+    #say STDERR "TTT: got this far";
+    system(qq|git checkout $current_branch|) and croak "Unable to 'git checkout $current_branch";
+    return \@outputs;
 }
 
 1;
