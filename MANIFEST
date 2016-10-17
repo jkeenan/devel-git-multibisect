@@ -12,4 +12,4 @@ t/001-opts.t
 t/002-new.t
 t/003-get-commits-range.t
 t/004-set-targets.t
-t/005-run-one-file-on-one-commit.t
+t/005-run-test-files-on-one-commit.t
