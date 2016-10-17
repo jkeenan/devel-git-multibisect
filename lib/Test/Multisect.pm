@@ -98,6 +98,7 @@ sub set_targets {
 sub run_test_files_on_one_commit {
     my ($self, $commit) = @_;
     $commit //= $self->{commits}->[0]->{sha};
+    my $short = substr($commit,0,$self->{short});
 
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
     system(qq|git clean -dfx|) and croak "Unable to 'git clean -dfx'";
@@ -120,6 +121,7 @@ sub run_test_files_on_one_commit {
         my $outputfile = join('/' => (
             $self->{outputdir},
             join('.' => (
+                $short,
                 $no_slash,
                 'output',
                 'txt'
@@ -134,6 +136,17 @@ sub run_test_files_on_one_commit {
     #say STDERR "TTT: got this far";
     system(qq|git checkout $current_branch|) and croak "Unable to 'git checkout $current_branch";
     return \@outputs;
+}
+
+sub run_test_files_on_all_commits {
+    my $self = shift;
+    my $all_commits = $self->get_commits_range();
+    my @all_outputs;
+    for my $commit (@{$all_commits}) {
+        my $outputs = $self->run_test_files_on_one_commit($commit);
+        push @all_outputs, $outputs;
+    }
+    return \@all_outputs;
 }
 
 1;
