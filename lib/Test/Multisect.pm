@@ -44,13 +44,11 @@ sub new {
     my ($older, $cmd);
     my ($fh, $err) = File::Temp::tempfile();
     if ($data{last_before}) {
-        $data{last_before_short} = substr($data{last_before}, 0, $data{short});
-        $older = '^' . $data{last_before_short};
+        $older = '^' . $data{last_before};
         $cmd = "git rev-list --reverse $older $data{last} 2>$err";
     }
     else {
-        $data{first_short} = substr($data{first}, 0, $data{short});
-        $older = $data{first_short} . '^';
+        $older = $data{first} . '^';
         $cmd = "git rev-list --reverse ${older}..$data{last} 2>$err";
     }
     chomp(@commits = `$cmd`);
@@ -61,14 +59,18 @@ sub new {
         close $FH or croak "Unable to close $err after reading";
         croak $error;
     }
-    $data{commits} = [ @commits ];
+    my @extended_commits = map { {
+        sha     => $_,
+        short   => substr($_, 0, $data{short}),
+    } } @commits;
+    $data{commits} = [ @extended_commits ];
 
     return bless \%data, $class;
 }
 
 sub get_commits_range {
     my $self = shift;
-    return $self->{commits};
+    return [  map { $_->{sha} } @{$self->{commits}} ];
 }
 
 sub set_targets {
@@ -113,10 +115,12 @@ sub run_test_files_on_one_commit {
     my @outputs;
     for my $test (@{$self->{targets}}) {
         my $this_test = "$self->{gitdir}/$test";
+        my $no_slash = $test;
+        $no_slash =~ s{/}{_}g;
         my $outputfile = join('/' => (
             $self->{outputdir},
             join('.' => (
-                $test,
+                $no_slash,
                 'output',
                 'txt'
             )),
