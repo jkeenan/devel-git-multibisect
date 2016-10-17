@@ -92,7 +92,11 @@ sub process_options {
 
     if ($opts{verbose}) {
         print "Command-line arguments:\n";
-        print Dumper \%opts;
+        my %defined_opts;
+        for my $k (keys %opts) {
+            $defined_opts{$k} = $opts{$k} if defined $opts{$k};
+        }
+        print Dumper \%defined_opts;
     }
 
     # Final selection of params starts with defaults.
