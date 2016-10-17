@@ -97,7 +97,7 @@ sub set_targets {
 
 sub run_test_files_on_one_commit {
     my ($self, $commit) = @_;
-    $commit //= $self->{commits}->[0];
+    $commit //= $self->{commits}->[0]->{sha};
 
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
     system(qq|git clean -dfx|) and croak "Unable to 'git clean -dfx'";

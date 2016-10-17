@@ -13,7 +13,6 @@ use Data::Dump qw(pp);
 my (%args, $params, $self);
 my ($good_gitdir, $good_last_before, $good_last);
 my ($target_args, $full_targets);
-my $bad_target_args;
 
 $good_gitdir = '/home/jkeenan/gitwork/list-compare';
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
@@ -42,7 +41,6 @@ is_deeply(
     [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
-#pp($self);
 
 my ($commits, $outputs);
 $commits = $self->get_commits_range();
@@ -54,3 +52,21 @@ for my $f (@{$outputs}) {
     ok(-f $f, "run_test_files_on_one_commit generated $f");
 }
 
+# Try with no arg to run_test_files_on_one_commit
+$target_args = [ 't/46_func_hashes_alt_dual_unsorted.t' ];
+$full_targets = $self->set_targets($target_args);
+pp($full_targets);
+ok($full_targets, "set_targets() returned true value");
+is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
+is_deeply(
+    $full_targets,
+    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    "Got expected full paths to target files for testing",
+);
+$outputs = $self->run_test_files_on_one_commit();
+ok($outputs, "run_test_files_on_one_commit() returned true value");
+is(ref($outputs), 'ARRAY', "run_test_files_on_one_commit() returned array ref");
+is(scalar(@{$outputs}), scalar(@{$target_args}), "Got expected number of output files");
+for my $f (@{$outputs}) {
+    ok(-f $f, "run_test_files_on_one_commit generated $f");
+}
