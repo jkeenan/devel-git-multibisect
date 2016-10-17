@@ -10,8 +10,8 @@ our @EXPORT_OK = qw(
 use Carp;
 use Cwd;
 use Data::Dumper;
+use File::Path qw( mkpath );
 use Getopt::Long;
-
 
 =head1 NAME
 
@@ -71,7 +71,6 @@ sub process_options {
        'make_command' => 'make',
        'test_command' => 'prove -vb',
    );
-   $defaults{outputdir} = $defaults{workdir};
 
     my %opts;
     GetOptions(
@@ -100,8 +99,6 @@ sub process_options {
     my %params = map { $_ => $defaults{$_} } keys %defaults;
 
     # Override with command-line arguments.
-    # If --suffix is supplied on command-line, any --prefix already present is
-    # deleted.
     for my $o (keys %opts) {
         if (defined $opts{$o}) {
             $params{$o} = $opts{$o};
@@ -111,6 +108,21 @@ sub process_options {
     # arguments.  (Mainly used in testing of this module.)
     for my $o (keys %args) {
         $params{$o} = $args{$o};
+    }
+
+    # If user has not supplied a value for 'outputdir' by this point, then we
+    # have to supply a plausible value.  We'll first try a directory other
+    # than the current one, then fall back to the current one.
+
+    if (! exists $params{outputdir}) {
+        my $first_try = '/tmp/test_outputs';
+        unless (-d $first_try) {
+            mkpath($first_try, 1, '0775')
+                or carp "Unable to create directory $first_try";
+        }
+        $params{outputdir} = (-d $first_try)
+            ? $first_try
+            : cwd();
     }
 
     croak "Must define only one of 'last_before' and 'first'"
