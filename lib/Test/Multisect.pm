@@ -117,7 +117,7 @@ sub run_test_files_on_one_commit {
     for my $test (@{$self->{targets}}) {
         my $this_test = "$self->{gitdir}/$test";
         my $no_slash = $test;
-        $no_slash =~ s{/}{_}g;
+        $no_slash =~ s{[./]}{_}g;
         my $outputfile = join('/' => (
             $self->{outputdir},
             join('.' => (
