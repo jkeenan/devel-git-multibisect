@@ -39,7 +39,6 @@ sub new {
     #                  git clean -dfx
     # that we can call each of configure_command, make_command, test_command
 
-    chdir $data{gitdir} or croak "Unable to chdir";
 
     $data{last_short} = substr($data{last}, 0, $data{short});
     $data{commits} = _get_commits(\%data);
@@ -49,6 +48,8 @@ sub new {
 
 sub _get_commits {
     my $dataref = shift;
+    my $cwd = cwd();
+    chdir $dataref->{gitdir} or croak "Unable to chdir";
     my @commits = ();
     my ($older, $cmd);
     my ($fh, $err) = File::Temp::tempfile();
@@ -72,6 +73,7 @@ sub _get_commits {
         sha     => $_,
         short   => substr($_, 0, $dataref->{short}),
     } } @commits;
+    chdir $cwd or croak "Unable to return to original directory";
     return [ @extended_commits ];
 }
 
