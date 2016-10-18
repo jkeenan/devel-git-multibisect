@@ -1,0 +1,27 @@
+In this branch the approach we take is to use 'git subtree' to pull in the
+list-compare repository from github.com and to place it under t/lib.
+
+However, t/005 fails with output like this:
+
+#####
+ok 5 - Got expected full paths to target files for testing
+AAA: 
+sh: 0: getcwd() failed: No such file or directory
+[]
+BBB: perl Makefile.PL
+Can't open perl script "Makefile.PL": No such file or directory
+Unable to run 'perl Makefile.PL)' at t/005-run-test-files-on-one-commit.t line 49.
+# Looks like your test exited with 2 just after 5.
+Dubious, test returned 2 (wstat 512, 0x200)
+Failed 12/17 subtests 
+
+Test Summary Report
+-------------------
+t/005-run-test-files-on-one-commit.t (Wstat: 512 Tests: 5 Failed: 0)
+  Non-zero exit status: 2
+  Parse errors: Bad plan.  You planned 17 tests but ran 5.
+#####
+
+t/006 would presumably fail miserably as well.  This failure occurs after
+the 'git checkout --quiet $commit' in run_test_files_on_one_commit().  We're
+now in a detached HEAD, so 'pwd' and 'ls' don't know where we are.

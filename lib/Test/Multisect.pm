@@ -10,7 +10,7 @@ use Digest::MD5;
 use File::Copy;
 use File::Temp;
 use List::Util qw(first);
-#use Data::Dump qw( pp );
+use Data::Dump qw( pp );
 
 our $VERSION = '0.01';
 
@@ -108,6 +108,8 @@ sub run_test_files_on_one_commit {
     my $short = substr($commit,0,$self->{short});
 
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
+    #my $cwd = cwd();
+    #say STDERR "AAA: $cwd|$commit";
     system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
     my @branches = qx{git branch};
     chomp(@branches);
@@ -116,6 +118,11 @@ sub run_test_files_on_one_commit {
     ($current_branch) = $cb =~ m{^\*\s+?(.*)};
 
     system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
+say STDERR "AAA: ";
+my @ls = qx{ls | cat};
+chomp(@ls);
+pp(\@ls);
+say STDERR "BBB: ", $self->{configure_command};
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
     system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
     my @outputs;
