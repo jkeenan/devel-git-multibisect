@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More qw(no_plan); # tests => 12;
-use Data::Dump qw(pp);
+use Test::More tests => 17;
+#use Data::Dump qw(pp);
 
 # Before releasing this to cpan I'll have to figure out how to embed a real
 # git repository within this repository.
@@ -55,7 +55,6 @@ for my $f (map { $_->{file} } @{$outputs}) {
 # Try with no arg to run_test_files_on_one_commit
 $target_args = [ 't/46_func_hashes_alt_dual_unsorted.t' ];
 $full_targets = $self->set_targets($target_args);
-pp($full_targets);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
@@ -70,4 +69,3 @@ is(scalar(@{$outputs}), scalar(@{$target_args}), "Got expected number of output 
 for my $f (map { $_->{file} } @{$outputs}) {
     ok(-f $f, "run_test_files_on_one_commit generated $f");
 }
-#pp([ map { $_->{md5_hex} } @{$outputs} ]);

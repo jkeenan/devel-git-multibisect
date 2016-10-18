@@ -5,7 +5,7 @@ use warnings;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 19;
 use Capture::Tiny qw( :all );
-use Data::Dump qw( pp );
+#use Data::Dump qw( pp );
 
 {
     local $@;

@@ -6,7 +6,7 @@ use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 11;
 use Data::Dumper;
-use Data::Dump qw(pp);
+#use Data::Dump qw(pp);
 
 # Before releasing this to cpan I'll have to figure out how to embed a real
 # git repository within this repository.
