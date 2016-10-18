@@ -4,7 +4,8 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More qw(no_plan); # tests => 12;
+use Test::More tests => 10;
+use Data::Dumper;
 use Data::Dump qw(pp);
 
 # Before releasing this to cpan I'll have to figure out how to embed a real
@@ -57,5 +58,14 @@ is(
     scalar(@{$self->get_commits_range}) * scalar(@{$target_args}),
     "Got expected number of output files"
 );
-#pp($all_outputs);
+my $transitions = $self->get_digests_by_file_and_commit();
 
+for my $test (sort keys %$transitions) {
+    my $expected_different = 0;
+    my $observed_different = 0;
+    for my $r (@{$transitions->{$test}}) {
+        $observed_different++ if $r->{compare} eq 'different';
+    }
+    cmp_ok($observed_different, '==', $expected_different,
+        "As expected, for $test got $expected_different 'different' for 'compare'");
+}

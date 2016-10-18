@@ -48,7 +48,7 @@ $outputs = $self->run_test_files_on_one_commit($commits->[0]);
 ok($outputs, "run_test_files_on_one_commit() returned true value");
 is(ref($outputs), 'ARRAY', "run_test_files_on_one_commit() returned array ref");
 is(scalar(@{$outputs}), scalar(@{$target_args}), "Got expected number of output files");
-for my $f (@{$outputs}) {
+for my $f (map { $_->{file} } @{$outputs}) {
     ok(-f $f, "run_test_files_on_one_commit generated $f");
 }
 
@@ -67,6 +67,7 @@ $outputs = $self->run_test_files_on_one_commit();
 ok($outputs, "run_test_files_on_one_commit() returned true value");
 is(ref($outputs), 'ARRAY', "run_test_files_on_one_commit() returned array ref");
 is(scalar(@{$outputs}), scalar(@{$target_args}), "Got expected number of output files");
-for my $f (@{$outputs}) {
+for my $f (map { $_->{file} } @{$outputs}) {
     ok(-f $f, "run_test_files_on_one_commit generated $f");
 }
+#pp([ map { $_->{md5_hex} } @{$outputs} ]);

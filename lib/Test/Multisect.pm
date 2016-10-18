@@ -5,10 +5,13 @@ use v5.10.0;
 use Test::Multisect::Opts qw( process_options );
 use Carp;
 use Cwd;
-use Data::Dumper;
+#use Data::Dumper;
+use Digest::MD5;
+use File::Compare qw(compare);
+use File::Copy;
 use File::Temp;
 use List::Util qw(first);
-use Data::Dump qw( pp );
+#use Data::Dump qw( pp );
 
 our $VERSION = '0.01';
 
@@ -108,7 +111,6 @@ sub run_test_files_on_one_commit {
     my ($cb, $current_branch);
     $cb = first { m/^\*\s+?/ } @branches;
     ($current_branch) = $cb =~ m{^\*\s+?(.*)};
-    #say STDERR "RRR: <$current_branch>";
 
     system(qq|git checkout $commit|) and croak "Unable to 'git checkout $commit";
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
@@ -128,14 +130,45 @@ sub run_test_files_on_one_commit {
             )),
         ));
         my $cmd = qq|$self->{test_command} $this_test >$outputfile 2>&1|;
-        #say STDERR "SSS: <$cmd>";;
         system($cmd) and croak "Unable to run test_command";
-        push @outputs, $outputfile;
+        _clean_outputfile($outputfile);
+        push @outputs, {
+            commit => $commit,
+            file => $outputfile,
+            md5_hex => _hexdigest_one_file($outputfile),
+            file_short => $no_slash,
+        };
         print "Created $outputfile\n" if $self->{verbose};
     }
-    #say STDERR "TTT: got this far";
     system(qq|git checkout $current_branch|) and croak "Unable to 'git checkout $current_branch";
     return \@outputs;
+}
+
+sub _clean_outputfile {
+    my $outputfile = shift;
+    my $replacement = "$outputfile.tmp";
+    open my $IN, '<', $outputfile
+        or croak "Could not open $outputfile for reading";
+    open my $OUT, '>', $replacement
+        or croak "Could not open $replacement for writing";
+    while (my $l = <$IN>) {
+        chomp $l;
+        say $OUT $l unless $l =~ m/^Files=\d+,\sTests=\d+/;
+    }
+    close $OUT or croak "Could not close after writing";
+    close $IN  or croak "Could not close after reading";
+    move $replacement => $outputfile or croak "Could not replace";
+    return 1;
+}
+
+sub _hexdigest_one_file {
+    my $filename = shift;
+    my $state = Digest::MD5->new();
+    open my $FH, '<', $filename or croak "Unable to open $filename for reading";
+    $state->addfile($FH);
+    close $FH or croak "Unable to close $filename after reading";
+    my $hexdigest = $state->hexdigest;
+    return $hexdigest;
 }
 
 sub run_test_files_on_all_commits {
@@ -146,7 +179,48 @@ sub run_test_files_on_all_commits {
         my $outputs = $self->run_test_files_on_one_commit($commit);
         push @all_outputs, $outputs;
     }
+    $self->{all_outputs} = [ @all_outputs ];
     return \@all_outputs;
+}
+
+sub get_digests_by_file_and_commit {
+    my $self = shift;
+    unless (exists $self->{all_outputs}) {
+        croak "You must call run_test_files_on_all_commits() before calling get_digests_by_file_and_commit()";
+    }
+    my $rv = {};
+    for my $commit (@{$self->{all_outputs}}) {
+        for my $target (@{$commit}) {
+            push @{$rv->{$target->{file_short}}},
+                {
+                    commit  => $target->{commit},
+                    file    => $target->{file},
+                };
+        }
+    }
+    my %transitions;
+    for my $k (sort keys %{$rv}) {
+        my @arr = @{$rv->{$k}};
+        for (my $i = 1; $i <= $#arr; $i++) {
+            my $older = $arr[$i-1]->{file};
+            my $newer = $arr[$i]->{file};
+            if (compare($older, $newer) == 0) {
+                push @{$transitions{$k}}, {
+                    older => { idx => $i-1, file => $older },
+                    newer => { idx => $i,   file => $newer },
+                    compare => 'same',
+                }
+            }
+            else {
+                push @{$transitions{$k}}, {
+                    older => { idx => $i-1, file => $older },
+                    newer => { idx => $i,   file => $newer },
+                    compare => 'different',
+                }
+            }
+        }
+    }
+    return \%transitions;
 }
 
 1;
