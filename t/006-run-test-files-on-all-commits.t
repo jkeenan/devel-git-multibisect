@@ -72,8 +72,8 @@ is(
 );
 
 
-##### get_digests_by_file_and_commit() #####
 
+##### get_digests_by_file_and_commit() #####
 
 $transitions = $self->get_digests_by_file_and_commit();
 

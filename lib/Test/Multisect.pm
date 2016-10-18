@@ -7,7 +7,6 @@ use Carp;
 use Cwd;
 #use Data::Dumper;
 use Digest::MD5;
-use File::Compare qw(compare);
 use File::Copy;
 use File::Temp;
 use List::Util qw(first);
@@ -107,7 +106,6 @@ sub run_test_files_on_one_commit {
     system(qq|git clean -dfx|) and croak "Unable to 'git clean -dfx'";
     my @branches = qx{git branch};
     chomp(@branches);
-    #pp(\@branches);
     my ($cb, $current_branch);
     $cb = first { m/^\*\s+?/ } @branches;
     ($current_branch) = $cb =~ m{^\*\s+?(.*)};
@@ -195,6 +193,7 @@ sub get_digests_by_file_and_commit {
                 {
                     commit  => $target->{commit},
                     file    => $target->{file},
+                    md5_hex => $target->{md5_hex},
                 };
         }
     }
@@ -202,9 +201,9 @@ sub get_digests_by_file_and_commit {
     for my $k (sort keys %{$rv}) {
         my @arr = @{$rv->{$k}};
         for (my $i = 1; $i <= $#arr; $i++) {
-            my $older = $arr[$i-1]->{file};
-            my $newer = $arr[$i]->{file};
-            if (compare($older, $newer) == 0) {
+            my $older = $arr[$i-1]->{md5_hex};
+            my $newer = $arr[$i]->{md5_hex};
+            if ($older eq $newer) {
                 push @{$transitions{$k}}, {
                     older => { idx => $i-1, file => $older },
                     newer => { idx => $i,   file => $newer },
