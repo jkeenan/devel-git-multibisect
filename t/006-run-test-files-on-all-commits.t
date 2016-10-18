@@ -1,19 +1,22 @@
 # -*- perl -*-
-# t/005-run-test_files-on-all-commits.t
+# t/006-run-test-files-on-all-commits.t
 use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Data::Dumper;
 use Data::Dump qw(pp);
 
 # Before releasing this to cpan I'll have to figure out how to embed a real
 # git repository within this repository.
 
+##### run_test_files_on_all_commits() #####
+
 my (%args, $params, $self);
 my ($good_gitdir, $good_last_before, $good_last);
 my ($target_args, $full_targets);
+my ($transitions, $all_outputs, $all_outputs_count);
 
 $good_gitdir = '/home/jkeenan/gitwork/list-compare';
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
@@ -43,11 +46,20 @@ is_deeply(
     "Got expected full paths to target files for testing",
 );
 
-my ($all_outputs);
+{
+    # error case: premature run of get_digests_by_file_and_commit()
+    local $@;
+    eval { $transitions = $self->get_digests_by_file_and_commit(); };
+    like($@,
+        qr/You must call run_test_files_on_all_commits\(\) before calling get_digests_by_file_and_commit\(\)/,
+        "Got expected error message for premature get_digests_by_file_and_commit()"
+    );
+}
+
 $all_outputs = $self->run_test_files_on_all_commits();
 ok($all_outputs, "run_test_files_on_all_commits() returned true value");
 is(ref($all_outputs), 'ARRAY', "run_test_files_on_all_commits() returned array ref");
-my $all_outputs_count = 0;
+$all_outputs_count = 0;
 for my $c (@{$all_outputs}) {
     for my $t (@{$c}) {
         $all_outputs_count++;
@@ -58,7 +70,12 @@ is(
     scalar(@{$self->get_commits_range}) * scalar(@{$target_args}),
     "Got expected number of output files"
 );
-my $transitions = $self->get_digests_by_file_and_commit();
+
+
+##### get_digests_by_file_and_commit() #####
+
+
+$transitions = $self->get_digests_by_file_and_commit();
 
 for my $test (sort keys %$transitions) {
     my $expected_different = 0;
@@ -69,3 +86,4 @@ for my $test (sort keys %$transitions) {
     cmp_ok($observed_different, '==', $expected_different,
         "As expected, for $test got $expected_different 'different' for 'compare'");
 }
+
