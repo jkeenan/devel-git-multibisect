@@ -110,7 +110,7 @@ sub run_test_files_on_one_commit {
     $cb = first { m/^\*\s+?/ } @branches;
     ($current_branch) = $cb =~ m{^\*\s+?(.*)};
 
-    system(qq|git checkout $commit|) and croak "Unable to 'git checkout $commit";
+    system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
     system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
     my @outputs;
