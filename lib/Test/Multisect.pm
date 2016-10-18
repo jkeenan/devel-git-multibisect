@@ -42,16 +42,23 @@ sub new {
     chdir $data{gitdir} or croak "Unable to chdir";
 
     $data{last_short} = substr($data{last}, 0, $data{short});
+    $data{commits} = _get_commits(\%data);
+
+    return bless \%data, $class;
+}
+
+sub _get_commits {
+    my $dataref = shift;
     my @commits = ();
     my ($older, $cmd);
     my ($fh, $err) = File::Temp::tempfile();
-    if ($data{last_before}) {
-        $older = '^' . $data{last_before};
-        $cmd = "git rev-list --reverse $older $data{last} 2>$err";
+    if ($dataref->{last_before}) {
+        $older = '^' . $dataref->{last_before};
+        $cmd = "git rev-list --reverse $older $dataref->{last} 2>$err";
     }
     else {
-        $older = $data{first} . '^';
-        $cmd = "git rev-list --reverse ${older}..$data{last} 2>$err";
+        $older = $dataref->{first} . '^';
+        $cmd = "git rev-list --reverse ${older}..$dataref->{last} 2>$err";
     }
     chomp(@commits = `$cmd`);
     if (! -z $err) {
@@ -63,11 +70,9 @@ sub new {
     }
     my @extended_commits = map { {
         sha     => $_,
-        short   => substr($_, 0, $data{short}),
+        short   => substr($_, 0, $dataref->{short}),
     } } @commits;
-    $data{commits} = [ @extended_commits ];
-
-    return bless \%data, $class;
+    return [ @extended_commits ];
 }
 
 sub get_commits_range {
@@ -103,7 +108,7 @@ sub run_test_files_on_one_commit {
     my $short = substr($commit,0,$self->{short});
 
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
-    system(qq|git clean -dfx|) and croak "Unable to 'git clean -dfx'";
+    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
     my @branches = qx{git branch};
     chomp(@branches);
     my ($cb, $current_branch);
