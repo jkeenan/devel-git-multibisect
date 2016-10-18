@@ -1,0 +1,3 @@
+[submodule "t/lib/list-compare"]
+	path = t/lib/list-compare
+	url = https://github.com/jkeenan/list-compare
