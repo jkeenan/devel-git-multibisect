@@ -5,6 +5,9 @@ use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests =>  8;
+use Cwd;
+
+my $cwd = cwd();
 
 # Before releasing this to cpan I'll have to figure out how to embed a real
 # git repository within this repository.
@@ -12,7 +15,7 @@ use Test::More tests =>  8;
 my (%args, $params, $self);
 
 my ($good_gitdir, $good_last_before, $good_last);
-$good_gitdir = '/home/jkeenan/gitwork/list-compare';
+$good_gitdir = "$cwd/t/lib/list-compare";
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
 $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
 %args = (
