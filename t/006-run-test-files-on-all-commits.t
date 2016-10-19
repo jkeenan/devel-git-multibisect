@@ -4,9 +4,10 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 11;
-use Data::Dumper;
+use Test::More tests => 29;
+#use Data::Dumper;
 #use Data::Dump qw(pp);
+use List::Util qw( first );
 use Cwd;
 
 my $cwd = cwd();
@@ -19,7 +20,7 @@ my $cwd = cwd();
 my (%args, $params, $self);
 my ($good_gitdir, $good_last_before, $good_last);
 my ($target_args, $full_targets);
-my ($transitions, $all_outputs, $all_outputs_count);
+my ($rv, $transitions, $all_outputs, $all_outputs_count, $expected_count, $first_element);
 
 $good_gitdir = "$cwd/t/lib/list-compare";
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
@@ -52,7 +53,7 @@ is_deeply(
 {
     # error case: premature run of get_digests_by_file_and_commit()
     local $@;
-    eval { $transitions = $self->get_digests_by_file_and_commit(); };
+    eval { $rv = $self->get_digests_by_file_and_commit(); };
     like($@,
         qr/You must call run_test_files_on_all_commits\(\) before calling get_digests_by_file_and_commit\(\)/,
         "Got expected error message for premature get_digests_by_file_and_commit()"
@@ -78,8 +79,43 @@ is(
 
 ##### get_digests_by_file_and_commit() #####
 
-$transitions = $self->get_digests_by_file_and_commit();
+$rv = $self->get_digests_by_file_and_commit();
+ok($rv, "get_digests_by_file_and_commit() returned true value");
+is(ref($rv), 'HASH', "get_digests_by_file_and_commit() returned hash ref");
+cmp_ok(scalar(keys %{$rv}), '==', scalar(@{$target_args}),
+    "Got expected number of elements: one for each of " . scalar(@{$target_args}) . " test files targeted");
+$first_element = first { $_ } keys %{$rv};
+is(ref($rv->{$first_element}), 'ARRAY', "Records are array references");
+is(
+    scalar(@{$rv->{$first_element}}),
+    scalar(@{$self->get_commits_range}),
+    "Got 1 element for each of " . scalar(@{$self->get_commits_range}) . " commits"
+);
+is(ref($rv->{$first_element}->[0]), 'HASH', "Records are hash references");
+for my $k ( qw| commit file md5_hex | ) {
+    ok(exists $rv->{$first_element}->[0]->{$k}, "Record has '$k' element");
+}
 
+
+##### examine_transitions #####
+
+$transitions = $self->examine_transitions();
+ok($transitions, "examine_transitions() returned true value");
+is(ref($transitions), 'HASH', "examine_transitions() returned hash ref");
+cmp_ok(scalar(keys %{$transitions}), '==', scalar(@{$target_args}),
+    "Got expected number of elements: one for each of " . scalar(@{$target_args}) . " test files targeted");
+$first_element = first { $_ } keys %{$transitions};
+is(ref($transitions->{$first_element}), 'ARRAY', "Records are array references");
+$expected_count = scalar(@{$self->get_commits_range}) - 1;
+is(
+    scalar(@{$transitions->{$first_element}}),
+    $expected_count,
+    "Got 1 element for each of $expected_count transitions between commits"
+);
+is(ref($transitions->{$first_element}->[0]), 'HASH', "Records are hash references");
+for my $k ( qw| older newer compare | ) {
+    ok(exists $transitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
+}
 for my $test (sort keys %$transitions) {
     my $expected_different = 0;
     my $observed_different = 0;
@@ -90,3 +126,4 @@ for my $test (sort keys %$transitions) {
         "As expected, for $test got $expected_different 'different' for 'compare'");
 }
 
+__END__

@@ -204,6 +204,12 @@ sub get_digests_by_file_and_commit {
                 };
         }
     }
+    return $rv;
+}
+
+sub examine_transitions {
+    my $self = shift;
+    my $rv = $self->get_digests_by_file_and_commit();
     my %transitions;
     for my $k (sort keys %{$rv}) {
         my @arr = @{$rv->{$k}};
@@ -231,3 +237,4 @@ sub get_digests_by_file_and_commit {
 
 1;
 
+__END__
