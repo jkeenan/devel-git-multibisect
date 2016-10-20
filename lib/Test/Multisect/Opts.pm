@@ -21,18 +21,19 @@ Test::Multisect::Opts - Prepare parameters for Test::Multisect
 
     use Test::Multisect::Opts qw( process_options );
 
-    my $params = process_options( 'include' => 't/001-load.t' );
+    my $params = process_options();
 
 =head1 DESCRIPTION
 
 This package exports on demand only one subroutine, C<process_options()>, used
 to prepare parameters for Test::Multisect.
 
-The subroutine takes as arguments an optional list of key-value pairs.  This
-approach is useful in testing the subroutine but is not expected to be used
-otherwise.  The subroutine is a wrapper around Getopt::Long::GetOptions(), so
-is devoted to processing command-line arguments provided, for example, to the
-command-line utility F<multisect> included in this CPAN distribution.
+C<process_options()> takes as arguments an optional list of key-value pairs.
+This approach is useful in testing the subroutine but is not expected to be
+used otherwise.  C<process_options()> is a wrapper around
+Getopt::Long::GetOptions(), so is devoted to processing command-line arguments
+provided, for example, to the command-line utility F<multisect> (not yet
+created, but to be included in a future version of this CPAN distribution).
 
 The subroutine returns a reference to a hash populated with values in the
 following order:

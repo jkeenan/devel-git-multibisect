@@ -33,13 +33,6 @@ sub new {
         croak "Cannot find directory(ies): @missing_dirs";
     }
 
-    # What will we eventually have to test for (or croak otherwise)?
-    # that we can say: git checkout one of last_before or first
-    #                  git checkout last
-    #                  git clean -dfx
-    # that we can call each of configure_command, make_command, test_command
-
-
     $data{last_short} = substr($data{last}, 0, $data{short});
     $data{commits} = _get_commits(\%data);
 
@@ -163,7 +156,7 @@ sub _clean_outputfile {
     close $OUT or croak "Could not close after writing";
     close $IN  or croak "Could not close after reading";
     move $replacement => $outputfile or croak "Could not replace";
-    return 1;
+    return $outputfile;
 }
 
 sub _hexdigest_one_file {
