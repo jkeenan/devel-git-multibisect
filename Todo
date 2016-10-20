@@ -1,5 +1,11 @@
 TODO list for Perl module Test::Multisect
 
-- Nothing yet
+1. Unless /tmp/test_outputs already exists, I can't create it in
+Test::Multisect::Opts.  If I can't create it, no CPAN tester would be able to,
+either.  Have to figure out workaround.
+
+2. Move two helper subs in Test::Multisect to their own package; test them
+individually; comment out most of rest of original package or move to branch
+so that I can release a CPAN version and gain access to those helper subs.
 
 
