@@ -31,7 +31,6 @@ svndiff/
 ^init
 ^results
 ^htmlify
-.git/
 ^MYMETA.*
 nytprof/
 nytprof.out
