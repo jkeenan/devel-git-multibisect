@@ -15,6 +15,17 @@ t/003-get-commits-range.t
 t/004-set-targets.t
 t/005-run-test-files-on-one-commit.t
 t/006-run-test-files-on-all-commits.t
+t/lib/dummyrepo/.git
+t/lib/dummyrepo/.gitignore
+t/lib/dummyrepo/Changes
+t/lib/dummyrepo/lib/Dummy/Repo.pm
+t/lib/dummyrepo/LICENSE
+t/lib/dummyrepo/Makefile.PL
+t/lib/dummyrepo/MANIFEST
+t/lib/dummyrepo/README
+t/lib/dummyrepo/README.md
+t/lib/dummyrepo/t/001_load.t
+t/lib/dummyrepo/Todo
 t/lib/list-compare/.cvsignore
 t/lib/list-compare/.git
 t/lib/list-compare/.gitignore
