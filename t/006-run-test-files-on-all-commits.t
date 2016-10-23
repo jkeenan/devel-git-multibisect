@@ -12,9 +12,6 @@ use Cwd;
 
 my $cwd = cwd();
 
-# Before releasing this to cpan I'll have to figure out how to embed a real
-# git repository within this repository.
-
 ##### run_test_files_on_all_commits() #####
 
 my (%args, $params, $self);

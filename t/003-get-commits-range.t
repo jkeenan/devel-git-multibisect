@@ -9,9 +9,6 @@ use Cwd;
 
 my $cwd = cwd();
 
-# Before releasing this to cpan I'll have to figure out how to embed a real
-# git repository within this repository.
-
 my (%args, $params, $self);
 my ($this_commit_range, @commit_ranges, $expect);
 
