@@ -3,11 +3,15 @@ use strict;
 use warnings;
 use v5.10.0;
 use Test::Multisect::Opts qw( process_options );
+use Test::Multisect::Auxiliary qw(
+    clean_outputfile
+    hexdigest_one_file
+);
 use Carp;
 use Cwd;
 #use Data::Dumper;
-use Digest::MD5;
-use File::Copy;
+#use Digest::MD5;
+#use File::Copy;
 use File::Temp;
 use List::Util qw(first);
 #use Data::Dump qw( pp );
@@ -129,11 +133,11 @@ sub run_test_files_on_one_commit {
         ));
         my $cmd = qq|$self->{test_command} $this_test >$outputfile 2>&1|;
         system($cmd) and croak "Unable to run test_command";
-        _clean_outputfile($outputfile);
+        clean_outputfile($outputfile);
         push @outputs, {
             commit => $commit,
             file => $outputfile,
-            md5_hex => _hexdigest_one_file($outputfile),
+            md5_hex => hexdigest_one_file($outputfile),
             file_short => $no_slash,
         };
         print "Created $outputfile\n" if $self->{verbose};
@@ -142,32 +146,32 @@ sub run_test_files_on_one_commit {
     return \@outputs;
 }
 
-sub _clean_outputfile {
-    my $outputfile = shift;
-    my $replacement = "$outputfile.tmp";
-    open my $IN, '<', $outputfile
-        or croak "Could not open $outputfile for reading";
-    open my $OUT, '>', $replacement
-        or croak "Could not open $replacement for writing";
-    while (my $l = <$IN>) {
-        chomp $l;
-        say $OUT $l unless $l =~ m/^Files=\d+,\sTests=\d+/;
-    }
-    close $OUT or croak "Could not close after writing";
-    close $IN  or croak "Could not close after reading";
-    move $replacement => $outputfile or croak "Could not replace";
-    return $outputfile;
-}
-
-sub _hexdigest_one_file {
-    my $filename = shift;
-    my $state = Digest::MD5->new();
-    open my $FH, '<', $filename or croak "Unable to open $filename for reading";
-    $state->addfile($FH);
-    close $FH or croak "Unable to close $filename after reading";
-    my $hexdigest = $state->hexdigest;
-    return $hexdigest;
-}
+#sub _clean_outputfile {
+#    my $outputfile = shift;
+#    my $replacement = "$outputfile.tmp";
+#    open my $IN, '<', $outputfile
+#        or croak "Could not open $outputfile for reading";
+#    open my $OUT, '>', $replacement
+#        or croak "Could not open $replacement for writing";
+#    while (my $l = <$IN>) {
+#        chomp $l;
+#        say $OUT $l unless $l =~ m/^Files=\d+,\sTests=\d+/;
+#    }
+#    close $OUT or croak "Could not close after writing";
+#    close $IN  or croak "Could not close after reading";
+#    move $replacement => $outputfile or croak "Could not replace";
+#    return $outputfile;
+#}
+#
+#sub _hexdigest_one_file {
+#    my $filename = shift;
+#    my $state = Digest::MD5->new();
+#    open my $FH, '<', $filename or croak "Unable to open $filename for reading";
+#    $state->addfile($FH);
+#    close $FH or croak "Unable to close $filename after reading";
+#    my $hexdigest = $state->hexdigest;
+#    return $hexdigest;
+#}
 
 sub run_test_files_on_all_commits {
     my $self = shift;

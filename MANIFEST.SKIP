@@ -35,4 +35,15 @@ svndiff/
 ^MYMETA.*
 nytprof/
 nytprof.out
-^test_outputs/*
+^t/lib/list-compare/blib/
+^t/lib/list-compare/Makefile$
+^t/lib/list-compare/Makefile\.[a-z]+$
+^t/lib/list-compare/pm_to_blib$
+^t/lib/list-compare/MYMETA.*
+^t/lib/list-compare/.cvsignore
+^t/lib/dummyrepo/blib/
+^t/lib/dummyrepo/Makefile$
+^t/lib/dummyrepo/Makefile\.[a-z]+$
+^t/lib/dummyrepo/pm_to_blib$
+^t/lib/dummyrepo/MYMETA.*
+^t/lib/dummyrepo/.cvsignore
