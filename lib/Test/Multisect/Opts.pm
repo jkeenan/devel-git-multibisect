@@ -11,6 +11,7 @@ use Carp;
 use Cwd;
 use Data::Dumper;
 use File::Path qw( mkpath );
+use File::Temp qw( tempdir );
 use Getopt::Long;
 
 =head1 NAME
@@ -116,18 +117,11 @@ sub process_options {
     }
 
     # If user has not supplied a value for 'outputdir' by this point, then we
-    # have to supply a plausible value.  We'll first try a directory other
-    # than the current one, then fall back to the current one.
+    # have to use a tempdir.
 
     if (! exists $params{outputdir}) {
-        my $first_try = '/tmp/test_outputs';
-        unless (-d $first_try) {
-            mkpath($first_try, 1, '0775')
-                or carp "Unable to create directory $first_try";
-        }
-        $params{outputdir} = (-d $first_try)
-            ? $first_try
-            : cwd();
+        $params{outputdir} = tempdir
+            or croak "Unable to create tempdir";
     }
 
     croak "Must define only one of 'last_before' and 'first'"
