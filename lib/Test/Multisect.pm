@@ -59,9 +59,22 @@ F<Test::Multisect> provides methods to achieve that objective.
 
 =item * Purpose
 
+Test::Multisect constructor.
+
 =item * Arguments
 
+    $self = Test::Multisect->new(\%params);
+
+Reference to a hash, typically the return value of
+C<Test::Multisect::Opts::process_options()>.
+
+The hashref passed as argument must contain key-value pairs for C<gitdir>,
+C<workdir> and C<outputdir>.  C<new()> tests for the existence of each of
+these directories.
+
 =item * Return Value
+
+Test::Multisect object.
 
 =item * Comment
 
@@ -76,8 +89,6 @@ sub new {
     while (my ($k,$v) = each %{$params}) {
         $data{$k} = $v;
     }
-    # What do we have to test for before proceeding?
-    # existence of directories workdir, outputdir, gitdir
 
     my @missing_dirs = ();
     for my $dir ( qw| gitdir workdir outputdir | ) {
@@ -131,9 +142,17 @@ sub _get_commits {
 
 =item * Purpose
 
+Identify the SHAs of each git commit identified by C<new()>.
+
 =item * Arguments
 
+    $commit_range = $self->get_commits_range();
+
+None; all data needed is already in the object.
+
 =item * Return Value
+
+Array reference, each element of which is a SHA.
 
 =item * Comment
 
@@ -152,9 +171,23 @@ sub get_commits_range {
 
 =item * Purpose
 
+Identify the test files which will be run at different points in the commits range.
+
 =item * Arguments
 
+    $target_args = [
+        't/44_func_hashes_mult_unsorted.t',
+        't/45_func_hashes_alt_dual_sorted.t',
+    ];
+    $full_targets = $self->set_targets($target_args);
+
+Reference to an array holding the relative paths beneath the C<gitdir> to the 
+test files selected for examination.
+
 =item * Return Value
+
+Reference to an array holding the absolute paths to the test files selected
+for examination.Each such test file is tested for its existence.
 
 =item * Comment
 
