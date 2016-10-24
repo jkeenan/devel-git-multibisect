@@ -11,9 +11,6 @@ our @EXPORT_OK = qw(
 use Carp;
 use Digest::MD5;
 use File::Copy;
-#use File::Path qw( mkpath );
-#use File::Temp qw( tempdir );
-#use Getopt::Long;
 
 =head1 NAME
 
@@ -28,8 +25,44 @@ Test::Multisect::Auxiliary - Helper functions for Test::Multisect
 
 =head1 DESCRIPTION
 
-This package exports on demand only subroutines used within publicly available
+This package exports, on demand only, subroutines used within publicly available
 methods in Test::Multisect.
+
+=head1 SUBROUTINES
+
+=head2 C<clean_outputfile()>
+
+=over 4
+
+=item * Purpose
+
+When we redirect the output of a test harness program such as F<prove> to a
+file, we typically get at the end a line matching this pattern:
+
+    m/^Files=\d+,\sTests=\d+/
+
+This line also contains measurements of the time it took for a particular file
+to be run.  These timings vary from one run to the next, which makes the
+content of otherwise identical files different, which in turn makes their
+md5_hex digests different.  So we simply rewrite the test output file to
+remove this line.
+
+=item * Arguments
+
+    $outputfile = clean_outputfile($outputfile);
+
+A string holding the path to a file holding TAP output.
+
+=item * Return Value
+
+A string holding the path to a file holding TAP output.
+
+=item * Comment
+
+The return value is provided for the purpose of chaining function calls; the
+file itself is changed in place.
+
+=back
 
 =cut
 
@@ -49,6 +82,35 @@ sub clean_outputfile {
     move $replacement => $outputfile or croak "Could not replace";
     return $outputfile;
 }
+
+=head2 C<hexdigest_one_file()>
+
+=over 4
+
+=item * Purpose
+
+To compare multiple files for same or different content, we need a convenient,
+short datum.  We will use the C<md5_hex> value provided by the F<Digest::MD5>
+module which is part of the Perl 5 core distribution.
+
+=item * Arguments
+
+    $md5_hex = hexdigest_one_file($outputfile);
+
+A string holding the path to a file holding TAP output.
+
+=item * Return Value
+
+A string holding the C<md5_hex> digest for that file.
+
+=item * Comment
+
+The file provided as argument should be run through C<clean_outputfile()>
+before being passed to this function.
+
+=back
+
+=cut
 
 sub hexdigest_one_file {
     my $filename = shift;
