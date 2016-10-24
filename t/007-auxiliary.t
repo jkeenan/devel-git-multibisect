@@ -8,12 +8,46 @@ use Test::Multisect::Auxiliary qw(
     hexdigest_one_file
     validate_list_sequence
 );
-use Test::More tests => 37;
-use File::Temp qw(tempfile);
+use Test::More tests => 41;
+use Cwd;
+use File::Copy;
+use File::Temp qw(tempfile tempdir);
 #use Data::Dump qw(pp);
+
+my $cwd = cwd();
+my $datadir = "$cwd/t/lib";
 
 ##### clean_outputfile() #####
 
+{
+    my ($f1, $f2) = map { "output${_}.txt" } (1..2);
+    my ($in1, $in2) = map { "$datadir/$_" } ($f1, $f2);
+    my (@sizes_before, @digests_before);
+    for ($in1, $in2) {
+        push @sizes_before, (stat($_))[7];
+        push @digests_before, hexdigest_one_file($_);
+    }
+    cmp_ok($sizes_before[0], '==', $sizes_before[1],
+        "Before treatment, the two files have the same size");
+    cmp_ok($digests_before[0], 'ne', $digests_before[1],
+        "Before treatment, the two files have different md5_hex values");
+
+    my $tdir1 = tempdir( CLEANUP => 1 );
+    my $tdir2 = tempdir( CLEANUP => 1 );
+    copy($in1 => "$tdir1/$f1") or croak "Unable to copy $in1";
+    copy($in2 => "$tdir2/$f2") or croak "Unable to copy $in2";
+    my $out1 = clean_outputfile("$tdir1/$f1");
+    my $out2 = clean_outputfile("$tdir2/$f2");
+    my (@sizes_after, @digests_after);
+    for ($out1, $out2) {
+        push @sizes_after, (stat($_))[7];
+        push @digests_after, hexdigest_one_file($_);
+    }
+    cmp_ok($sizes_after[0], '==', $sizes_after[1],
+        "After treatment, the two files have the same size");
+    cmp_ok($digests_after[0], 'eq', $digests_after[1],
+        "After treatment, the two files have the same md5_hex value");
+}
 
 
 ##### hexdigest_one_file() #####
