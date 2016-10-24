@@ -33,6 +33,7 @@ my %WriteMakefileArgs = (
     TEST_REQUIRES => {
         'Test::Simple' => 0.44,
         'Capture::Tiny' => 0,
+        'IO::CaptureOutput' => 0,
     },
 );
 

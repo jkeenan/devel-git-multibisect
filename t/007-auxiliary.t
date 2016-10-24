@@ -6,9 +6,11 @@ use Carp;
 use Test::Multisect::Auxiliary qw(
     clean_outputfile
     hexdigest_one_file
+    validate_list_sequence
 );
-use Test::More qw(no_plan); # tests => 19;
+use Test::More tests => 31;
 use File::Temp qw(tempfile);
+#use Data::Dump qw(pp);
 
 ##### clean_outputfile() #####
 
@@ -78,3 +80,84 @@ use File::Temp qw(tempfile);
 }
 
 
+##### validate_list_sequence #####
+
+{
+    my $rv;
+    {
+        my %hash = (
+            'alpha' => 5,
+            'beta'  => 2,
+        );
+        local $@;
+        eval { $rv = validate_list_sequence(\%hash); };
+        like($@, qr/Must provide array ref to validate_list_sequence\(\)/,
+            "Got expected error message for non-array-ref argument to validate_list_sequence()");
+    }
+
+    my @list_basic = (
+        ('alpha') x 5,
+        (undef) x 5,
+        ('alpha') x 5,
+        'beta',
+        ('gamma') x 5,
+        (undef) x 5,
+        'gamma',
+        ('delta') x 5,
+        undef,
+        'delta',
+        undef,
+        'delta',
+    );
+
+    note("List starts with undef");
+    my @bad_1 = (undef, @list_basic);
+    $rv = validate_list_sequence(\@bad_1);
+    ok($rv, "validate_list_sequence() returned true value");
+    is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
+    is(scalar(@$rv), 3, "validate_list_sequence() returned array with 3 elements");
+    is($rv->[0], 0, "list not validated");
+    is($rv->[1], 0, "Failure to validate at index 0");
+    is($rv->[2], 'first element undefined', "first element undefined");
+
+    note("List ends with undef");
+    my @bad_2 = (@list_basic, undef);
+    $rv = validate_list_sequence(\@bad_2);
+    ok($rv, "validate_list_sequence() returned true value");
+    is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
+    is(scalar(@$rv), 3, "validate_list_sequence() returned array with 3 elements");
+    is($rv->[0], 0, "list not validated");
+    is($rv->[1], $#bad_2, "Failure to validate at index $#bad_2");
+    is($rv->[2], 'last element undefined', "last element undefined");
+
+    note("List ends with previously seen value");
+    my @bad_3 = (@list_basic, 'beta');
+    $rv = validate_list_sequence(\@bad_3);
+    ok($rv, "validate_list_sequence() returned true value");
+    is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
+    is(scalar(@$rv), 3, "validate_list_sequence() returned array with 3 elements");
+    is($rv->[0], 0, "list not validated");
+    is($rv->[1], $#bad_3, "Failure to validate at index $#bad_3");
+    is($rv->[2], "$bad_3[-1] previously observed", "element $bad_3[-1] previously observed");
+
+    note("List ends with undef, then previously seen value");
+    my @bad_4 = (@list_basic, undef, 'beta');
+    $rv = validate_list_sequence(\@bad_4);
+    ok($rv, "validate_list_sequence() returned true value");
+    is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
+    is(scalar(@$rv), 3, "validate_list_sequence() returned array with 3 elements");
+    is($rv->[0], 0, "list not validated");
+    is($rv->[1], $#bad_4, "Failure to validate at index $#bad_4");
+    is($rv->[2], "$bad_4[-1] previously observed", "element $bad_4[-1] previously observed");
+
+    #####
+
+    note("Good list");
+    $rv = validate_list_sequence(\@list_basic);
+    ok($rv, "validate_list_sequence() returned true value");
+    is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
+    is(scalar(@$rv), 1, "validate_list_sequence() returned array with 1 element");
+    ok($rv->[0], "validate_list_sequence() has true status");
+    #pp(\@list_basic);
+
+}

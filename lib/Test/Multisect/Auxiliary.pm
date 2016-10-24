@@ -7,6 +7,7 @@ use base qw( Exporter );
 our @EXPORT_OK = qw(
     clean_outputfile
     hexdigest_one_file
+    validate_list_sequence
 );
 use Carp;
 use Digest::MD5;
@@ -120,6 +121,50 @@ sub hexdigest_one_file {
     close $FH or croak "Unable to close $filename after reading";
     my $hexdigest = $state->hexdigest;
     return $hexdigest;
+}
+
+sub validate_list_sequence {
+    my $list = shift;
+    croak "Must provide array ref to validate_list_sequence()"
+        unless ref($list) eq 'ARRAY';;
+    my $rv = [];
+    my $status = 1;
+    if (! defined $list->[0]) {
+        $rv = [0, 0, 'first element undefined'];
+        return $rv;
+    }
+    if (! defined $list->[$#{$list}]) {
+        $rv = [0, $#{$list}, 'last element undefined'];
+        return $rv;
+    }
+    # lpd => 'last previously defined'
+    my $lpd = $list->[0];
+    my %previous = ();
+    for (my $j = 1; $j <= $#{$list}; $j++) {
+        if (! defined $list->[$j]) {
+            next;
+        }
+        else {
+            if ($list->[$j] eq $lpd) {
+                next;
+            }
+            else {
+                # value differs from last previously observed
+                # Was it ever previously observed?  If so, bad.
+                if (exists $previous{$list->[$j]}) {
+                    $status = 0;
+                    $rv = [$status, $j, "$list->[$j] previously observed"];
+                    return $rv;
+                }
+                else {
+                    $previous{$lpd}++;
+                    $lpd = $list->[$j];
+                    next;
+                }
+            }
+        }
+    }
+    return [$status];
 }
 
 1;
