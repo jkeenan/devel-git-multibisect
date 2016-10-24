@@ -8,7 +8,7 @@ use Test::Multisect::Auxiliary qw(
     hexdigest_one_file
     validate_list_sequence
 );
-use Test::More tests => 31;
+use Test::More tests => 37;
 use File::Temp qw(tempfile);
 #use Data::Dump qw(pp);
 
@@ -95,19 +95,31 @@ use File::Temp qw(tempfile);
             "Got expected error message for non-array-ref argument to validate_list_sequence()");
     }
 
-    my @list_basic = (
+    my @good_alpha = (
         ('alpha') x 5,
         (undef) x 5,
         ('alpha') x 5,
+    );
+    my @good_beta = (
         'beta',
+    );
+    my @good_gamma = (
         ('gamma') x 5,
         (undef) x 5,
         'gamma',
+    );
+    my @good_delta = (
         ('delta') x 5,
         undef,
         'delta',
         undef,
         'delta',
+    );
+    my @list_basic = (
+        @good_alpha,
+        @good_beta,
+        @good_gamma,
+        @good_delta,
     );
 
     note("List starts with undef");
@@ -150,7 +162,30 @@ use File::Temp qw(tempfile);
     is($rv->[1], $#bad_4, "Failure to validate at index $#bad_4");
     is($rv->[2], "$bad_4[-1] previously observed", "element $bad_4[-1] previously observed");
 
+    note("Sequence not closed off, ends with undef");
+    my @bad_5 = (
+        @good_alpha,
+        @good_beta,
+        undef,
+        @good_gamma,
+        @good_delta,
+    );
+    $rv = validate_list_sequence(\@bad_5);
+    ok($rv, "validate_list_sequence() returned true value");
+    is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
+    is(scalar(@$rv), 3,
+        "validate_list_sequence() returned array with 3 elements");
+    is($rv->[0], 0, "list not validated");
+    my $exp = scalar(@good_alpha) + scalar(@good_beta) + 1;
+    is($rv->[1], $exp, "Failure to validate at index $exp");
+    $exp -= 1;
+    like($rv->[2],
+        qr/Immediately preceding element \(index $exp\) not defined/,
+        "Got expected error message"
+    );
+
     #####
+
 
     note("Good list");
     $rv = validate_list_sequence(\@list_basic);

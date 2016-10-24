@@ -22,6 +22,7 @@ Test::Multisect::Auxiliary - Helper functions for Test::Multisect
     use Test::Multisect::Auxiliary qw(
         clean_outputfile
         hexdigest_one_file
+        validate_list_sequence
     );
 
 =head1 DESCRIPTION
@@ -149,7 +150,7 @@ sub validate_list_sequence {
                 next;
             }
             else {
-                # value differs from last previously observed
+                # Value differs from last previously observed.
                 # Was it ever previously observed?  If so, bad.
                 if (exists $previous{$list->[$j]}) {
                     $status = 0;
@@ -157,9 +158,23 @@ sub validate_list_sequence {
                     return $rv;
                 }
                 else {
-                    $previous{$lpd}++;
-                    $lpd = $list->[$j];
-                    next;
+                    # Value not previously observed, but since previous
+                    # sequence ends with an undef, that sequence was not
+                    # properly terminated.  Bad.
+                    if (! defined $list->[$j-1]) {
+                        $status = 0;
+                        $rv = [
+                            $status,
+                            $j,
+                            "Immediately preceding element (index " . ($j-1) . ") not defined",
+                        ];
+                        return $rv;
+                    }
+                    else {
+                        $previous{$lpd}++;
+                        $lpd = $list->[$j];
+                        next;
+                    }
                 }
             }
         }
