@@ -1,6 +1,4 @@
 use v5.10.0;
-#use Devel::CheckBin;
-#check_bin('git');
 
 use ExtUtils::MakeMaker;
 use Carp;
@@ -16,9 +14,8 @@ my %WriteMakefileArgs = (
     NAME         => 'Test::Multisect',
     VERSION_FROM => 'lib/Test/Multisect.pm', # finds \$VERSION
     AUTHOR       => 'James E Keenan (jkeenan@cpan.org)',
-    ABSTRACT     => 'Run test file(s) at consecutive git commits',
+    ABSTRACT     => 'Study test output over a range of git commits',
     CONFIGURE_REQUIRES => {
-        #'Devel::CheckBin' => 0,
         'ExtUtils::MakeMaker' => 0,
     },
     PREREQ_PM    => {

@@ -15,6 +15,60 @@ use List::Util qw(first);
 
 our $VERSION = '0.01';
 
+=head1 NAME
+
+Test::Multisect - Study test output over a range of git commits
+
+=head1 SYNOPSIS
+
+    use Test::Multisect;
+
+    $self = Test::Multisect->new(\%parameters);
+
+    $commit_range = $self->get_commits_range();
+
+    $full_targets = $self->set_targets(\@target_args);
+
+    $outputs = $self->run_test_files_on_one_commit($commit_range->[0]);
+
+    $all_outputs = $self->run_test_files_on_all_commits();
+
+    $rv = $self->get_digests_by_file_and_commit();
+
+    $transitions = $self->examine_transitions();
+
+=head1 DESCRIPTION
+
+Given a Perl library or application kept in F<git> for version control, it is
+often useful to be able to compare the output collected from running one or
+several test files over a range of git commits.  If that range is sufficiently
+large, a test may fail in B<more than one way> over that range.
+
+If that is the case, then simply asking, I<"When did this file start to
+fail?"> is insufficient.  We may want to capture the test output for each
+commit, or, more usefully, may want to capture the test output only at those
+commits where the output changed.
+
+F<Test::Multisect> provides methods to achieve that objective.
+
+=head1 METHODS
+
+=head2 C<new()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
+
 sub new {
     my ($class, $params) = @_;
     my %data;
@@ -71,10 +125,42 @@ sub _get_commits {
     return [ @extended_commits ];
 }
 
+=head2 C<get_commits_range()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
+
 sub get_commits_range {
     my $self = shift;
     return [  map { $_->{sha} } @{$self->{commits}} ];
 }
+
+=head2 C<set_targets()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
 
 sub set_targets {
     my ($self, $targets) = @_;
@@ -97,6 +183,22 @@ sub set_targets {
     }
     return \@full_targets;
 }
+
+=head2 C<run_test_files_on_one_commit()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
 
 sub run_test_files_on_one_commit {
     my ($self, $commit) = @_;
@@ -143,6 +245,22 @@ sub run_test_files_on_one_commit {
     return \@outputs;
 }
 
+=head2 C<run_test_files_on_all_commits()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
+
 sub run_test_files_on_all_commits {
     my $self = shift;
     my $all_commits = $self->get_commits_range();
@@ -154,6 +272,22 @@ sub run_test_files_on_all_commits {
     $self->{all_outputs} = [ @all_outputs ];
     return \@all_outputs;
 }
+
+=head2 C<get_digests_by_file_and_commit()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
 
 sub get_digests_by_file_and_commit {
     my $self = shift;
@@ -173,6 +307,22 @@ sub get_digests_by_file_and_commit {
     }
     return $rv;
 }
+
+=head2 C<examine_transitions()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
 
 sub examine_transitions {
     my $self = shift;
