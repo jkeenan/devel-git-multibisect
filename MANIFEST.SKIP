@@ -46,3 +46,4 @@ nytprof.out
 ^t/lib/dummyrepo/pm_to_blib$
 ^t/lib/dummyrepo/MYMETA.*
 ^t/lib/dummyrepo/.cvsignore
+^.git/objects/
