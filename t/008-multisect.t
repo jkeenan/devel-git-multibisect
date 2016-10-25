@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More qw(no_plan); # tests => 26;
+use Test::More tests => 37;
 #use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
@@ -26,17 +26,18 @@ $good_last = 'efdd091cf3690010913b849dcf4fee290f399009';
     gitdir => $good_gitdir,
     last_before => $good_last_before,
     last => $good_last,
-    verbose => 1,
+    verbose => 0,
     make_command => 'make -s',
 );
 $params = process_options(%args);
+$target_args = [ 't/001_load.t' ];
+
+note("First object");
+
 $self = Test::Multisect->new($params);
 ok($self, "new() returned true value");
 isa_ok($self, 'Test::Multisect');
 
-$target_args = [
-    't/001_load.t',
-];
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
@@ -98,4 +99,45 @@ for my $k ( qw| older newer compare | ) {
 
 #pp($transitions);
 
-__END__
+#######################################
+
+note("Second object");
+
+my ($dself, $bisected_outputs, $bisected_outputs_non_empty_count);
+
+$dself = Test::Multisect->new($params);
+ok($dself, "new() returned true value");
+isa_ok($dself, 'Test::Multisect');
+
+$full_targets = $dself->set_targets($target_args);
+ok($full_targets, "set_targets() returned true value");
+is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
+is_deeply(
+    $full_targets,
+    [ map { "$dself->{gitdir}/$_" } @{$target_args} ],
+    "Got expected full paths to target files for testing",
+);
+
+note("prepare_multisect()");
+
+$bisected_outputs = $dself->prepare_multisect();
+ok($bisected_outputs, "prepare_multisect() returned true value");
+is(ref($bisected_outputs), 'ARRAY', "prepare_multisect() returned array ref");
+#say STDERR "BBB:";
+#pp($bisected_outputs);
+cmp_ok(
+    scalar(@{$bisected_outputs}),
+    '==',
+    scalar(@{$self->get_commits_range}),
+    "Got expected number of elements in bisected outputs"
+);
+ok(scalar(@{$bisected_outputs->[0]}), "Array ref in first element is non-empty");
+ok(scalar(@{$bisected_outputs->[-1]}), "Array ref in last element is non-empty");
+$bisected_outputs_non_empty_count = 0;
+for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
+    $bisected_outputs_non_empty_count++
+        if scalar(@{$bisected_outputs->[$idx]});
+}
+ok(! $bisected_outputs_non_empty_count,
+    "After prepare_multisect(), internal elements are all empty array refs");
+
