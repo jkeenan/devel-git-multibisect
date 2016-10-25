@@ -766,7 +766,7 @@ Example:
 sub prepare_multisect {
     my $self = shift;
     my $all_commits = $self->get_commits_range();
-    my @bisected_outputs = ([]) x scalar(@{$all_commits});
+    my @bisected_outputs = (undef) x scalar(@{$all_commits});
     for my $idx (0, $#{$all_commits}) {
         my $outputs = $self->run_test_files_on_one_commit($all_commits->[$idx]);
         $bisected_outputs[$idx] = $outputs;

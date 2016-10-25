@@ -103,7 +103,7 @@ for my $k ( qw| older newer compare | ) {
 
 note("Second object");
 
-my ($dself, $bisected_outputs, $bisected_outputs_non_empty_count);
+my ($dself, $bisected_outputs, $bisected_outputs_undef_count);
 
 $dself = Test::Multisect->new($params);
 ok($dself, "new() returned true value");
@@ -133,11 +133,12 @@ cmp_ok(
 );
 ok(scalar(@{$bisected_outputs->[0]}), "Array ref in first element is non-empty");
 ok(scalar(@{$bisected_outputs->[-1]}), "Array ref in last element is non-empty");
-$bisected_outputs_non_empty_count = 0;
+$bisected_outputs_undef_count = 0;
 for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
-    $bisected_outputs_non_empty_count++
-        if scalar(@{$bisected_outputs->[$idx]});
+    $bisected_outputs_undef_count++
+    #if scalar(@{$bisected_outputs->[$idx]});
+        if defined $bisected_outputs->[$idx];
 }
-ok(! $bisected_outputs_non_empty_count,
-    "After prepare_multisect(), internal elements are all empty array refs");
+ok(! $bisected_outputs_undef_count,
+    "After prepare_multisect(), internal elements are all as yet undefined");
 
