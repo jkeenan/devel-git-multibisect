@@ -252,6 +252,18 @@ the default described above).
 String holding the value of C<commit> (above) to the number of characters
 specified in the C<short> element passed to the constructor; defaults to 7.
 
+=item * C<file_stub>
+
+String holding a rewritten version of the relative path beneath C<gitcir> of
+the test file being run.  In this relative path forward slash (C</>) and dot
+(C<.>) characters are changed to underscores C(<_>).  So,
+
+    t/44_func_hashes_mult_unsorted.t
+
+... becomes:
+
+    t_44_func_hashes_mult_unsorted_t'
+
 =item * C<file>
 
 String holding the full path to the file holding the TAP output collected
@@ -263,11 +275,10 @@ how that path is calculated.  Given:
     shortened SHA (commit_short)    => '2a2e54a'
     test file (target->[$i])        => 't/44_func_hashes_mult_unsorted.t'
 
-... the file is placed in the directory specified by C<outputdir>.  The
-relative path beneath C<gitcir> of the test file being run is rewritten to
-change forward slash (C</>) and dot (C<.>) characters to underscores C(<_>).
-We then join the shortened SHA, the rewritten relative path and the strings
-C<output> and C<txt> with a dot to yield this value for the C<file> element:
+... the file is placed in the directory specified by C<outputdir>.  We then
+join C<commit_short> (the shortened SHA), C<file_stub> (the rewritten relative
+path) and the strings C<output> and C<txt> with a dot to yield this value for
+the C<file> element:
 
     2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt
 
@@ -285,14 +296,16 @@ Example:
     [
       {
         commit => "2a2e54af709f17cc6186b42840549c46478b6467",
-        commit_short => "t_44_func_hashes_mult_unsorted_t",
-        file => "/tmp/Z6gv3KT1Sz/2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt",
+        commit_short => "2a2e54a",
+        file => "/tmp/1mVnyd59ee/2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt",
+        file_stub => "t_44_func_hashes_mult_unsorted_t",
         md5_hex => "31b7c93474e15a16d702da31989ab565",
       },
       {
         commit => "2a2e54af709f17cc6186b42840549c46478b6467",
-        commit_short => "t_45_func_hashes_alt_dual_sorted_t",
-        file => "/tmp/Z6gv3KT1Sz/2a2e54a.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+        commit_short => "2a2e54a",
+        file => "/tmp/1mVnyd59ee/2a2e54a.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+        file_stub => "t_45_func_hashes_alt_dual_sorted_t",
         md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
       },
     ]
@@ -352,8 +365,9 @@ sub run_test_files_on_one_commit {
         $outputfile = clean_outputfile($outputfile);
         push @outputs, {
             commit => $commit,
-            commit_short => $no_slash,
+            commit_short => $short,
             file => $outputfile,
+            file_stub => $no_slash,
             md5_hex => hexdigest_one_file($outputfile),
         };
         say "Created $outputfile" if $self->{verbose};
@@ -549,7 +563,7 @@ sub get_digests_by_file_and_commit {
     my $rv = {};
     for my $commit (@{$self->{all_outputs}}) {
         for my $target (@{$commit}) {
-            push @{$rv->{$target->{commit_short}}},
+            push @{$rv->{$target->{file_stub}}},
                 {
                     commit  => $target->{commit},
                     file    => $target->{file},
