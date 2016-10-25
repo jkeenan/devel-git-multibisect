@@ -212,3 +212,5 @@ t/lib/list-compare/t/90_oo_errors.t
 t/lib/list-compare/t/91_func_errors.t
 t/lib/list-compare/t/IO/CaptureOutput.pm
 t/lib/list-compare/t/Test/ListCompareSpecial.pm
+t/lib/output1.txt
+t/lib/output2.txt
