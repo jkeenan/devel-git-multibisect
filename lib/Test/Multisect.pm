@@ -457,9 +457,63 @@ sub run_test_files_on_all_commits {
 
 =item * Purpose
 
+Present the same outcomes as C<run_test_files_on_all_commits()>, but formatted by target file, then commit.
+
 =item * Arguments
 
+    $rv = $self->get_digests_by_file_and_commit();
+
+None; all data needed is already present in the object.
+
 =item * Return Value
+
+Reference to a hash keyed on the basename of the target file, modified to substitute underscores for forward slashes and dots.  The value of each element in the hash is a reference to an array which, in turn, holds a list of hash references, one per git commit.  Each such hash has the following keys:
+
+    commit
+    file
+    md5_hex
+
+Example:
+
+    {
+      t_44_func_hashes_mult_unsorted_t   => [
+          {
+            commit  => "2a2e54af709f17cc6186b42840549c46478b6467",
+            file    => "/tmp/Xhilc8ZSgS/2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt",
+            md5_hex => "31b7c93474e15a16d702da31989ab565",
+          },
+          {
+            commit  => "a624024294a56964eca53ec4617a58a138e91568",
+            file    => "/tmp/Xhilc8ZSgS/a624024.t_44_func_hashes_mult_unsorted_t.output.txt",
+            md5_hex => "31b7c93474e15a16d702da31989ab565",
+          },
+          # ...
+          {
+            commit  => "d304a207329e6bd7e62354df4f561d9a7ce1c8c2",
+            file    => "/tmp/Xhilc8ZSgS/d304a20.t_44_func_hashes_mult_unsorted_t.output.txt",
+            md5_hex => "31b7c93474e15a16d702da31989ab565",
+          },
+      ],
+      t_45_func_hashes_alt_dual_sorted_t => [
+          {
+            commit  => "2a2e54af709f17cc6186b42840549c46478b6467",
+            file    => "/tmp/Xhilc8ZSgS/2a2e54a.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+            md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
+          },
+          {
+            commit  => "a624024294a56964eca53ec4617a58a138e91568",
+            file    => "/tmp/Xhilc8ZSgS/a624024.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+            md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
+          },
+          # ...
+          {
+            commit  => "d304a207329e6bd7e62354df4f561d9a7ce1c8c2",
+            file    => "/tmp/Xhilc8ZSgS/d304a20.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+            md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
+          },
+      ],
+    }
+
 
 =item * Comment
 
@@ -495,14 +549,93 @@ sub get_digests_by_file_and_commit {
 
 =item * Purpose
 
+Determine whether a run of the same targeted test file run at two consecutive
+commits produced the same or different output (as measured by string equality
+or inequality of each commit's md5_hex value.
+
 =item * Arguments
 
+    $transitions = $self->examine_transitions();
+
+None; all data needed is already present in the object.
+
 =item * Return Value
+
+Reference to a hash keyed on the basename of the target file, modified to
+substitute underscores for forward slashes and dots.  The value of each
+element in the hash is a reference to an array which, in turn, holds a list of
+hash references, one per each pair of consecutive git commits.  Each such hash
+has the following keys:
+
+    older
+    newer
+    compare
+
+The value for each of the C<older> and C<newer> elements is a reference to a
+hash with two elements:
+
+    md5_hex
+    idx
+
+... where C<md5_hex> is the digest of the test output file and C<idx> is the
+position (count starting at C<0>) of that element in the list of commits in
+the commit range.
+
+Example:
+
+    {
+      t_44_func_hashes_mult_unsorted_t   => [
+          {
+            compare => "same",
+            newer   => { md5_hex => "31b7c93474e15a16d702da31989ab565", idx => 1 },
+            older   => { md5_hex => "31b7c93474e15a16d702da31989ab565", idx => 0 },
+          },
+          {
+            compare => "same",
+            newer   => { md5_hex => "31b7c93474e15a16d702da31989ab565", idx => 2 },
+            older   => { md5_hex => "31b7c93474e15a16d702da31989ab565", idx => 1 },
+          },
+          # ...
+          {
+            compare => "same",
+            newer   => { md5_hex => "31b7c93474e15a16d702da31989ab565", idx => 9 },
+            older   => { md5_hex => "31b7c93474e15a16d702da31989ab565", idx => 8 },
+          },
+      ],
+      t_45_func_hashes_alt_dual_sorted_t => [
+          {
+            compare => "same",
+            newer   => { md5_hex => "6ee767b9d2838e4bbe83be0749b841c1", idx => 1 },
+            older   => { md5_hex => "6ee767b9d2838e4bbe83be0749b841c1", idx => 0 },
+          },
+          {
+            compare => "same",
+            newer   => { md5_hex => "6ee767b9d2838e4bbe83be0749b841c1", idx => 2 },
+            older   => { md5_hex => "6ee767b9d2838e4bbe83be0749b841c1", idx => 1 },
+          },
+          {
+            compare => "same",
+            newer   => { md5_hex => "6ee767b9d2838e4bbe83be0749b841c1", idx => 3 },
+            older   => { md5_hex => "6ee767b9d2838e4bbe83be0749b841c1", idx => 2 },
+          },
+          # ...
+          {
+            compare => "same",
+            newer   => { md5_hex => "6ee767b9d2838e4bbe83be0749b841c1", idx => 9 },
+            older   => { md5_hex => "6ee767b9d2838e4bbe83be0749b841c1", idx => 8 },
+          },
+      ],
+    }
 
 =item * Comment
 
 This method currently may be called only after calling
 C<run_test_files_on_all_commits()> and will die otherwise.
+
+Since in this method we are concerned with the B<transition> in the test
+output between a pair of commits, the second-level arrays returned by this
+method will have one fewer element than the second-level arrays returned by
+C<get_digests_by_file_and_commit()>.
 
 =back
 
@@ -519,15 +652,15 @@ sub examine_transitions {
             my $newer = $arr[$i]->{md5_hex};
             if ($older eq $newer) {
                 push @{$transitions{$k}}, {
-                    older => { idx => $i-1, file => $older },
-                    newer => { idx => $i,   file => $newer },
+                    older => { idx => $i-1, md5_hex => $older },
+                    newer => { idx => $i,   md5_hex => $newer },
                     compare => 'same',
                 }
             }
             else {
                 push @{$transitions{$k}}, {
-                    older => { idx => $i-1, file => $older },
-                    newer => { idx => $i,   file => $newer },
+                    older => { idx => $i-1, md5_hex => $older },
+                    newer => { idx => $i,   md5_hex => $newer },
                     compare => 'different',
                 }
             }
