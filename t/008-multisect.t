@@ -1,26 +1,27 @@
 # -*- perl -*-
-# t/006-run-test-files-on-all-commits.t
+# t/008-multisect.t
 use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 29;
+use Test::More qw(no_plan); # tests => 26;
 #use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
 
 my $cwd = cwd();
 
-##### run_test_files_on_all_commits() #####
-
 my (%args, $params, $self);
 my ($good_gitdir, $good_last_before, $good_last);
 my ($target_args, $full_targets);
 my ($rv, $transitions, $all_outputs, $all_outputs_count, $expected_count, $first_element);
 
-$good_gitdir = "$cwd/t/lib/list-compare";
-$good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
-$good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
+# So that we have a basis for comparison, we'll first run already tested
+# methods over the 'dummyrepo'.
+
+$good_gitdir = "$cwd/t/lib/dummyrepo";
+$good_last_before = '92a79a3dc5bba45930a52e4affd91551aa6c78fc';
+$good_last = 'efdd091cf3690010913b849dcf4fee290f399009';
 %args = (
     gitdir => $good_gitdir,
     last_before => $good_last_before,
@@ -34,8 +35,7 @@ ok($self, "new() returned true value");
 isa_ok($self, 'Test::Multisect');
 
 $target_args = [
-    't/44_func_hashes_mult_unsorted.t',
-    't/45_func_hashes_alt_dual_sorted.t',
+    't/001_load.t',
 ];
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -45,16 +45,6 @@ is_deeply(
     [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
-
-{
-    # error case: premature run of get_digests_by_file_and_commit()
-    local $@;
-    eval { $rv = $self->get_digests_by_file_and_commit(); };
-    like($@,
-        qr/You must call run_test_files_on_all_commits\(\) before calling get_digests_by_file_and_commit\(\)/,
-        "Got expected error message for premature get_digests_by_file_and_commit()"
-    );
-}
 
 $all_outputs = $self->run_test_files_on_all_commits();
 ok($all_outputs, "run_test_files_on_all_commits() returned true value");
@@ -70,10 +60,6 @@ is(
     scalar(@{$self->get_commits_range}) * scalar(@{$target_args}),
     "Got expected number of output files"
 );
-
-
-
-##### get_digests_by_file_and_commit() #####
 
 $rv = $self->get_digests_by_file_and_commit();
 ok($rv, "get_digests_by_file_and_commit() returned true value");
@@ -92,9 +78,6 @@ for my $k ( qw| commit file md5_hex | ) {
     ok(exists $rv->{$first_element}->[0]->{$k}, "Record has '$k' element");
 }
 
-
-##### examine_transitions #####
-
 $transitions = $self->examine_transitions();
 ok($transitions, "examine_transitions() returned true value");
 is(ref($transitions), 'HASH', "examine_transitions() returned hash ref");
@@ -112,13 +95,7 @@ is(ref($transitions->{$first_element}->[0]), 'HASH', "Records are hash reference
 for my $k ( qw| older newer compare | ) {
     ok(exists $transitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
 }
-for my $test (sort keys %$transitions) {
-    my $expected_different = 0;
-    my $observed_different = 0;
-    for my $r (@{$transitions->{$test}}) {
-        $observed_different++ if $r->{compare} eq 'different';
-    }
-    cmp_ok($observed_different, '==', $expected_different,
-        "As expected, for $test got $expected_different 'different' for 'compare'");
-}
 
+#pp($transitions);
+
+__END__
