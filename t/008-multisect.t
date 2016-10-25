@@ -5,7 +5,7 @@ use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 37;
-#use Data::Dump qw(pp);
+use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
 
@@ -123,8 +123,8 @@ note("prepare_multisect()");
 $bisected_outputs = $dself->prepare_multisect();
 ok($bisected_outputs, "prepare_multisect() returned true value");
 is(ref($bisected_outputs), 'ARRAY', "prepare_multisect() returned array ref");
-#say STDERR "BBB:";
-#pp($bisected_outputs);
+say STDERR "BBB:";
+pp($bisected_outputs);
 cmp_ok(
     scalar(@{$bisected_outputs}),
     '==',

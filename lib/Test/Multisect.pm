@@ -700,6 +700,69 @@ sub examine_transitions {
     return \%transitions;
 }
 
+=head2 C<prepare_multisect()>
+
+=over 4
+
+=item * Purpose
+
+Set up data structures within object needed before multisection can start.
+
+=item * Arguments
+
+    $bisected_outputs = $dself->prepare_multisect();
+
+None; all data needed is already present in the object.
+
+=item * Return Value
+
+Reference to an array holding a list of array references, one for each commit
+in the range.  Only the first and last elements of the array will be
+populated, as the other, internal elements will be populated in the course of
+the multisection process.  The first and last elements will hold one element
+for each of the test files targeted.  Each such element will be a hash keyed
+on the same keys as C<run_test_files_on_one_commit()>:
+
+    commit
+    commit_short
+    file
+    file_stub
+    md5_hex
+
+Example:
+
+   [
+     [
+       {
+         commit => "630a7804a7849e0075351ef72b0cbf5a44985fb1",
+         commit_short => "630a780",
+         file => "/tmp/T8oUInphoW/630a780.t_001_load_t.output.txt",
+         file_stub => "t_001_load_t",
+         md5_hex => "59c9d8f4cee1c31bcc3d85ab79a158e7",
+       },
+     ],
+     [],
+     [],
+     # ...
+     [],
+     [
+       {
+         commit => "efdd091cf3690010913b849dcf4fee290f399009",
+         commit_short => "efdd091",
+         file => "/tmp/T8oUInphoW/efdd091.t_001_load_t.output.txt",
+         file_stub => "t_001_load_t",
+         md5_hex => "318ce8b2ccb3e92a6e516e18d1481066",
+       },
+     ],
+   ];
+
+
+=item * Comment
+
+=back
+
+=cut
+
 sub prepare_multisect {
     my $self = shift;
     my $all_commits = $self->get_commits_range();
