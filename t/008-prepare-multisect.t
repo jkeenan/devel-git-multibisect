@@ -1,5 +1,5 @@
 # -*- perl -*-
-# t/008-multisect.t
+# t/008-prepare-multisect.t
 use strict;
 use warnings;
 use Test::Multisect;
