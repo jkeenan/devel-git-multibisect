@@ -181,7 +181,7 @@ Identify the test files which will be run at different points in the commits ran
     ];
     $full_targets = $self->set_targets($target_args);
 
-Reference to an array holding the relative paths beneath the C<gitdir> to the 
+Reference to an array holding the relative paths beneath the C<gitdir> to the
 test files selected for examination.
 
 =item * Return Value
@@ -223,11 +223,78 @@ sub set_targets {
 
 =item * Purpose
 
+Capture the output from running the selected test files at one specific git checkout.
+
 =item * Arguments
+
+    $outputs = $self->run_test_files_on_one_commit("2a2e54a");
+
+String holding the SHA from a single commit in the repository.  This string
+would typically be one of the elements in the array reference returned by
+C<$self->get_commits_range()>.  If no argument is provided, the method will
+default to using the first element in the array reference returned by
+C<$self->get_commits_range()>.
 
 =item * Return Value
 
+Reference to an array, each element of which is a hash reference with the
+following elements:
+
+=over 4
+
+=item * C<commit>
+
+String holding the SHA from the commit passed as argument to this method (or
+the default described above).
+
+=item * C<commit_short>
+
+String holding the value of C<commit> (above) to the number of characters
+specified in the C<short> element passed to the constructor; defaults to 7.
+
+=item * C<file>
+
+String holding the full path to the file holding the TAP output collected
+while running one test file at the given commit.  The following example shows
+how that path is calculated.  Given:
+
+    output directory (outputdir)    => '/tmp/DQBuT_SRAY/'
+    SHA (commit)                    => '2a2e54af709f17cc6186b42840549c46478b6467'
+    shortened SHA (commit_short)    => '2a2e54a'
+    test file (target->[$i])        => 't/44_func_hashes_mult_unsorted.t'
+
+... the file is placed in the directory specified by C<outputdir>.  The
+relative path beneath C<gitcir> of the test file being run is rewritten to
+change forward slash (C</>) and dot (C<.>) characters to underscores C(<_>).
+We then join the shortened SHA, the rewritten relative path and the strings
+C<output> and C<txt> with a dot to yield this value for the C<file> element:
+
+    2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt
+
+=item * C<md5_hex>
+
+String holding the return value of
+C<Test::Multisect::Auxiliary::hexdigest_one_file()> run with the file
+designated by the C<file> element as an argument.  (More precisely, the file
+as modified by C<Test::Multisect::Auxiliary::clean_outputfile()>.)
+
+=back
+
 =item * Comment
+
+In this method's current implementation, we start with a C<git checkout> from
+the repository at the specified C<commit>.  We configure (I<e.g.,> C<perl
+Makefile.PL>) and build (I<e.g.,> C<make>) the source code.  We then test each
+of the test files we have targeted (I<e.g.,> C<prove -vb
+relative/path/to/test_file.t>).  We redirect both STDOUT and STDERR to
+C<outputfile>, clean up the outputfile to remove the line containing timings
+(as that introduces unwanted variability in the C<md5_hex> values) and compute
+the digest.
+
+This implementation is very much subject to change.
+
+If a true value for C<verbose> has been passed to the constructor, the method
+prints C<Created [outputfile]> to STDOUT before returning.
 
 =back
 
@@ -268,11 +335,11 @@ sub run_test_files_on_one_commit {
         $outputfile = clean_outputfile($outputfile);
         push @outputs, {
             commit => $commit,
+            commit_short => $no_slash,
             file => $outputfile,
             md5_hex => hexdigest_one_file($outputfile),
-            file_short => $no_slash,
         };
-        print "Created $outputfile\n" if $self->{verbose};
+        say "Created $outputfile" if $self->{verbose};
     }
     system(qq|git checkout $current_branch|) and croak "Unable to 'git checkout $current_branch";
     return \@outputs;
@@ -284,11 +351,89 @@ sub run_test_files_on_one_commit {
 
 =item * Purpose
 
+Capture the output from a run of the selected test files at each specific git
+checkout in the selected commit range.
+
 =item * Arguments
+
+    $all_outputs = $self->run_test_files_on_all_commits();
+
+None; all data needed is already present in the object.
 
 =item * Return Value
 
+Array reference, each of whose elements is an array reference, each of whose elements is a hash reference with the same four keys as in the return value from C<run_test_files_on_one_commit()>:
+
+    commit
+    commit_short
+    file
+    md5_hex
+
+Example:
+
+    [
+      # Array where each element corresponds to a single git checkout
+
+      [
+        # Array where each element corresponds to one of the selected test
+        # files (here, 2 test files were targetd)
+
+        {
+          # Hash where each element correponds to the result of running a
+          # single test file at a single commit point
+
+          commit => "2a2e54af709f17cc6186b42840549c46478b6467",
+          commit_short => "t_44_func_hashes_mult_unsorted_t",
+          file => "/tmp/BrihPrp0qw/2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt",
+          md5_hex => "31b7c93474e15a16d702da31989ab565",
+        },
+        {
+          commit => "2a2e54af709f17cc6186b42840549c46478b6467",
+          commit_short => "t_45_func_hashes_alt_dual_sorted_t",
+          file => "/tmp/BrihPrp0qw/2a2e54a.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
+        },
+      ],
+      [
+        {
+          commit => "a624024294a56964eca53ec4617a58a138e91568",
+          commit_short => "t_44_func_hashes_mult_unsorted_t",
+          file => "/tmp/BrihPrp0qw/a624024.t_44_func_hashes_mult_unsorted_t.output.txt",
+          md5_hex => "31b7c93474e15a16d702da31989ab565",
+        },
+        {
+          commit => "a624024294a56964eca53ec4617a58a138e91568",
+          commit_short => "t_45_func_hashes_alt_dual_sorted_t",
+          file => "/tmp/BrihPrp0qw/a624024.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
+        },
+      ],
+    # ...
+      [
+        {
+          commit => "d304a207329e6bd7e62354df4f561d9a7ce1c8c2",
+          commit_short => "t_44_func_hashes_mult_unsorted_t",
+          file => "/tmp/BrihPrp0qw/d304a20.t_44_func_hashes_mult_unsorted_t.output.txt",
+          md5_hex => "31b7c93474e15a16d702da31989ab565",
+        },
+        {
+          commit => "d304a207329e6bd7e62354df4f561d9a7ce1c8c2",
+          commit_short => "t_45_func_hashes_alt_dual_sorted_t",
+          file => "/tmp/BrihPrp0qw/d304a20.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
+        },
+      ],
+    ]
+
 =item * Comment
+
+Note:  If the number of commits in the commits range is large, this method
+will take a long time to run.  That time will be even longer if the
+configuration and build times for each commit are large.  For example, to run
+one test over 160 commits from the Perl 5 core distribution might take 15
+hours.  YMMV.
+
+The implementation of this method is very much subject to change.
 
 =back
 
@@ -318,6 +463,9 @@ sub run_test_files_on_all_commits {
 
 =item * Comment
 
+This method currently may be called only after calling
+C<run_test_files_on_all_commits()> and will die otherwise.
+
 =back
 
 =cut
@@ -330,7 +478,7 @@ sub get_digests_by_file_and_commit {
     my $rv = {};
     for my $commit (@{$self->{all_outputs}}) {
         for my $target (@{$commit}) {
-            push @{$rv->{$target->{file_short}}},
+            push @{$rv->{$target->{commit_short}}},
                 {
                     commit  => $target->{commit},
                     file    => $target->{file},
@@ -352,6 +500,9 @@ sub get_digests_by_file_and_commit {
 =item * Return Value
 
 =item * Comment
+
+This method currently may be called only after calling
+C<run_test_files_on_all_commits()> and will die otherwise.
 
 =back
 
