@@ -280,6 +280,23 @@ as modified by C<Test::Multisect::Auxiliary::clean_outputfile()>.)
 
 =back
 
+Example:
+
+    [
+      {
+        commit => "2a2e54af709f17cc6186b42840549c46478b6467",
+        commit_short => "t_44_func_hashes_mult_unsorted_t",
+        file => "/tmp/Z6gv3KT1Sz/2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt",
+        md5_hex => "31b7c93474e15a16d702da31989ab565",
+      },
+      {
+        commit => "2a2e54af709f17cc6186b42840549c46478b6467",
+        commit_short => "t_45_func_hashes_alt_dual_sorted_t",
+        file => "/tmp/Z6gv3KT1Sz/2a2e54a.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+        md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
+      },
+    ]
+
 =item * Comment
 
 In this method's current implementation, we start with a C<git checkout> from
