@@ -3,4 +3,4 @@
 	url = https://github.com/jkeenan/list-compare
 [submodule "t/lib/dummyrepo"]
 	path = t/lib/dummyrepo
-	url = git@github.com:jkeenan/dummyrepo.git
+	url = https://github.com/jkeenan/dummyrepo
