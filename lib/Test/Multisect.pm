@@ -775,6 +775,23 @@ sub prepare_multisect {
     return \@bisected_outputs;
 }
 
+sub prepare_multisect_hash {
+    my $self = shift;
+    my $all_commits = $self->get_commits_range();
+    my %bisected_outputs;
+    for my $idx (0, $#{$all_commits}) {
+        my $outputs = $self->run_test_files_on_one_commit($all_commits->[$idx]);
+        for my $target (@{$outputs}) {
+#            say STDERR "DDD: $target->{file_stub}";
+            my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
+            $bisected_outputs{$target->{file_stub}}[$idx] =
+                { map { $_ => $target->{$_} } @other_keys };
+        }
+    }
+    $self->{bisected_outputs} = { %bisected_outputs };
+    return \%bisected_outputs;
+}
+
 =pod
 
 This is a first pass at multisection.  Here, we'll only try to identify the
@@ -802,10 +819,12 @@ we should check the status.
 =cut
 
 sub identify_first_transition_per_target {
-    my $self = shift;
+    my ($self, $current_start_idx) = @_;
     croak "You must run prepare_multisect() before identify_first_transition_per_target()"
-        unless exists $self->{bisected_objects};
+        unless exists $self->{bisected_outputs};
+    say STDERR "CCC: ", join('|' => ($current_start_idx, $self->{commits}->[$current_start_idx]->{sha}));
 
+    return 1;
 }
 
 1;

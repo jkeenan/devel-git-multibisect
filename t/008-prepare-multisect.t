@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 37;
+use Test::More qw(no_plan); # tests => 37;
 use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
@@ -128,7 +128,7 @@ pp($bisected_outputs);
 cmp_ok(
     scalar(@{$bisected_outputs}),
     '==',
-    scalar(@{$self->get_commits_range}),
+    scalar(@{$dself->get_commits_range}),
     "Got expected number of elements in bisected outputs"
 );
 ok(scalar(@{$bisected_outputs->[0]}), "Array ref in first element is non-empty");
@@ -142,3 +142,10 @@ for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
 ok(! $bisected_outputs_undef_count,
     "After prepare_multisect(), internal elements are all as yet undefined");
 
+note("prepare_multisect_hash()");
+
+$bisected_outputs = $dself->prepare_multisect_hash();
+ok($bisected_outputs, "prepare_multisect() returned true value");
+is(ref($bisected_outputs), 'HASH', "prepare_multisect() returned hash ref");
+say STDERR "CCC: hash form of bisected_outputs";
+pp($bisected_outputs);

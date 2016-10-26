@@ -104,32 +104,34 @@ for my $k ( qw| older newer compare | ) {
     ok(exists $transitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
 }
 
-say STDERR "AAA: transitions";
-pp($transitions);
+#say STDERR "AAA: transitions";
+#pp($transitions);
 
 #######################################
 
 note("Second object");
 
-my ($dself, $bisected_outputs, $bisected_outputs_undef_count);
+my ($self2, $commit_range, $idx, $bisected_outputs, $bisected_outputs_undef_count);
 
-$dself = Test::Multisect->new($params);
-ok($dself, "new() returned true value");
-isa_ok($dself, 'Test::Multisect');
+$self2 = Test::Multisect->new($params);
+ok($self2, "new() returned true value");
+isa_ok($self2, 'Test::Multisect');
 
-$full_targets = $dself->set_targets($target_args);
+$commit_range = $self2->get_commits_range;
+
+$full_targets = $self2->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     $full_targets,
-    [ map { "$dself->{gitdir}/$_" } @{$target_args} ],
+    [ map { "$self2->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
 {
     # error case: premature run of identify_first_transition_per_target()
     local $@;
-    eval { $rv = $self->identify_first_transition_per_target(); };
+    eval { $rv = $self2->identify_first_transition_per_target(); };
     like($@,
         qr/You must run prepare_multisect\(\) before identify_first_transition_per_target\(\)/,
         "Got expected error message for premature identify_first_transition_per_target()"
@@ -138,15 +140,15 @@ is_deeply(
 
 note("prepare_multisect()");
 
-$bisected_outputs = $dself->prepare_multisect();
+$bisected_outputs = $self2->prepare_multisect();
 ok($bisected_outputs, "prepare_multisect() returned true value");
 is(ref($bisected_outputs), 'ARRAY', "prepare_multisect() returned array ref");
-say STDERR "BBB: bisected_outputs";
-pp($bisected_outputs);
+say STDERR "BBB:";
+pp($self2);
 cmp_ok(
     scalar(@{$bisected_outputs}),
     '==',
-    scalar(@{$self->get_commits_range}),
+    scalar(@{$self2->get_commits_range}),
     "Got expected number of elements in bisected outputs"
 );
 ok(scalar(@{$bisected_outputs->[0]}), "Array ref in first element is non-empty");
@@ -154,9 +156,32 @@ ok(scalar(@{$bisected_outputs->[-1]}), "Array ref in last element is non-empty")
 $bisected_outputs_undef_count = 0;
 for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
     $bisected_outputs_undef_count++
-    #if scalar(@{$bisected_outputs->[$idx]});
         if defined $bisected_outputs->[$idx];
 }
 ok(! $bisected_outputs_undef_count,
     "After prepare_multisect(), internal elements are all as yet undefined");
+
+$idx = 0;
+$self2->identify_first_transition_per_target($idx);
+
+note("prepare_multisect_hash()");
+
+$bisected_outputs = $self2->prepare_multisect_hash();
+ok($bisected_outputs, "prepare_multisect_hash() returned true value");
+is(ref($bisected_outputs), 'HASH', "prepare_multisect() returned hash ref");
+say STDERR "CCC: hash form of bisected_outputs";
+pp($bisected_outputs);
+for my $target (keys %{$bisected_outputs}) {
+    ok(defined $bisected_outputs->{$target}->[0], "first element for $target is defined");
+    ok(defined $bisected_outputs->{$target}->[-1], "last element for $target is defined");
+    is(ref($bisected_outputs->{$target}->[0]), 'HASH', "first element for $target is a hash ref");
+    is(ref($bisected_outputs->{$target}->[-1]), 'HASH', "last element for $target is a hash ref");
+    $bisected_outputs_undef_count = 0;
+    for my $idx (1 .. ($#{$bisected_outputs->{$target}} - 1)) {
+        $bisected_outputs_undef_count++
+            if defined $bisected_outputs->{$target}->[$idx];
+    }
+    ok(! $bisected_outputs_undef_count,
+        "After prepare_multisect_hash(), internal elements for $target are all as yet undefined");
+}
 
