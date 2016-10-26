@@ -161,9 +161,6 @@ for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
 ok(! $bisected_outputs_undef_count,
     "After prepare_multisect(), internal elements are all as yet undefined");
 
-$idx = 0;
-$self2->identify_first_transition_per_target($idx);
-
 note("prepare_multisect_hash()");
 
 $bisected_outputs = $self2->prepare_multisect_hash();
@@ -184,4 +181,7 @@ for my $target (keys %{$bisected_outputs}) {
     ok(! $bisected_outputs_undef_count,
         "After prepare_multisect_hash(), internal elements for $target are all as yet undefined");
 }
+
+$idx = 0;
+$self2->identify_first_transition_per_target($idx);
 

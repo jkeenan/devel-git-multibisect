@@ -10,8 +10,8 @@ use Test::Multisect::Auxiliary qw(
 use Carp;
 use Cwd;
 use File::Temp;
-use List::Util qw(first);
-#use Data::Dump qw( pp );
+use List::Util qw(first sum);
+use Data::Dump qw( pp );
 
 our $VERSION = '0.01';
 
@@ -229,11 +229,28 @@ Capture the output from running the selected test files at one specific git chec
 
     $outputs = $self->run_test_files_on_one_commit("2a2e54a");
 
+or
+
+    $excluded_targets = [
+        't/45_func_hashes_alt_dual_sorted.t',
+    ];
+    $outputs = $self->run_test_files_on_one_commit("2a2e54a", $excluded_targets);
+
+=over 4
+
+=item 1
+
 String holding the SHA from a single commit in the repository.  This string
 would typically be one of the elements in the array reference returned by
 C<$self->get_commits_range()>.  If no argument is provided, the method will
 default to using the first element in the array reference returned by
 C<$self->get_commits_range()>.
+
+=item 2
+
+Reference to array of target test files to be excluded from a particular invocation of this method.  Optional, but will die if argument is not an array reference.
+
+=back
 
 =item * Return Value
 
@@ -331,7 +348,17 @@ prints C<Created [outputfile]> to STDOUT before returning.
 =cut
 
 sub run_test_files_on_one_commit {
-    my ($self, $commit) = @_;
+    my ($self, $commit, $excluded_targets) = @_;
+    if (defined $excluded_targets) {
+        if (ref($excluded_targets) ne 'ARRAY') {
+            croak "excluded_targets, if defined, must be in array reference";
+        }
+    }
+    else {
+        $excluded_targets = [];
+    }
+    my %excluded_targets = map { $_ => 1 } @{$excluded_targets};
+    my @current_targets = grep { ! exists $excluded_targets{$_} } @{$self->{targets}};
     $commit //= $self->{commits}->[0]->{sha};
     my $short = substr($commit,0,$self->{short});
 
@@ -347,7 +374,8 @@ sub run_test_files_on_one_commit {
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
     system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
     my @outputs;
-    for my $test (@{$self->{targets}}) {
+    #for my $test (@{$self->{targets}}) {
+    for my $test (@current_targets) {
         my $this_test = "$self->{gitdir}/$test";
         my $no_slash = $test;
         $no_slash =~ s{[./]}{_}g;
@@ -782,7 +810,6 @@ sub prepare_multisect_hash {
     for my $idx (0, $#{$all_commits}) {
         my $outputs = $self->run_test_files_on_one_commit($all_commits->[$idx]);
         for my $target (@{$outputs}) {
-#            say STDERR "DDD: $target->{file_stub}";
             my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
             $bisected_outputs{$target->{file_stub}}[$idx] =
                 { map { $_ => $target->{$_} } @other_keys };
@@ -822,8 +849,50 @@ sub identify_first_transition_per_target {
     my ($self, $current_start_idx) = @_;
     croak "You must run prepare_multisect() before identify_first_transition_per_target()"
         unless exists $self->{bisected_outputs};
-    say STDERR "CCC: ", join('|' => ($current_start_idx, $self->{commits}->[$current_start_idx]->{sha}));
+    my $current_start_sha = $self->{commits}->[$current_start_idx]->{sha};
+    my $max_idx = $#{$self->{commits}};
+    my $n = 1;
+    #say STDERR "CCC: current_start_idx|sha: ", join('|' => ($current_start_idx, $self->{commits}->[$current_start_idx]->{sha}));
+say STDERR "CCC: current_start_idx|sha: ", join('|' => ($current_start_idx, $current_start_sha));
+say STDERR "DDD: max_idx: ", join('|' => ($max_idx));
 
+    my %this_round_status = map { $_ => 0 } keys %{$self->{bisected_outputs}};
+say STDERR "EEE: this_round_status:";
+pp(\%this_round_status);
+
+    while ($n <= $max_idx) {
+        # Above is sanity check: We should never need more rounds than there are
+        # commits in the range.
+
+        # Our process has to set the value of each element (file_stub) in
+        # %this_round_status to 1 to terminate.
+        #
+        # For each test file, the process is over when (a) the sha of the
+        # commit currently under consideration is *different* from
+        # $current_start_sha and (b) the sha of the immediately preceding
+        # commit is defined and is the *same* as $current_start_sha.
+
+        return 1 if sum(values %this_round_status) ==
+            scalar(@{$self->{targets}});
+        
+        my $h = sprintf("%d" => (($current_start_idx + $max_idx) / 2));
+        my $this_commit = $self->{commits}->[$h]->{sha};
+        say STDERR "FFF: h|this_commit: $h|$this_commit";
+        my $these_outputs = $self->run_test_files_on_one_commit($this_commit);
+
+        for my $target (@{$these_outputs}) {
+            my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
+            $self->{bisected_outputs}->{$target->{file_stub}}->[$h] =
+                { map { $_ => $target->{$_} } @other_keys };
+        }
+say STDERR "FFF: bisected_outputs:";
+pp($self->{bisected_outputs});
+return 1;
+
+        $n++;
+    }
+    #croak "Problem:  Number of bisection rounds exceeded " . ($max_idx + 1) . " commits in range"; 
+    say STDERR "ZZZ:";
     return 1;
 }
 
