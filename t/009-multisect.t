@@ -104,8 +104,8 @@ for my $k ( qw| older newer compare | ) {
     ok(exists $transitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
 }
 
-#say STDERR "AAA: transitions";
-#pp($transitions);
+say STDERR "AAA: transitions";
+pp($transitions);
 
 #######################################
 
@@ -166,8 +166,8 @@ note("prepare_multisect_hash()");
 $bisected_outputs = $self2->prepare_multisect_hash();
 ok($bisected_outputs, "prepare_multisect_hash() returned true value");
 is(ref($bisected_outputs), 'HASH', "prepare_multisect() returned hash ref");
-say STDERR "CCC: hash form of bisected_outputs";
-pp($bisected_outputs);
+#say STDERR "CCC: hash form of bisected_outputs";
+#pp($bisected_outputs);
 for my $target (keys %{$bisected_outputs}) {
     ok(defined $bisected_outputs->{$target}->[0], "first element for $target is defined");
     ok(defined $bisected_outputs->{$target}->[-1], "last element for $target is defined");
