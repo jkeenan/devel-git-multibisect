@@ -775,6 +775,39 @@ sub prepare_multisect {
     return \@bisected_outputs;
 }
 
+=pod
+
+This is a first pass at multisection.  Here, we'll only try to identify the
+very first transition for each test file targeted.
+
+To establish that, for each target, we have to find the commit whose md5_hex
+first differs from that of the very first commit in the range.  How will we
+know when we've found it?  Its md5_hex will be different from the very first's,
+but the immediately preceding commit will have the same md5_hex as the very first.
+
+Hence, we have to do *two* instances of run_test_files_on_one_commit() at each
+bisection point.  For each of them we will stash the result in a cache.  That way,
+before calling run_test_files_on_one_commit(), we can check the cache to see 
+whether we can skip the configure-build-test cycle for that particular commit.
+As a matter of fact, that cache will be nothing other than the 'bisected_outputs'
+array created in prepare_multisect().
+
+We have to account for the fact that the first transition is quite likely to be
+different for each of the test files targeted.  We are likely to have to keep on
+bisecting for one file after we've completed another.  Hence, we'll need a hash
+keyed on file_stub in which to record the Boolean status of our progress for each
+target and before embarking on a given round of run_test_files_on_one_commit()
+we should check the status.
+
+=cut
+
+sub identify_first_transition_per_target {
+    my $self = shift;
+    croak "You must run prepare_multisect() before identify_first_transition_per_target()"
+        unless exists $self->{bisected_objects};
+
+}
+
 1;
 
 __END__
