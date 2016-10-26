@@ -6,6 +6,7 @@ use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 12;
 use Cwd;
+#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 
@@ -36,7 +37,7 @@ $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
-    $full_targets,
+    [ map { $_->{path} } @{$full_targets} ],
     [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
@@ -65,7 +66,7 @@ $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
-    $full_targets,
+    [ map { $_->{path} } @{$full_targets} ],
     [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
@@ -81,3 +82,4 @@ is_deeply(
         "Got expected error message: bad target file: $bad_target_args->[1]");
 }
 
+__END__

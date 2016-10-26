@@ -186,8 +186,24 @@ test files selected for examination.
 
 =item * Return Value
 
-Reference to an array holding the absolute paths to the test files selected
-for examination.Each such test file is tested for its existence.
+Reference to an array holding hash references with these elements:
+
+=over 4
+
+=item * C<path>
+
+Absolute paths to the test files selected for examination.  Test file is
+tested for its existence.
+
+=item * C<stub>
+
+String composed by taking an element in the array ref passed as argument and substituting underscores C(<_>) for forward slash (C</>) and dot (C<.>) characters.  So,
+
+    t/44_func_hashes_mult_unsorted.t
+
+... becomes:
+
+    t_44_func_hashes_mult_unsorted_t'
 
 =item * Comment
 
@@ -198,22 +214,34 @@ for examination.Each such test file is tested for its existence.
 sub set_targets {
     my ($self, $targets) = @_;
 
+    my @raw_targets = ();
+    if (defined $self->{targets} and @{$self->{targets}}) {
+        @raw_targets = @{$self->{targets}};
+    }
+
     # If set_targets() is provided with an appropriate argument, override
     # whatever may have been stored in the object by new().
 
     if (defined $targets and ref($targets) eq 'ARRAY') {
-        $self->{targets} = $targets;
+        @raw_targets = @{$targets};
     }
 
+    my @full_targets = ();
     my @missing_files = ();
-    my @full_targets = map { "$self->{gitdir}/$_" } @{$self->{targets}};
-    for my $f (@full_targets) {
-        push @missing_files, $f
-            unless (-e $f);
+    for my $rt (@raw_targets) {
+        my $ft = "$self->{gitdir}/$rt";
+        if (! -e $ft) { push @missing_files, $ft; next }
+        my $stub;
+        ($stub = $rt) =~ s{[./]}{_}g;
+        push @full_targets, {
+            path    => $ft,
+            stub    => $stub,
+        };
     }
     if (@missing_files) {
         croak "Cannot find file(s) to be tested: @missing_files";
     }
+    $self->{targets} = [ @full_targets ];
     return \@full_targets;
 }
 
@@ -271,7 +299,7 @@ specified in the C<short> element passed to the constructor; defaults to 7.
 
 =item * C<file_stub>
 
-String holding a rewritten version of the relative path beneath C<gitcir> of
+String holding a rewritten version of the relative path beneath C<gitdir> of
 the test file being run.  In this relative path forward slash (C</>) and dot
 (C<.>) characters are changed to underscores C(<_>).  So,
 
@@ -373,35 +401,36 @@ sub run_test_files_on_one_commit {
     else {
         $excluded_targets = [];
     }
-    my %excluded_targets = map { $_ => 1 } @{$excluded_targets};
-    my @current_targets = grep { ! exists $excluded_targets{$_} } @{$self->{targets}};
+    my %excluded_targets;
+    for my $t (@{$excluded_targets}) {
+        $excluded_targets{"$self->{gitdir}/$t"}++;
+    }
+
+    my @current_targets = grep { ! exists $excluded_targets{$_->{path}} } @{$self->{targets}};
     $commit //= $self->{commits}->[0]->{sha};
     my $short = substr($commit,0,$self->{short});
 
     my $current_branch = $self->_configure_build_one_commit($commit);
 
     my @outputs;
-    for my $test (@current_targets) {
-        my $this_test = "$self->{gitdir}/$test";
-        my $no_slash = $test;
-        $no_slash =~ s{[./]}{_}g;
+    for my $target (@current_targets) {
         my $outputfile = join('/' => (
             $self->{outputdir},
             join('.' => (
                 $short,
-                $no_slash,
+                $target->{stub},
                 'output',
                 'txt'
             )),
         ));
-        my $cmd = qq|$self->{test_command} $this_test >$outputfile 2>&1|;
+        my $cmd = qq|$self->{test_command} $target->{path} >$outputfile 2>&1|;
         system($cmd) and croak "Unable to run test_command";
         $outputfile = clean_outputfile($outputfile);
         push @outputs, {
             commit => $commit,
             commit_short => $short,
             file => $outputfile,
-            file_stub => $no_slash,
+            file_stub => $target->{stub},
             md5_hex => hexdigest_one_file($outputfile),
         };
         say "Created $outputfile" if $self->{verbose};
@@ -858,7 +887,6 @@ sub identify_first_transition_per_target {
     my $current_start_sha = $self->{commits}->[$current_start_idx]->{sha};
     my $max_idx = $#{$self->{commits}};
     my $n = 1;
-    #say STDERR "CCC: current_start_idx|sha: ", join('|' => ($current_start_idx, $self->{commits}->[$current_start_idx]->{sha}));
 say STDERR "CCC: current_start_idx|sha: ", join('|' => ($current_start_idx, $current_start_sha));
 say STDERR "DDD: max_idx: ", join('|' => ($max_idx));
 

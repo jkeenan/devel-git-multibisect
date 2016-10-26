@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More qw(no_plan); # tests => 37;
+use Test::More tests => 39;
 use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
@@ -42,7 +42,7 @@ $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
-    $full_targets,
+    [ map { $_->{path} } @{$full_targets} ],
     [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
@@ -113,8 +113,8 @@ $full_targets = $dself->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
-    $full_targets,
-    [ map { "$dself->{gitdir}/$_" } @{$target_args} ],
+    [ map { $_->{path} } @{$full_targets} ],
+    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 

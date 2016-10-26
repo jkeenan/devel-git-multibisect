@@ -37,7 +37,7 @@ $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
-    $full_targets,
+    [ map { $_->{path} } @{$full_targets} ],
     [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
@@ -58,7 +58,7 @@ $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
-    $full_targets,
+    [ map { $_->{path} } @{$full_targets} ],
     [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
