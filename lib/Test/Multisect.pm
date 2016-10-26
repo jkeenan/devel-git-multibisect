@@ -347,6 +347,22 @@ prints C<Created [outputfile]> to STDOUT before returning.
 
 =cut
 
+sub _configure_build_one_commit {
+    my ($self, $commit) = @_;
+    chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
+    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
+    my @branches = qx{git branch};
+    chomp(@branches);
+    my ($cb, $current_branch);
+    $cb = first { m/^\*\s+?/ } @branches;
+    ($current_branch) = $cb =~ m{^\*\s+?(.*)};
+
+    system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
+    system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
+    system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
+    return $current_branch;
+}
+
 sub run_test_files_on_one_commit {
     my ($self, $commit, $excluded_targets) = @_;
     if (defined $excluded_targets) {
@@ -362,19 +378,9 @@ sub run_test_files_on_one_commit {
     $commit //= $self->{commits}->[0]->{sha};
     my $short = substr($commit,0,$self->{short});
 
-    chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
-    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
-    my @branches = qx{git branch};
-    chomp(@branches);
-    my ($cb, $current_branch);
-    $cb = first { m/^\*\s+?/ } @branches;
-    ($current_branch) = $cb =~ m{^\*\s+?(.*)};
+    my $current_branch = $self->_configure_build_one_commit($commit);
 
-    system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
-    system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
-    system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
     my @outputs;
-    #for my $test (@{$self->{targets}}) {
     for my $test (@current_targets) {
         my $this_test = "$self->{gitdir}/$test";
         my $no_slash = $test;
@@ -859,6 +865,7 @@ say STDERR "DDD: max_idx: ", join('|' => ($max_idx));
     my %this_round_status = map { $_ => 0 } keys %{$self->{bisected_outputs}};
 say STDERR "EEE: this_round_status:";
 pp(\%this_round_status);
+    my $excluded_targets = {};
 
     while ($n <= $max_idx) {
         # Above is sanity check: We should never need more rounds than there are
@@ -887,6 +894,14 @@ pp(\%this_round_status);
         }
 say STDERR "FFF: bisected_outputs:";
 pp($self->{bisected_outputs});
+
+        # Decision criteria:
+        # We'll handle 1 target test file at a time; too confusing otherwise.
+        # If 
+
+
+
+
 return 1;
 
         $n++;
