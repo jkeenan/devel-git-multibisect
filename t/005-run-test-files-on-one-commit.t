@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 24;
+use Test::More tests => 29;
 #use Data::Dump qw(pp);
 use Cwd;
 
@@ -80,9 +80,24 @@ $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 
-my $excluded_targets = [
+my $excluded_targets;
+
+$excluded_targets = [
     't/45_func_hashes_alt_dual_sorted.t',
 ];
+$outputs = $self->run_test_files_on_one_commit($commits->[0], $excluded_targets);
+ok($outputs, "run_test_files_on_one_commit() returned true value");
+is(ref($outputs), 'ARRAY', "run_test_files_on_one_commit() returned array ref");
+is(
+    scalar(@{$outputs}),
+    scalar(@{$target_args}) - scalar(@{$excluded_targets}),
+    "Got expected number of output files, considering excluded targets"
+);
+for my $f (map { $_->{file} } @{$outputs}) {
+    ok(-f $f, "run_test_files_on_one_commit generated $f");
+}
+
+$excluded_targets = [];
 $outputs = $self->run_test_files_on_one_commit($commits->[0], $excluded_targets);
 ok($outputs, "run_test_files_on_one_commit() returned true value");
 is(ref($outputs), 'ARRAY', "run_test_files_on_one_commit() returned array ref");
