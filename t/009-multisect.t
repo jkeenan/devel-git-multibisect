@@ -190,7 +190,13 @@ for my $target (keys %{$bisected_outputs}) {
     {
         local $@;
         eval { my $rv = $self2->multisect_one_target(); };
-        like($@, qr/target must be a hash ref/,
+        like($@, qr/Must supply index of test file within targets list/,
+            "multisect_one_target: got expected failure message for lack of argument");
+    }
+    {
+        local $@;
+        eval { my $rv = $self2->multisect_one_target('not a number'); };
+        like($@, qr/Must supply index of test file within targets list/,
             "multisect_one_target: got expected failure message for lack of argument");
     }
     {
