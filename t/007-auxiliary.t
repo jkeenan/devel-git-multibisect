@@ -8,11 +8,11 @@ use Test::Multisect::Auxiliary qw(
     hexdigest_one_file
     validate_list_sequence
 );
-use Test::More tests => 41;
+use Test::More qw(no_plan); # tests => 41;
 use Cwd;
 use File::Copy;
 use File::Temp qw(tempfile tempdir);
-#use Data::Dump qw(pp);
+use Data::Dump qw(pp);
 
 my $cwd = cwd();
 my $datadir = "$cwd/t/lib";
@@ -229,4 +229,32 @@ my $datadir = "$cwd/t/lib";
     ok($rv->[0], "validate_list_sequence() has true status");
     #pp(\@list_basic);
 
+    note("Problematic list");
+    my $observed = [
+        "318ce8b2ccb3e92a6e516e18d1481066",
+        undef,
+        undef,
+        "318ce8b2ccb3e92a6e516e18d1481066",
+        "318ce8b2ccb3e92a6e516e18d1481066",
+        "e5a839ea2e34b8976000c78c258299b0",
+        "e5a839ea2e34b8976000c78c258299b0",
+        "e5a839ea2e34b8976000c78c258299b0",
+        "f4920ddfdd9f1e6fc21ebfab09b5fcfe",
+        "f4920ddfdd9f1e6fc21ebfab09b5fcfe",
+        "f4920ddfdd9f1e6fc21ebfab09b5fcfe",
+        "f4920ddfdd9f1e6fc21ebfab09b5fcfe",
+        "d7125615b2e5dbb4750ff107bbc1bad3",
+        "d7125615b2e5dbb4750ff107bbc1bad3",
+    ];
+say STDERR "WWW:";
+pp($observed);
+
+    $rv = validate_list_sequence($observed);
+say STDERR "XXX:";
+pp($rv);
+    ok($rv, "validate_list_sequence() returned true value");
+    is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
+    is(scalar(@$rv), 1, "validate_list_sequence() returned array with 1 element");
+    ok($rv->[0], "validate_list_sequence() has true status");
 }
+

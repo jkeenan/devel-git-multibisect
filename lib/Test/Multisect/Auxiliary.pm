@@ -12,6 +12,7 @@ our @EXPORT_OK = qw(
 use Carp;
 use Digest::MD5;
 use File::Copy;
+use Data::Dump qw(pp);
 
 =head1 NAME
 
@@ -141,27 +142,37 @@ sub validate_list_sequence {
     # lpd => 'last previously defined'
     my $lpd = $list->[0];
     my %previous = ();
-    for (my $j = 1; $j <= $#{$list}; $j++) {
-        if (! defined $list->[$j]) {
+    XYZ: for (my $j = 1; $j <= $#{$list}; $j++) {
+#say STDERR "FFF: <", (defined $list->[$j] ? $list->[$j] : 'undef'), ">";
+        my $this; if (defined $list->[$j]) { $this = $list->[$j]; }
+        if (! defined $this) {
+#say STDERR "Index $j: not defined";
+            #next XYZ;
             next;
         }
         else {
-            if ($list->[$j] eq $lpd) {
+            if ($this eq $lpd) {
+#say STDERR "Index $j: defined, equal to lpd";
+                #next XYZ;
                 next;
             }
             else {
+#say STDERR "Index $j: defined, differs from lpd";
                 # Value differs from last previously observed.
                 # Was it ever previously observed?  If so, bad.
-                if (exists $previous{$list->[$j]}) {
+                if (exists $previous{$this}) {
+#say STDERR "Index $j: defined, differs from lpd, in previous hash";
                     $status = 0;
-                    $rv = [$status, $j, "$list->[$j] previously observed"];
+                    $rv = [$status, $j, "$this previously observed"];
                     return $rv;
                 }
                 else {
+#say STDERR "Index $j: defined, differs from lpd, not in previous hash";
                     # Value not previously observed, but since previous
                     # sequence ends with an undef, that sequence was not
                     # properly terminated.  Bad.
                     if (! defined $list->[$j-1]) {
+#say STDERR "Index $j: defined, differs from lpd, not in previous hash, but prev was undefined";
                         $status = 0;
                         $rv = [
                             $status,
@@ -171,8 +182,9 @@ sub validate_list_sequence {
                         return $rv;
                     }
                     else {
+#say STDERR "Index $j: defined, differs from lpd, not in previous hash, but prev was defined";
                         $previous{$lpd}++;
-                        $lpd = $list->[$j];
+                        $lpd = $this;
                         next;
                     }
                 }
