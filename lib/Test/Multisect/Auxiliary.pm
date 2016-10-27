@@ -142,36 +142,26 @@ sub validate_list_sequence {
     my $lpd = $list->[0];
     my %previous = ();
     for (my $j = 1; $j <= $#{$list}; $j++) {
-say STDERR "AAA: $j";
         if (! defined $list->[$j]) {
-say STDERR "BBB: not defined";
             next;
         }
         else {
-say STDERR "CCC: defined";
             if ($list->[$j] eq $lpd) {
-say STDERR "CCC1: equal to last previously defined";
                 next;
             }
             else {
-say STDERR "CCC1: differs from last previously defined";
-say STDERR "CCC1: list->j: $list->[$j]";
-say STDERR "CCC1: lpd:     $lpd";
                 # Value differs from last previously observed.
                 # Was it ever previously observed?  If so, bad.
                 if (exists $previous{$list->[$j]}) {
-say STDERR "CCC1a:";
                     $status = 0;
                     $rv = [$status, $j, "$list->[$j] previously observed"];
                     return $rv;
                 }
                 else {
-say STDERR "CCC1b:";
                     # Value not previously observed, but since previous
                     # sequence ends with an undef, that sequence was not
                     # properly terminated.  Bad.
                     if (! defined $list->[$j-1]) {
-say STDERR "CCC1bi:";
                         $status = 0;
                         $rv = [
                             $status,
@@ -181,7 +171,6 @@ say STDERR "CCC1bi:";
                         return $rv;
                     }
                     else {
-say STDERR "CCC1bj:";
                         $previous{$lpd}++;
                         ######## 
                         #$lpd = $list->[$j];

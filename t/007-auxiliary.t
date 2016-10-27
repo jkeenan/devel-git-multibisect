@@ -8,111 +8,109 @@ use Test::Multisect::Auxiliary qw(
     hexdigest_one_file
     validate_list_sequence
 );
-use Test::More qw(no_plan); # tests => 41;
+use Test::More tests => 45;
 use Cwd;
 use File::Copy;
 use File::Temp qw(tempfile tempdir);
-use Data::Dump qw(pp);
+#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 my $datadir = "$cwd/t/lib";
 
-###### clean_outputfile() #####
-#
-#{
-#    my ($f1, $f2) = map { "output${_}.txt" } (1..2);
-#    my ($in1, $in2) = map { "$datadir/$_" } ($f1, $f2);
-#    my (@sizes_before, @digests_before);
-#    for ($in1, $in2) {
-#        push @sizes_before, (stat($_))[7];
-#        push @digests_before, hexdigest_one_file($_);
-#    }
-#    cmp_ok($sizes_before[0], '==', $sizes_before[1],
-#        "Before treatment, the two files have the same size");
-#    cmp_ok($digests_before[0], 'ne', $digests_before[1],
-#        "Before treatment, the two files have different md5_hex values");
-#
-#    my $tdir1 = tempdir( CLEANUP => 1 );
-#    my $tdir2 = tempdir( CLEANUP => 1 );
-#    copy($in1 => "$tdir1/$f1") or croak "Unable to copy $in1";
-#    copy($in2 => "$tdir2/$f2") or croak "Unable to copy $in2";
-#    my $out1 = clean_outputfile("$tdir1/$f1");
-#    my $out2 = clean_outputfile("$tdir2/$f2");
-#    my (@sizes_after, @digests_after);
-#    for ($out1, $out2) {
-#        push @sizes_after, (stat($_))[7];
-#        push @digests_after, hexdigest_one_file($_);
-#    }
-#    cmp_ok($sizes_after[0], '==', $sizes_after[1],
-#        "After treatment, the two files have the same size");
-#    cmp_ok($digests_after[0], 'eq', $digests_after[1],
-#        "After treatment, the two files have the same md5_hex value");
-#}
-#
-#
-###### hexdigest_one_file() #####
-#
-#{
-#    my $basic       = 'x' x 10**2;
-#    my $minus       = 'x' x (10**2 - 1);
-#    my $end_a       = 'x' x (10**2 - 1) . 'a';
-#    my $end_b       = 'x' x (10**2 - 1) . 'b';
-#    my $plus        = 'x' x 10**2 . 'y';
-#    #say STDERR $_ for ('', $basic, $minus, $end_a, $end_b, $plus);
-#
-#    my @digests;
-#
-#    my ($fh1, $t1) = tempfile();
-#    for (1..100) { say $fh1 $basic }
-#    close $fh1 or croak "Unable to close $t1 after writing";
-#    push @digests, hexdigest_one_file($t1);
-#
-#    my ($fh2, $t2) = tempfile();
-#    for (1..100) { say $fh2 $basic }
-#    close $fh2 or croak "Unable to close $t2 after writing";
-#    push @digests, hexdigest_one_file($t2);
-#
-#    my ($fh3, $t3) = tempfile();
-#    for (1.. 99) { say $fh3 $basic }
-#    say $fh3 $minus;
-#    close $fh3 or croak "Unable to close $t3 after writing";
-#    push @digests, hexdigest_one_file($t3);
-#
-#    my ($fh4, $t4) = tempfile();
-#    for (1.. 99) { say $fh4 $basic }
-#    say $fh4 $end_a;
-#    close $fh4 or croak "Unable to close $t4 after writing";
-#    push @digests, hexdigest_one_file($t4);
-#
-#    my ($fh5, $t5) = tempfile();
-#    for (1.. 99) { say $fh5 $basic }
-#    say $fh5 $end_b;
-#    close $fh5 or croak "Unable to close $t5 after writing";
-#    push @digests, hexdigest_one_file($t5);
-#
-#    my ($fh6, $t6) = tempfile();
-#    for (1.. 99) { say $fh6 $basic }
-#    say $fh6 $plus;
-#    close $fh6 or croak "Unable to close $t6 after writing";
-#    push @digests, hexdigest_one_file($t6);
-#
-#    cmp_ok($digests[0], 'eq', $digests[1],
-#        "Same md5_hex for identically written files");
-#
-#    my %digests;
-#    $digests{$_}++ for @digests;
-#
-#    my $expect = {
-#        $digests[0] => 2,
-#        $digests[2] => 1,
-#        $digests[3] => 1,
-#        $digests[4] => 1,
-#        $digests[5] => 1,
-#    };
-#    is_deeply(\%digests, $expect,
-#        "Got expected count of different digests");
-#}
+##### clean_outputfile() #####
 
+{
+    my ($f1, $f2) = map { "output${_}.txt" } (1..2);
+    my ($in1, $in2) = map { "$datadir/$_" } ($f1, $f2);
+    my (@sizes_before, @digests_before);
+    for ($in1, $in2) {
+        push @sizes_before, (stat($_))[7];
+        push @digests_before, hexdigest_one_file($_);
+    }
+    cmp_ok($sizes_before[0], '==', $sizes_before[1],
+        "Before treatment, the two files have the same size");
+    cmp_ok($digests_before[0], 'ne', $digests_before[1],
+        "Before treatment, the two files have different md5_hex values");
+
+    my $tdir1 = tempdir( CLEANUP => 1 );
+    my $tdir2 = tempdir( CLEANUP => 1 );
+    copy($in1 => "$tdir1/$f1") or croak "Unable to copy $in1";
+    copy($in2 => "$tdir2/$f2") or croak "Unable to copy $in2";
+    my $out1 = clean_outputfile("$tdir1/$f1");
+    my $out2 = clean_outputfile("$tdir2/$f2");
+    my (@sizes_after, @digests_after);
+    for ($out1, $out2) {
+        push @sizes_after, (stat($_))[7];
+        push @digests_after, hexdigest_one_file($_);
+    }
+    cmp_ok($sizes_after[0], '==', $sizes_after[1],
+        "After treatment, the two files have the same size");
+    cmp_ok($digests_after[0], 'eq', $digests_after[1],
+        "After treatment, the two files have the same md5_hex value");
+}
+
+
+##### hexdigest_one_file() #####
+
+{
+    my $basic       = 'x' x 10**2;
+    my $minus       = 'x' x (10**2 - 1);
+    my $end_a       = 'x' x (10**2 - 1) . 'a';
+    my $end_b       = 'x' x (10**2 - 1) . 'b';
+    my $plus        = 'x' x 10**2 . 'y';
+
+    my @digests;
+
+    my ($fh1, $t1) = tempfile();
+    for (1..100) { say $fh1 $basic }
+    close $fh1 or croak "Unable to close $t1 after writing";
+    push @digests, hexdigest_one_file($t1);
+
+    my ($fh2, $t2) = tempfile();
+    for (1..100) { say $fh2 $basic }
+    close $fh2 or croak "Unable to close $t2 after writing";
+    push @digests, hexdigest_one_file($t2);
+
+    my ($fh3, $t3) = tempfile();
+    for (1.. 99) { say $fh3 $basic }
+    say $fh3 $minus;
+    close $fh3 or croak "Unable to close $t3 after writing";
+    push @digests, hexdigest_one_file($t3);
+
+    my ($fh4, $t4) = tempfile();
+    for (1.. 99) { say $fh4 $basic }
+    say $fh4 $end_a;
+    close $fh4 or croak "Unable to close $t4 after writing";
+    push @digests, hexdigest_one_file($t4);
+
+    my ($fh5, $t5) = tempfile();
+    for (1.. 99) { say $fh5 $basic }
+    say $fh5 $end_b;
+    close $fh5 or croak "Unable to close $t5 after writing";
+    push @digests, hexdigest_one_file($t5);
+
+    my ($fh6, $t6) = tempfile();
+    for (1.. 99) { say $fh6 $basic }
+    say $fh6 $plus;
+    close $fh6 or croak "Unable to close $t6 after writing";
+    push @digests, hexdigest_one_file($t6);
+
+    cmp_ok($digests[0], 'eq', $digests[1],
+        "Same md5_hex for identically written files");
+
+    my %digests;
+    $digests{$_}++ for @digests;
+
+    my $expect = {
+        $digests[0] => 2,
+        $digests[2] => 1,
+        $digests[3] => 1,
+        $digests[4] => 1,
+        $digests[5] => 1,
+    };
+    is_deeply(\%digests, $expect,
+        "Got expected count of different digests");
+}
 
 ##### validate_list_sequence #####
 
@@ -232,8 +230,8 @@ my $datadir = "$cwd/t/lib";
     note("Problematic list");
     my $observed = [
         "318ce8b2ccb3e92a6e516e18d1481066",
-        "undef",
-        "undef",
+        undef,
+        undef,
         "318ce8b2ccb3e92a6e516e18d1481066",
         "318ce8b2ccb3e92a6e516e18d1481066",
         "e5a839ea2e34b8976000c78c258299b0",
@@ -248,8 +246,6 @@ my $datadir = "$cwd/t/lib";
     ];
 
     $rv = validate_list_sequence($observed);
-say STDERR "XXX:";
-pp($rv);
     ok($rv, "validate_list_sequence() returned true value");
     is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
     is(scalar(@$rv), 1, "validate_list_sequence() returned array with 1 element");
