@@ -887,120 +887,173 @@ we should check the status.
 =cut
 
 sub identify_transitions {
-    my ($self, $current_start_idx) = @_;
-say STDERR "AAA: object at opening of identify_transitions";
+    #my ($self, $current_start_idx) = @_;
+    my ($self) = @_;
+say STDERR "AAA: state of object at opening of identify_transitions";
 pp($self);
-    croak "You must run prepare_multisect() before identify_transitions()"
+    croak "You must run prepare_multisect_hash() before identify_transitions()"
         unless exists $self->{bisected_outputs};
 
-    my ($max_idx, $current_end_idx, $n);
-    my (%this_round_status, $excluded_targets);
+    my ($min_idx, $max_idx) = (0, $#{$self->{commits}});
+    my $target_count = scalar(@{$self->{targets}});
+    my $max_target_idx = $#{$self->{targets}};
 
-    $current_end_idx = $max_idx = $#{$self->{commits}};
-    $n = 1;
-#say STDERR "BBB: current_start_idx|current_end_idx: ", join('|' => ($current_start_idx, $current_end_idx));
-#say STDERR "CCC: max_idx: ", join('|' => ($max_idx));
+    # 1 element per test target file, keyed on stub, value 0 or 1
+    my %overall_status = map { $self->{targets}->[$_]->{stub} => 0 } (0 .. $max_target_idx);
+say STDERR "BBB0:";
+pp(\%overall_status);
+        
+    # Overall success criterion:  We must have completed multisection for each
+    # targeted test file and recorded that completion with a '1' in its
+    # element in %overall_status.
+    
+    # For debugging purposes, we'll create a phony count.
+    #my $phony_count = 1;
+    #$target_count = $phony_count;
 
-    %this_round_status = map { $_ => 0 } keys %{$self->{bisected_outputs}};
-    $excluded_targets = {};
-
-    ABC: while ($n <= $max_idx) {
-        # What gets (or may get) updated or assigned to in the course of one rep of this loop:
-        # $current_start_idx
-        # $current_end_idx
-        # $n
-        # %this_round_status
-        # $excluded_targets
-        # $self->{xall_outputs}
-        # $self->{bisected_outputs}
-
-say STDERR "DDD: $n";
-say STDERR "DDD1: current_start_idx|current_end_idx: ", join('|' => ($current_start_idx, $current_end_idx));
-say STDERR "EEE: this_round_status:";
-pp(\%this_round_status);
-        # Above is sanity check: We should never need more rounds than there are
-        # commits in the range.
-
-        # Our process has to set the value of each element (file_stub) in
-        # %this_round_status to 1 to terminate.
-
-        # For each test file, we know we've identified *one* transition point
-        # when (a) the md5_hex of the commit currently under consideration is
-        # *different* from $current_start_md5_hex and (b) the md5_hex of the
-        # immediately preceding commit is defined and is the *same* as
-        # $current_start_md5_hex.
-
-        # For each test file, we know we've identified *all* transition points
-        # when, after repeating the procedure in the preceding paragraph
-        # enough times, (a) the md5_hex of the current commit is the same as that
-        # of the very last commit and (b) the md5_hex of the immediately
-        # preceding commit is defined and is *different* from the current
-        # md5_hex.
-
-        return 1 if sum(values %this_round_status) ==
-            scalar(@{$self->{targets}});
-
-        my $h = sprintf("%d" => (($current_start_idx + $current_end_idx) / 2));
-        $self->_run_one_commit_and_assign($h);
-
-
-        # Decision criteria:
-        # We'll handle 1 target test file at a time; too confusing otherwise.
-        my $first_target_stub = $self->{targets}->[0]->{stub};
-        my $current_start_md5_hex = $self->{bisected_outputs}->{$first_target_stub}->[0]->{md5_hex};
-        my $first_target_md5_hex  = $self->{bisected_outputs}->{$first_target_stub}->[$h]->{md5_hex};
-say STDERR "GGG: ", join('|' => $first_target_stub, $current_start_md5_hex, $first_target_md5_hex);
-
-        # If $first_target_stub eq $current_start_md5_hex, then the first
-        # transition is *after* index $h.  Hence bisection should go upwards.
-        #
-        # If $first_target_stub ne $current_start_md5_hex, then the first
-        # transition has come *before* index $h.  Hence bisection should go
-        # downwards.  However, since the test of where the first transition is
-        # is that index j-1 has the same md5_hex as $current_start_md5_hex but
-        #         index j   has a different md5_hex, we have to do a run on
-        #         j-1 as well.
-
-        if (! $this_round_status{$first_target_stub}) {
-say STDERR "HHH: status for $first_target_stub: $this_round_status{$first_target_stub}";
-            if ($first_target_md5_hex ne $current_start_md5_hex) {
-                my $g = $h - 1;
-                $self->_run_one_commit_and_assign($g);
-
-say STDERR "JJJ: bisected_outputs:";
-pp($self->{bisected_outputs});
-say STDERR "KKK: xall_outputs after precheck:";
-pp($self->{xall_outputs});
-                my $pre_target_md5_hex  = $self->{bisected_outputs}->{$first_target_stub}->[$g]->{md5_hex};
-say STDERR "LLL: $pre_target_md5_hex";
-                if ($pre_target_md5_hex eq $current_start_md5_hex) {
-                    # Success on the first target!
-                    $this_round_status{$first_target_stub}++;
-say STDERR "MMM: success on first target";
-                    last ABC;
-                }
-                else {
-                    # Bisection should continue downwards
-say STDERR "NNN: Bisection should continue downwards";
-                    $current_end_idx = $h;
-                    $n++;
-                    next ABC;
-                }
-            }
-            else {
-                # Bisection should continue upwards
-say STDERR "OOO: Bisection should continue upwards";
-                $current_start_idx = $h;
-                $n++;
-                next ABC;
-            }
+    until (sum(values(%overall_status)) == $target_count) {
+        if ($self->{verbose}) {
+            say "target count|sum of status values: ",
+                join('|' => $target_count, sum(values(%overall_status)));
         }
-        else {
-say STDERR "HHHHHH: status for $first_target_stub: $this_round_status{$first_target_stub}";
+        for my $idx (0 .. $max_target_idx) {
+            my $target = $self->{targets}->[$idx];
+            if ($self->{verbose}) {
+                say "Targeting file: $target->{path}";
+            }
+            my $rv = $self->multisect_one_target($target);
+            if ($rv) {
+                $overall_status{$target->{stub}}++;
+            }
+        say STDERR "CCC: ", sum(values(%overall_status)), "\t", $target_count;
+        pp(\%overall_status);
         }
+
+#        my ($current_start_idx, $current_end_idx, $n);
+#        my (%this_round_status, $excluded_targets);
+#        $current_start_idx = 0;
+#    
+#        $current_end_idx = $max_idx = $#{$self->{commits}};
+#        $n = 1;
+#    #say STDERR "BBB: current_start_idx|current_end_idx: ", join('|' => ($current_start_idx, $current_end_idx));
+#    #say STDERR "CCC: max_idx: ", join('|' => ($max_idx));
+#    
+#        %this_round_status = map { $_ => 0 } keys %{$self->{bisected_outputs}};
+#        $excluded_targets = {};
+#    
+#        ABC: while ($n <= $max_idx) {
+#            # What gets (or may get) updated or assigned to in the course of one rep of this loop:
+#            # $current_start_idx
+#            # $current_end_idx
+#            # $n
+#            # %this_round_status
+#            # $excluded_targets
+#            # $self->{xall_outputs}
+#            # $self->{bisected_outputs}
+#    
+#    say STDERR "DDD: $n";
+#    say STDERR "DDD1: current_start_idx|current_end_idx: ", join('|' => ($current_start_idx, $current_end_idx));
+#    say STDERR "EEE: this_round_status:";
+#    pp(\%this_round_status);
+#            # Above is sanity check: We should never need more rounds than there are
+#            # commits in the range.
+#    
+#            # Our process has to set the value of each element (file_stub) in
+#            # %this_round_status to 1 to terminate.
+#    
+#            # For each test file, we know we've identified *one* transition point
+#            # when (a) the md5_hex of the commit currently under consideration is
+#            # *different* from $current_start_md5_hex and (b) the md5_hex of the
+#            # immediately preceding commit is defined and is the *same* as
+#            # $current_start_md5_hex.
+#    
+#            # For each test file, we know we've identified *all* transition points
+#            # when, after repeating the procedure in the preceding paragraph
+#            # enough times, (a) the md5_hex of the current commit is the same as that
+#            # of the very last commit and (b) the md5_hex of the immediately
+#            # preceding commit is defined and is *different* from the current
+#            # md5_hex.
+#    
+#    #        return 1 if sum(values %this_round_status) ==
+#    #            scalar(@{$self->{targets}});
+#    
+#            my $h = sprintf("%d" => (($current_start_idx + $current_end_idx) / 2));
+#            $self->_run_one_commit_and_assign($h);
+#    
+#    
+#            # Decision criteria:
+#            # We'll handle 1 target test file at a time; too confusing otherwise.
+#            my $first_target_stub = $self->{targets}->[0]->{stub};
+#            my $current_start_md5_hex = $self->{bisected_outputs}->{$first_target_stub}->[0]->{md5_hex};
+#            my $first_target_md5_hex  = $self->{bisected_outputs}->{$first_target_stub}->[$h]->{md5_hex};
+#    say STDERR "GGG: ", join('|' => $first_target_stub, $current_start_md5_hex, $first_target_md5_hex);
+#    
+#            # If $first_target_stub eq $current_start_md5_hex, then the first
+#            # transition is *after* index $h.  Hence bisection should go upwards.
+#            #
+#            # If $first_target_stub ne $current_start_md5_hex, then the first
+#            # transition has come *before* index $h.  Hence bisection should go
+#            # downwards.  However, since the test of where the first transition is
+#            # is that index j-1 has the same md5_hex as $current_start_md5_hex but
+#            #         index j   has a different md5_hex, we have to do a run on
+#            #         j-1 as well.
+#    
+#            if (! $this_round_status{$first_target_stub}) {
+#    say STDERR "HHH: status for $first_target_stub: $this_round_status{$first_target_stub}";
+#                if ($first_target_md5_hex ne $current_start_md5_hex) {
+#                    my $g = $h - 1;
+#                    $self->_run_one_commit_and_assign($g);
+#    
+#    say STDERR "JJJ: bisected_outputs:";
+#    pp($self->{bisected_outputs});
+#    say STDERR "KKK: xall_outputs after precheck:";
+#    pp($self->{xall_outputs});
+#                    my $pre_target_md5_hex  = $self->{bisected_outputs}->{$first_target_stub}->[$g]->{md5_hex};
+#    say STDERR "LLL: $pre_target_md5_hex";
+#                    if ($pre_target_md5_hex eq $current_start_md5_hex) {
+#                        # Success on the first target!
+#                        $this_round_status{$first_target_stub}++;
+#    say STDERR "MMM: success on first target";
+#                        last ABC;
+#                    }
+#                    else {
+#                        # Bisection should continue downwards
+#    say STDERR "NNN: Bisection should continue downwards";
+#                        $current_end_idx = $h;
+#                        $n++;
+#                        next ABC;
+#                    }
+#                }
+#                else {
+#                    # Bisection should continue upwards
+#    say STDERR "OOO: Bisection should continue upwards";
+#                    $current_start_idx = $h;
+#                    $n++;
+#                    next ABC;
+#                }
+#            }
+#            else {
+#    say STDERR "HHHHHH: status for $first_target_stub: $this_round_status{$first_target_stub}";
+#            }
+#        }
+#        croak "XXX: Problem:  Number of bisection rounds ($n) exceeded " . ($max_idx) . " commits in range"
+#            if $n > ($max_idx + 1);
+#        return 1;
+    } # END until loop
+    #croak "Never completed loop over all targeted test files"
+        
+}
+
+sub multisect_one_target {
+    my ($self, $target) = @_;
+    croak "target must be a hash ref" unless ref($target) eq 'HASH';
+    for my $arg ( qw| path stub | ) {
+        croak "target must have a '$arg' element" unless defined $target->{$arg};
+#        unless (defined $target->{$arg}) {
+#            carp "target must have a '$arg' element";
+#            return 0;
+#        }
     }
-    croak "XXX: Problem:  Number of bisection rounds ($n) exceeded " . ($max_idx) . " commits in range"
-        if $n > ($max_idx + 1);
     return 1;
 }
 
