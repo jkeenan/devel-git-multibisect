@@ -131,12 +131,12 @@ is_deeply(
 );
 
 {
-    # error case: premature run of identify_first_transition_per_target()
+    # error case: premature run of identify_transitions()
     local $@;
-    eval { $rv = $self2->identify_first_transition_per_target(); };
+    eval { $rv = $self2->identify_transitions(); };
     like($@,
-        qr/You must run prepare_multisect\(\) before identify_first_transition_per_target\(\)/,
-        "Got expected error message for premature identify_first_transition_per_target()"
+        qr/You must run prepare_multisect\(\) before identify_transitions\(\)/,
+        "Got expected error message for premature identify_transitions()"
     );
 }
 
@@ -185,7 +185,7 @@ for my $target (keys %{$bisected_outputs}) {
 }
 
 $idx = 0;
-$self2->identify_first_transition_per_target($idx);
+$self2->identify_transitions($idx);
 
 $rv = $self2->get_bisected_outputs();
 my $xtransitions = $self2->examine_transitions($rv);

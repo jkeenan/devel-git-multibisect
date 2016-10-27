@@ -884,11 +884,11 @@ we should check the status.
 
 =cut
 
-sub identify_first_transition_per_target {
+sub identify_transitions {
     my ($self, $current_start_idx) = @_;
-say STDERR "AAA: object at opening of identify_first_transition_per_target";
+say STDERR "AAA: object at opening of identify_transitions";
 pp($self);
-    croak "You must run prepare_multisect() before identify_first_transition_per_target()"
+    croak "You must run prepare_multisect() before identify_transitions()"
         unless exists $self->{bisected_outputs};
 
     my ($max_idx, $current_end_idx, $n);
