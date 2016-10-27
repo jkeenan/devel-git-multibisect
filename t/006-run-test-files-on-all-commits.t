@@ -95,7 +95,7 @@ for my $k ( qw| commit file md5_hex | ) {
 
 ##### examine_transitions #####
 
-$transitions = $self->examine_transitions();
+$transitions = $self->examine_transitions($rv);
 ok($transitions, "examine_transitions() returned true value");
 is(ref($transitions), 'HASH', "examine_transitions() returned hash ref");
 cmp_ok(scalar(keys %{$transitions}), '==', scalar(@{$target_args}),

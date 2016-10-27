@@ -649,9 +649,11 @@ or inequality of each commit's md5_hex value.
 
 =item * Arguments
 
-    $transitions = $self->examine_transitions();
+    $hashref = $self->get_digests_by_file_and_commit();
 
-None; all data needed is already present in the object.
+    $transitions = $self->examine_transitions($hashref);
+
+Hash reference returned by C<get_digests_by_file_and_commit()>;
 
 =item * Return Value
 
@@ -736,12 +738,12 @@ C<get_digests_by_file_and_commit()>.
 =cut
 
 sub examine_transitions {
-    my $self = shift;
-    my $rv = $self->get_digests_by_file_and_commit();
+    my ($self, $rv) = @_;
     my %transitions;
     for my $k (sort keys %{$rv}) {
         my @arr = @{$rv->{$k}};
         for (my $i = 1; $i <= $#arr; $i++) {
+            next unless (defined $arr[$i] and defined $arr[$i-1]);
             my $older = $arr[$i-1]->{md5_hex};
             my $newer = $arr[$i]->{md5_hex};
             if ($older eq $newer) {
@@ -901,6 +903,15 @@ say STDERR "CCC: max_idx: ", join('|' => ($max_idx));
     $excluded_targets = {};
 
     ABC: while ($n <= $max_idx) {
+        # What gets (or may get ) updated or assigned to in the course of one rep of this loop:
+        # $current_start_idx
+        # $current_end_idx
+        # $n
+        # %this_round_status
+        # $excluded_targets
+        # $self->{xall_outputs}
+        # $self->{bisected_outputs}
+
 say STDERR "DDD: $n";
 say STDERR "DDD1: current_start_idx|current_end_idx: ", join('|' => ($current_start_idx, $current_end_idx));
 say STDERR "EEE: this_round_status:";
@@ -920,32 +931,11 @@ pp(\%this_round_status);
             scalar(@{$self->{targets}});
 
         my $h = sprintf("%d" => (($current_start_idx + $current_end_idx) / 2));
-        my $this_commit = $self->{commits}->[$h]->{sha};
-say STDERR "FFF: h|this_commit: $h|$this_commit";
+        $self->_run_one_commit_and_assign($h);
 
-        # If we've already stashed a particular commit's outputs in
-        # xall_outputs (and, simultaneously) in bisected_outputs,
-        # then we don't need to actually perform a run.
-
-        unless (defined $self->{xall_outputs}->[$h]) {
-            my $these_outputs = $self->run_test_files_on_one_commit($this_commit);
-            $self->{xall_outputs}->[$h] = $these_outputs;
-
-            for my $target (@{$these_outputs}) {
-                my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
-                $self->{bisected_outputs}->{$target->{file_stub}}->[$h] =
-                    { map { $_ => $target->{$_} } @other_keys };
-            }
-        }
-#say STDERR "GGG: bisected_outputs:";
-#pp($self->{bisected_outputs});
 
         # Decision criteria:
         # We'll handle 1 target test file at a time; too confusing otherwise.
-#say STDERR "HHH: ", $self->{targets}->[0]->{stub};
-#say STDERR "III: ", $self->{targets}->[1]->{stub};
-#say STDERR "JJJ: ", $self->{bisected_outputs}->{$self->{targets}->[0]->{stub}}->[$h]->{md5_hex};
-#say STDERR "KKK: ", $self->{bisected_outputs}->{$self->{targets}->[1]->{stub}}->[$h]->{md5_hex};
         my $first_target_stub = $self->{targets}->[0]->{stub};
         my $current_start_md5_hex = $self->{bisected_outputs}->{$first_target_stub}->[0]->{md5_hex};
         my $first_target_md5_hex  = $self->{bisected_outputs}->{$first_target_stub}->[$h]->{md5_hex};
@@ -965,18 +955,8 @@ say STDERR "GGG: ", join('|' => $first_target_stub, $current_start_md5_hex, $fir
 say STDERR "HHH: status for $first_target_stub: $this_round_status{$first_target_stub}";
             if ($first_target_md5_hex ne $current_start_md5_hex) {
                 my $g = $h - 1;
-                my $this_commit = $self->{commits}->[$g]->{sha};
-say STDERR "III: i|this_commit: $g|$this_commit";
-                unless (defined $self->{xall_outputs}->[$g]) {
-                    my $these_outputs = $self->run_test_files_on_one_commit($this_commit);
-                    $self->{xall_outputs}->[$g] = $these_outputs;
+                $self->_run_one_commit_and_assign($g);
 
-                    for my $target (@{$these_outputs}) {
-                        my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
-                        $self->{bisected_outputs}->{$target->{file_stub}}->[$g] =
-                            { map { $_ => $target->{$_} } @other_keys };
-                    }
-                }
 say STDERR "JJJ: bisected_outputs:";
 pp($self->{bisected_outputs});
 say STDERR "KKK: xall_outputs after precheck:";
@@ -1012,6 +992,34 @@ say STDERR "HHHHHH: status for $first_target_stub: $this_round_status{$first_tar
     croak "XXX: Problem:  Number of bisection rounds ($n) exceeded " . ($max_idx) . " commits in range"
         if $n > ($max_idx + 1);
     return 1;
+}
+
+sub _run_one_commit_and_assign {
+
+    # If we've already stashed a particular commit's outputs in
+    # xall_outputs (and, simultaneously) in bisected_outputs,
+    # then we don't need to actually perform a run.
+
+    # This internal method assigns to xall_outputs and bisected_outputs in
+    # place.
+
+    my ($self, $idx) = @_;
+    my $this_commit = $self->{commits}->[$idx]->{sha};
+    unless (defined $self->{xall_outputs}->[$idx]) {
+        my $these_outputs = $self->run_test_files_on_one_commit($this_commit);
+        $self->{xall_outputs}->[$idx] = $these_outputs;
+
+        for my $target (@{$these_outputs}) {
+            my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
+            $self->{bisected_outputs}->{$target->{file_stub}}->[$idx] =
+                { map { $_ => $target->{$_} } @other_keys };
+        }
+    }
+}
+
+sub get_bisected_outputs {
+    my $self = shift;
+    return $self->{bisected_outputs};
 }
 
 1;
