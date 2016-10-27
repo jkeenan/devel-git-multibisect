@@ -209,6 +209,8 @@ String composed by taking an element in the array ref passed as argument and sub
 
 =back
 
+=back
+
 =cut
 
 sub set_targets {
@@ -896,14 +898,14 @@ pp($self);
 
     $current_end_idx = $max_idx = $#{$self->{commits}};
     $n = 1;
-say STDERR "BBB: current_start_idx|current_end_idx: ", join('|' => ($current_start_idx, $current_end_idx));
-say STDERR "CCC: max_idx: ", join('|' => ($max_idx));
+#say STDERR "BBB: current_start_idx|current_end_idx: ", join('|' => ($current_start_idx, $current_end_idx));
+#say STDERR "CCC: max_idx: ", join('|' => ($max_idx));
 
     %this_round_status = map { $_ => 0 } keys %{$self->{bisected_outputs}};
     $excluded_targets = {};
 
     ABC: while ($n <= $max_idx) {
-        # What gets (or may get ) updated or assigned to in the course of one rep of this loop:
+        # What gets (or may get) updated or assigned to in the course of one rep of this loop:
         # $current_start_idx
         # $current_end_idx
         # $n
@@ -921,11 +923,19 @@ pp(\%this_round_status);
 
         # Our process has to set the value of each element (file_stub) in
         # %this_round_status to 1 to terminate.
-        #
-        # For each test file, the process is over when (a) the md5_hex of the
-        # commit currently under consideration is *different* from
-        # $current_start_md5_hex and (b) the md5_hex of the immediately preceding
-        # commit is defined and is the *same* as $current_start_md5_hex.
+
+        # For each test file, we know we've identified *one* transition point
+        # when (a) the md5_hex of the commit currently under consideration is
+        # *different* from $current_start_md5_hex and (b) the md5_hex of the
+        # immediately preceding commit is defined and is the *same* as
+        # $current_start_md5_hex.
+
+        # For each test file, we know we've identified *all* transition points
+        # when, after repeating the procedure in the preceding paragraph
+        # enough times, (a) the md5_hex of the current commit is the same as that
+        # of the very last commit and (b) the md5_hex of the immediately
+        # preceding commit is defined and is *different* from the current
+        # md5_hex.
 
         return 1 if sum(values %this_round_status) ==
             scalar(@{$self->{targets}});
