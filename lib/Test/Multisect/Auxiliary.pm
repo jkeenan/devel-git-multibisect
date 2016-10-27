@@ -172,8 +172,6 @@ sub validate_list_sequence {
                     }
                     else {
                         $previous{$lpd}++;
-                        ######## 
-                        #$lpd = $list->[$j];
                         if (defined $list->[$j]) { $lpd = $list->[$j]; }
                         next;
                     }
