@@ -1,10 +1,10 @@
 TODO list for Perl module Test::Multisect
 
-1. Decide whether it will be more fruitful to:
-a. Identify all the transition points for the first test target file before
-proceeding on to subsequent target file; or
-b. Identify the first transition point for the second test target file.
-
 2. Create a data structure in the object similar to 'transitions' that
 can be accessed to look up results of multisecting.
 
+3. Use 'excluded_targets' to avoid re-running particular test files once we've
+completed that target.
+
+4. Decide what to do with 'examine_transitions()', as its behavior depends on
+its caller.

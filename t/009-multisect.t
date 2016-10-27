@@ -8,7 +8,7 @@ use Test::Multisect::Auxiliary qw(
     validate_list_sequence
 );
 use Test::More tests => 53;
-use Data::Dump qw(pp);
+#use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
 
@@ -90,8 +90,6 @@ for my $k ( qw| commit file md5_hex | ) {
 }
 
 $transitions = $self->examine_transitions($rv);
-#say STDERR "TTT:";
-#pp($transitions);
 ok($transitions, "examine_transitions() returned true value");
 is(ref($transitions), 'HASH', "examine_transitions() returned hash ref");
 cmp_ok(scalar(keys %{$transitions}), '==', scalar(@{$target_args}),
@@ -108,9 +106,6 @@ is(ref($transitions->{$first_element}->[0]), 'HASH', "Records are hash reference
 for my $k ( qw| older newer compare | ) {
     ok(exists $transitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
 }
-
-#say STDERR "AAA: transitions";
-#pp($transitions);
 
 #######################################
 
@@ -149,8 +144,6 @@ note("prepare_multisect()");
 $bisected_outputs = $self2->prepare_multisect();
 ok($bisected_outputs, "prepare_multisect() returned true value");
 is(ref($bisected_outputs), 'ARRAY', "prepare_multisect() returned array ref");
-#say STDERR "BBB:";
-#pp($self2);
 cmp_ok(
     scalar(@{$bisected_outputs}),
     '==',

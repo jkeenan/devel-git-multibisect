@@ -378,6 +378,37 @@ prints C<Created [outputfile]> to STDOUT before returning.
 
 =cut
 
+sub run_test_files_on_one_commit {
+    my ($self, $commit, $excluded_targets) = @_;
+    if (defined $excluded_targets) {
+        if (ref($excluded_targets) ne 'ARRAY') {
+            croak "excluded_targets, if defined, must be in array reference";
+        }
+    }
+    else {
+        $excluded_targets = [];
+    }
+    my %excluded_targets;
+    for my $t (@{$excluded_targets}) {
+        $excluded_targets{"$self->{gitdir}/$t"}++;
+    }
+
+    my $current_targets = [
+        grep { ! exists $excluded_targets{$_->{path}} }
+        @{$self->{targets}}
+    ];
+    $commit //= $self->{commits}->[0]->{sha};
+
+    my $current_branch = $self->_configure_build_one_commit($commit);
+
+    my $outputsref = $self->_test_one_commit($commit, $current_targets);
+
+    system(qq|git checkout $current_branch|)
+        and croak "Unable to 'git checkout $current_branch";
+
+    return $outputsref;
+}
+
 sub _configure_build_one_commit {
     my ($self, $commit) = @_;
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
@@ -394,29 +425,11 @@ sub _configure_build_one_commit {
     return $current_branch;
 }
 
-sub run_test_files_on_one_commit {
-    my ($self, $commit, $excluded_targets) = @_;
-    if (defined $excluded_targets) {
-        if (ref($excluded_targets) ne 'ARRAY') {
-            croak "excluded_targets, if defined, must be in array reference";
-        }
-    }
-    else {
-        $excluded_targets = [];
-    }
-    my %excluded_targets;
-    for my $t (@{$excluded_targets}) {
-        $excluded_targets{"$self->{gitdir}/$t"}++;
-    }
-
-    my @current_targets = grep { ! exists $excluded_targets{$_->{path}} } @{$self->{targets}};
-    $commit //= $self->{commits}->[0]->{sha};
+sub _test_one_commit {
+    my ($self, $commit, $current_targets) = @_; 
     my $short = substr($commit,0,$self->{short});
-
-    my $current_branch = $self->_configure_build_one_commit($commit);
-
     my @outputs;
-    for my $target (@current_targets) {
+    for my $target (@{$current_targets}) {
         my $outputfile = join('/' => (
             $self->{outputdir},
             join('.' => (
@@ -438,7 +451,6 @@ sub run_test_files_on_one_commit {
         };
         say "Created $outputfile" if $self->{verbose};
     }
-    system(qq|git checkout $current_branch|) and croak "Unable to 'git checkout $current_branch";
     return \@outputs;
 }
 
@@ -554,7 +566,8 @@ sub run_test_files_on_all_commits {
 
 =item * Purpose
 
-Present the same outcomes as C<run_test_files_on_all_commits()>, but formatted by target file, then commit.
+Present the same outcomes as C<run_test_files_on_all_commits()>, but formatted
+by target file, then commit.
 
 =item * Arguments
 
@@ -564,7 +577,10 @@ None; all data needed is already present in the object.
 
 =item * Return Value
 
-Reference to a hash keyed on the basename of the target file, modified to substitute underscores for forward slashes and dots.  The value of each element in the hash is a reference to an array which, in turn, holds a list of hash references, one per git commit.  Each such hash has the following keys:
+Reference to a hash keyed on the basename of the target file, modified to
+substitute underscores for forward slashes and dots.  The value of each
+element in the hash is a reference to an array which, in turn, holds a list of
+hash references, one per git commit.  Each such hash has the following keys:
 
     commit
     file
@@ -889,8 +905,6 @@ we should check the status.
 
 sub identify_transitions {
     my ($self) = @_;
-#say STDERR "AA: state of object at opening of identify_transitions";
-#pp($self);
     croak "You must run prepare_multisect_hash() before identify_transitions()"
         unless exists $self->{bisected_outputs};
 
@@ -899,18 +913,21 @@ sub identify_transitions {
 
     # 1 element per test target file, keyed on stub, value 0 or 1
     my %overall_status = map { $self->{targets}->[$_]->{stub} => 0 } (0 .. $max_target_idx);
-#say STDERR "BB:";
-#pp(\%overall_status);
 
     # Overall success criterion:  We must have completed multisection for each
     # targeted test file and recorded that completion with a '1' in its
-    # element in %overall_status.
+    # element in %overall_status.  If we have achieved that, then each element
+    # in %overall_status will have the value '1' and they will sum up to the
+    # total number of test files being targeted.
 
     until (sum(values(%overall_status)) == $target_count) {
         if ($self->{verbose}) {
             say "target count|sum of status values: ",
                 join('|' => $target_count, sum(values(%overall_status)));
         }
+
+        # Target and process one file at a time.
+
         for my $target_idx (0 .. $max_target_idx) {
             my $target = $self->{targets}->[$target_idx];
             if ($self->{verbose}) {
@@ -920,8 +937,6 @@ sub identify_transitions {
             if ($rv) {
                 $overall_status{$target->{stub}}++;
             }
-#say STDERR "CC: ", sum(values(%overall_status)), "\t", $target_count;
-#pp(\%overall_status);
         }
     } # END until loop
 }
@@ -930,18 +945,19 @@ sub multisect_one_target {
     my ($self, $target_idx) = @_;
     croak "Must supply index of test file within targets list"
         unless(defined $target_idx and $target_idx =~ m/^\d+$/);
-    my $target = $self->{targets}->[$target_idx];
-    my $stub = $target->{stub};
+    my $target  = $self->{targets}->[$target_idx];
+    my $stub    = $target->{stub};
 
     # The condition for successful multisection of one particular test file
     # target is that the list of md5_hex values for files holding the output of TAP
     # run over the commit range exhibit the following behavior:
 
-    # The list is composed of sub-sequences (a) whose elements are either (i) the md5_hex value for
-    # the TAP outputfiles at a given commit or (ii) undefined; (b) if defined,
-    # the md5_values are all identical; (c) the first and last elements of the
-    # sub-sequence are both defined; and (d) the sub-sequence's unique defined
-    # value never reoccurs in any subsequent sub-sequence.
+    # The list is composed of sub-sequences (a) whose elements are either (i)
+    # the md5_hex value for the TAP outputfiles at a given commit or (ii)
+    # undefined; (b) if defined, the md5_values are all identical; (c) the
+    # first and last elements of the sub-sequence are both defined; and (d)
+    # the sub-sequence's unique defined value never reoccurs in any subsequent
+    # sub-sequence.
 
     # For each run of multisect_one_target() over a given target, it will
     # return a true value (1) if the above condition(s) are met and 0
@@ -978,45 +994,38 @@ sub multisect_one_target {
     # will be able to skip configuration, build and test-running at commits
     # visited during the pass over the first target file.
 
-    # Consider adding a counter here to defend against infinite loops.
-    my ($min_idx, $max_idx) = (0, $#{$self->{commits}});
-    my $this_target_status = 0;
-    my $current_start_idx = $min_idx;
-    my $current_end_idx  = $max_idx;
-    my $overall_start_md5_hex =
+    my ($min_idx, $max_idx)     = (0, $#{$self->{commits}});
+    my $this_target_status      = 0;
+    my $current_start_idx       = $min_idx;
+    my $current_end_idx         = $max_idx;
+    my $overall_start_md5_hex   =
             $self->{bisected_outputs}->{$stub}->[$min_idx]->{md5_hex};
-    my $overall_end_md5_hex =
+    my $overall_end_md5_hex     =
             $self->{bisected_outputs}->{$stub}->[$max_idx]->{md5_hex};
     my $excluded_targets = {};
     my $n = 0;
-    #  my (%this_round_status);
-#say STDERR "III: min_idx|max_idx:                            ", join('|' => ($min_idx, $max_idx));
-#say STDERR "IIIa: overall_start_md5_hex|overall_end_md5_hex: ", join('|' => ($overall_start_md5_hex, $overall_end_md5_hex));
 
-    ABC: while ((! $this_target_status) or ($n <= scalar(@{$self->{targets}}))) {
-#say STDERR "JJJ: current_start_idx|current_end_idx|this_target_status: ", join('|' => ($current_start_idx, $current_end_idx, $this_target_status));
-        # Start multisecting on this test target file:
-        # one transition point at a time until we've got them all for this
-        # test file.
+    #ABC: while ((! $this_target_status) or ($n <= scalar(@{$self->{targets}}))) {
+    while (! $this_target_status) {
+
+        # Start multisecting on this test target file: one transition point at
+        # a time until we've got them all for this test file.
 
         # What gets (or may get) updated or assigned to in the course of one rep of this loop:
         # $current_start_idx
         # $current_end_idx
         # $n
-        # %this_round_status
         # $excluded_targets
         # $self->{xall_outputs}
         # $self->{bisected_outputs}
 
         my $h = sprintf("%d" => (($current_start_idx + $current_end_idx) / 2));
-#say STDERR "KKK: index of commit being handled: $h";
         $self->_run_one_commit_and_assign($h);
 
         my $current_start_md5_hex =
             $self->{bisected_outputs}->{$stub}->[$current_start_idx]->{md5_hex};
         my $target_h_md5_hex  =
             $self->{bisected_outputs}->{$stub}->[$h]->{md5_hex};
-#say STDERR "LLL: ", join('|' => $stub, $current_start_md5_hex, $target_h_md5_hex);
 
         # Decision criteria:
         # If $target_h_md5_hex eq $current_start_md5_hex, then the first
@@ -1032,28 +1041,11 @@ sub multisect_one_target {
         if ($target_h_md5_hex ne $current_start_md5_hex) {
             my $g = $h - 1;
             $self->_run_one_commit_and_assign($g);
-#say STDERR "MMM: bisected_outputs:";
-#pp($self->{bisected_outputs});
-#say STDERR "NNN: xall_outputs after precheck:";
-#pp($self->{xall_outputs});
             my $target_g_md5_hex  = $self->{bisected_outputs}->{$stub}->[$g]->{md5_hex};
-#say STDERR "OOO: $target_h_md5_hex";
             if ($target_g_md5_hex eq $current_start_md5_hex) {
-                # WRONG!:  Success on this transition point in the current target file!
-                # Have to handle the case where $target_h_md5_hex is also eq
-                #
-                # To find the next transition point for the current target
-                # file, we assign $h to $current_start_idx
-#say STDERR "MMM1: For target '$stub', identified transition at commit index '$h'";
-#say STDERR "MMM1a: target_g_md5_hex:         $target_g_md5_hex";
-#say STDERR "MMM1a: target_h_md5_hex:         $target_h_md5_hex";
-#say STDERR "MMM1b: current_start_md5_hex:    $current_start_md5_hex";
-#say STDERR "MMM1c: overall_end_md5_hex:      $overall_end_md5_hex";
                 if ($target_h_md5_hex eq $overall_end_md5_hex) {
-#say STDERR "MMM1x: For target '$stub', identified final transition at commit index '$h'";
                 }
                 else {
-#say STDERR "MMM1y: For target '$stub', identified non-final transition at commit index '$h'";
                     $current_start_idx  = $h;
                     $current_end_idx    = $max_idx;
                 }
@@ -1061,40 +1053,29 @@ sub multisect_one_target {
             }
             else {
                 # Bisection should continue downwards
-#say STDERR "MMM2: For target '$stub', bisection should continue downwards from commit index '$h'";
                 $current_end_idx = $h;
                 $n++;
             }
         }
         else {
             # Bisection should continue upwards
-#say STDERR "MMM3: For target '$stub', bisection should continue upwards from commit index '$h'";
             $current_start_idx = $h;
             $n++;
         }
-        $this_target_status = $self->evaluate_status_one_target_run($target_idx);
-#say STDERR "ZZZ1: n:                  $n";
-#say STDERR "ZZZ2: this_target_status: $this_target_status";
-#next ABC;
+        $this_target_status = $self->_evaluate_status_one_target_run($target_idx);
     }
-
     return 1;
 }
 
-sub evaluate_status_one_target_run {
+sub _evaluate_status_one_target_run {
     my ($self, $target_idx) = @_;
     my $stub = $self->{targets}->[$target_idx]->{stub};
-#say STDERR "QQQQ: $stub";
     my @trans = ();
     for my $o (@{$self->{xall_outputs}}) {
         push @trans,
             defined $o ? $o->[$target_idx]->{md5_hex} : undef;
     }
-#say STDERR "RRRR:";
-#pp(\@trans);
     my $vls = validate_list_sequence(\@trans);
-#say STDERR "SSSS:";
-#pp($vls);
     (
         (ref($vls) eq 'ARRAY') and
         (scalar(@{$vls}) == 1 ) and
