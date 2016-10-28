@@ -19,7 +19,7 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Test::Multisect::AllCommits - Gather test output over an entire range of git commits
+Test::Multisect::AllCommits - Gather test output over an entire range of F<git> commits
 
 =head1 SYNOPSIS
 
@@ -43,7 +43,7 @@ Test::Multisect::AllCommits - Gather test output over an entire range of git com
 
 Given a Perl library or application kept in F<git> for version control, it is
 often useful to be able to compare the output collected from running one or
-several test files over a range of git commits.  If that range is sufficiently
+several test files over a range of F<git> commits.  If that range is sufficiently
 large, a test may fail in B<more than one way> over that range.
 
 If that is the case, then simply asking, I<"When did this file start to
@@ -57,7 +57,7 @@ F<Test::Multisect> provides methods to achieve that objective.  More specificall
 
 =item *
 
-When you want th capture the test output for each commit in a specified range,
+When you want to capture the test output for each commit in a specified range,
 you can use this package, F<Test::Multisect::AllCommits>.
 
 =item *
@@ -215,7 +215,7 @@ None; all data needed is already present in the object.
 Reference to a hash keyed on the basename of the target file, modified to
 substitute underscores for forward slashes and dots.  The value of each
 element in the hash is a reference to an array which, in turn, holds a list of
-hash references, one per git commit.  Each such hash has the following keys:
+hash references, one per F<git> commit.  Each such hash has the following keys:
 
     commit
     file
@@ -314,7 +314,7 @@ Hash reference returned by C<get_digests_by_file_and_commit()>;
 Reference to a hash keyed on the basename of the target file, modified to
 substitute underscores for forward slashes and dots.  The value of each
 element in the hash is a reference to an array which, in turn, holds a list of
-hash references, one per each pair of consecutive git commits.  Each such hash
+hash references, one per each pair of consecutive F<git> commits.  Each such hash
 has the following keys:
 
     older

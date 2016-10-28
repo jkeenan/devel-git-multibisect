@@ -19,25 +19,48 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Test::Multisect::Transitions - Study test output over a range of git commits
+Test::Multisect::Transitions - Gather test output where it changes over a range of F<git> commits
 
 =head1 SYNOPSIS
 
-    use Test::Multisect;
+    use Test::Multisect::Transitions;
 
-    $self = Test::Multisect->new(\%parameters);
+    $self = Test::Multisect::Transitions->new(\%parameters);
 
     $commit_range = $self->get_commits_range();
 
     $full_targets = $self->set_targets(\@target_args);
 
-    $outputs = $self->run_test_files_on_one_commit($commit_range->[0]);
-
-    TK
+    $self->multisect_all_targets()
 
 =head1 DESCRIPTION
 
-    TK
+Given a Perl library or application kept in F<git> for version control, it is
+often useful to be able to compare the output collected from running one or
+several test files over a range of F<git> commits.  If that range is sufficiently
+large, a test may fail in B<more than one way> over that range.
+
+If that is the case, then simply asking, I<"When did this file start to
+fail?"> is insufficient.  We may want to capture the test output for each
+commit, or, more usefully, may want to capture the test output only at those
+commits where the output changed.
+
+F<Test::Multisect> provides methods to achieve that objective.  More specifically:
+
+=over 4
+
+=item *
+
+When the number of commits in the specified range is large and you only need
+the test output at those commits where the output materially changed, you can
+use this package, F<Test::Multisect::Transitions>.
+
+When you want to capture the test output for each commit in a specified range,
+you can use another package in this library, F<Test::Multisect::AllCommits>.
+
+=item *
+
+=back
 
 =head1 METHODS
 

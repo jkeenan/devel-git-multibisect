@@ -18,7 +18,7 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Test::Multisect - Study test output over a range of git commits
+Test::Multisect - Study test output over a range of F<git> commits
 
 =head1 SYNOPSIS
 
@@ -49,7 +49,7 @@ be called from either child class.
 
 Given a Perl library or application kept in F<git> for version control, it is
 often useful to be able to compare the output collected from running one or
-several test files over a range of git commits.  If that range is sufficiently
+several test files over a range of F<git> commits.  If that range is sufficiently
 large, a test may fail in B<more than one way> over that range.
 
 If that is the case, then simply asking, I<"When did this file start to
@@ -155,7 +155,7 @@ sub _get_commits {
 
 =item * Purpose
 
-Identify the SHAs of each git commit identified by C<new()>.
+Identify the SHAs of each F<git> commit identified by C<new()>.
 
 =item * Arguments
 
@@ -262,7 +262,7 @@ sub set_targets {
 
 =item * Purpose
 
-Capture the output from running the selected test files at one specific git checkout.
+Capture the output from running the selected test files at one specific F<git> checkout.
 
 =item * Arguments
 
