@@ -13,13 +13,13 @@ use Carp;
 use Cwd;
 use File::Temp;
 use List::Util qw(first sum);
-use Data::Dump qw( pp );
+#use Data::Dump qw( pp );
 
 our $VERSION = '0.01';
 
 =head1 NAME
 
-Test::Multisect::AllCommits - Study test output over an entire range of git commits
+Test::Multisect::AllCommits - Gather test output over an entire range of git commits
 
 =head1 SYNOPSIS
 
@@ -51,11 +51,33 @@ fail?"> is insufficient.  We may want to capture the test output for each
 commit, or, more usefully, may want to capture the test output only at those
 commits where the output changed.
 
-F<Test::Multisect> provides methods to achieve that objective.
+F<Test::Multisect> provides methods to achieve that objective.  More specifically:
+
+=over 4
+
+=item *
+
+When you want th capture the test output for each commit in a specified range,
+you can use this package, F<Test::Multisect::AllCommits>.
+
+=item *
+
+When the number of commits in the specified range is large and you only need
+the test output at those commits where the output materially changed, you can
+use another package found in this library, F<Test::Multisect::Transitions>.
+
+=back
 
 =head1 METHODS
 
-This package inherits methods from F<Test::Multisect>.  Only methods unique to F<Test::Multisect::AllCommits> are documented here.
+This package inherits methods from F<Test::Multisect>.  Only methods unique to
+F<Test::Multisect::AllCommits> are documented here.  See the documentation for
+F<Test::Multisect> for all other methods, including:
+
+    new()
+    get_commits_range()
+    set_targets()
+    run_test_files_on_one_commit()
 
 =head2 C<run_test_files_on_all_commits()>
 
@@ -74,11 +96,14 @@ None; all data needed is already present in the object.
 
 =item * Return Value
 
-Array reference, each of whose elements is an array reference, each of whose elements is a hash reference with the same four keys as in the return value from C<run_test_files_on_one_commit()>:
+Array reference, each of whose elements is an array reference, each of whose
+elements is a hash reference with the same four keys as in the return value
+from C<run_test_files_on_one_commit()>:
 
     commit
     commit_short
     file
+    file_stub
     md5_hex
 
 Example:
@@ -95,28 +120,32 @@ Example:
           # single test file at a single commit point
 
           commit => "2a2e54af709f17cc6186b42840549c46478b6467",
-          commit_short => "t_44_func_hashes_mult_unsorted_t",
-          file => "/tmp/BrihPrp0qw/2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt",
+          commit_short => "2a2e54a",
+          file => "/tmp/AHC_YkwUYg/2a2e54a.t_44_func_hashes_mult_unsorted_t.output.txt",
+          file_stub => "t_44_func_hashes_mult_unsorted_t",
           md5_hex => "31b7c93474e15a16d702da31989ab565",
         },
         {
           commit => "2a2e54af709f17cc6186b42840549c46478b6467",
-          commit_short => "t_45_func_hashes_alt_dual_sorted_t",
-          file => "/tmp/BrihPrp0qw/2a2e54a.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          commit_short => "2a2e54a",
+          file => "/tmp/AHC_YkwUYg/2a2e54a.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          file_stub => "t_45_func_hashes_alt_dual_sorted_t",
           md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
         },
       ],
       [
         {
           commit => "a624024294a56964eca53ec4617a58a138e91568",
-          commit_short => "t_44_func_hashes_mult_unsorted_t",
-          file => "/tmp/BrihPrp0qw/a624024.t_44_func_hashes_mult_unsorted_t.output.txt",
+          commit_short => "a624024",
+          file => "/tmp/AHC_YkwUYg/a624024.t_44_func_hashes_mult_unsorted_t.output.txt",
+          file_stub => "t_44_func_hashes_mult_unsorted_t",
           md5_hex => "31b7c93474e15a16d702da31989ab565",
         },
         {
           commit => "a624024294a56964eca53ec4617a58a138e91568",
-          commit_short => "t_45_func_hashes_alt_dual_sorted_t",
-          file => "/tmp/BrihPrp0qw/a624024.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          commit_short => "a624024",
+          file => "/tmp/AHC_YkwUYg/a624024.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          file_stub => "t_45_func_hashes_alt_dual_sorted_t",
           md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
         },
       ],
@@ -124,14 +153,16 @@ Example:
       [
         {
           commit => "d304a207329e6bd7e62354df4f561d9a7ce1c8c2",
-          commit_short => "t_44_func_hashes_mult_unsorted_t",
-          file => "/tmp/BrihPrp0qw/d304a20.t_44_func_hashes_mult_unsorted_t.output.txt",
+          commit_short => "d304a20",
+          file => "/tmp/AHC_YkwUYg/d304a20.t_44_func_hashes_mult_unsorted_t.output.txt",
+          file_stub => "t_44_func_hashes_mult_unsorted_t",
           md5_hex => "31b7c93474e15a16d702da31989ab565",
         },
         {
           commit => "d304a207329e6bd7e62354df4f561d9a7ce1c8c2",
-          commit_short => "t_45_func_hashes_alt_dual_sorted_t",
-          file => "/tmp/BrihPrp0qw/d304a20.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          commit_short => "d304a20",
+          file => "/tmp/AHC_YkwUYg/d304a20.t_45_func_hashes_alt_dual_sorted_t.output.txt",
+          file_stub => "t_45_func_hashes_alt_dual_sorted_t",
           md5_hex => "6ee767b9d2838e4bbe83be0749b841c1",
         },
       ],
@@ -143,7 +174,8 @@ Note:  If the number of commits in the commits range is large, this method
 will take a long time to run.  That time will be even longer if the
 configuration and build times for each commit are large.  For example, to run
 one test over 160 commits from the Perl 5 core distribution might take 15
-hours.  YMMV.
+hours.  YMMV.  If either of these conditions holds, you are probably better
+off using F<Test::Multisect::Transitions>.
 
 The implementation of this method is very much subject to change.
 
@@ -233,8 +265,8 @@ Example:
 
 =item * Comment
 
-This method currently may be called only after calling
-C<run_test_files_on_all_commits()> and will die otherwise.
+This method currently presumes that you have called
+C<run_test_files_on_all_commits()>.  It will die otherwise.
 
 =back
 
@@ -365,7 +397,6 @@ sub examine_transitions {
     for my $k (sort keys %{$rv}) {
         my @arr = @{$rv->{$k}};
         for (my $i = 1; $i <= $#arr; $i++) {
-            #            next unless (defined $arr[$i] and defined $arr[$i-1]);
             my $older = $arr[$i-1]->{md5_hex};
             my $newer = $arr[$i]->{md5_hex};
             if ($older eq $newer) {
@@ -385,81 +416,6 @@ sub examine_transitions {
         }
     }
     return \%transitions;
-}
-
-=head2 C<prepare_multisect()>
-
-=over 4
-
-=item * Purpose
-
-Set up data structures within object needed before multisection can start.
-
-=item * Arguments
-
-    $bisected_outputs = $dself->prepare_multisect();
-
-None; all data needed is already present in the object.
-
-=item * Return Value
-
-Reference to an array holding a list of array references, one for each commit
-in the range.  Only the first and last elements of the array will be
-populated, as the other, internal elements will be populated in the course of
-the multisection process.  The first and last elements will hold one element
-for each of the test files targeted.  Each such element will be a hash keyed
-on the same keys as C<run_test_files_on_one_commit()>:
-
-    commit
-    commit_short
-    file
-    file_stub
-    md5_hex
-
-Example:
-
-   [
-     [
-       {
-         commit => "630a7804a7849e0075351ef72b0cbf5a44985fb1",
-         commit_short => "630a780",
-         file => "/tmp/T8oUInphoW/630a780.t_001_load_t.output.txt",
-         file_stub => "t_001_load_t",
-         md5_hex => "59c9d8f4cee1c31bcc3d85ab79a158e7",
-       },
-     ],
-     [],
-     [],
-     # ...
-     [],
-     [
-       {
-         commit => "efdd091cf3690010913b849dcf4fee290f399009",
-         commit_short => "efdd091",
-         file => "/tmp/T8oUInphoW/efdd091.t_001_load_t.output.txt",
-         file_stub => "t_001_load_t",
-         md5_hex => "318ce8b2ccb3e92a6e516e18d1481066",
-       },
-     ],
-   ];
-
-
-=item * Comment
-
-=back
-
-=cut
-
-sub prepare_multisect {
-    my $self = shift;
-    my $all_commits = $self->get_commits_range();
-    my @bisected_outputs = (undef) x scalar(@{$all_commits});
-    for my $idx (0, $#{$all_commits}) {
-        my $outputs = $self->run_test_files_on_one_commit($all_commits->[$idx]);
-        $bisected_outputs[$idx] = $outputs;
-    }
-    $self->{bisected_outputs} = [ @bisected_outputs ];
-    return \@bisected_outputs;
 }
 
 1;

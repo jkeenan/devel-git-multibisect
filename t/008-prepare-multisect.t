@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 37;
+use Test::More qw(no_plan); # tests => 37;
 use List::Util qw( first );
 use Cwd;
 #use Data::Dump qw(pp);
@@ -119,25 +119,4 @@ is_deeply(
     [ map { "$self->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
-
-note("prepare_multisect()");
-
-$bisected_outputs = $self->prepare_multisect();
-ok($bisected_outputs, "prepare_multisect() returned true value");
-is(ref($bisected_outputs), 'ARRAY', "prepare_multisect() returned array ref");
-cmp_ok(
-    scalar(@{$bisected_outputs}),
-    '==',
-    scalar(@{$self->get_commits_range}),
-    "Got expected number of elements in bisected outputs"
-);
-ok(scalar(@{$bisected_outputs->[0]}), "Array ref in first element is non-empty");
-ok(scalar(@{$bisected_outputs->[-1]}), "Array ref in last element is non-empty");
-$bisected_outputs_undef_count = 0;
-for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
-    $bisected_outputs_undef_count++
-        if defined $bisected_outputs->[$idx];
-}
-ok(! $bisected_outputs_undef_count,
-    "After prepare_multisect(), internal elements are all as yet undefined");
 

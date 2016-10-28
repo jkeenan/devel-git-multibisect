@@ -22,15 +22,28 @@ Test::Multisect - Study test output over a range of git commits
 
 =head1 SYNOPSIS
 
-    use Test::Multisect;
+You will typically construct an object of a class which is a child of
+F<Test::Multisect>, such as F<Test::Multisect::AllCommits> or
+F<Test::Multisect::Transitions>.  All methods documented in this package may
+be called from either child class.
 
-    $self = Test::Multisect->new(\%parameters);
+    use Test::Multisect::AllCommits;
+    $self = Test::Multisect::AllCommits->new(\%parameters);
+
+... or
+
+    use Test::Multisect::Transitions;
+    $self = Test::Multisect::Transitions->new(\%parameters);
+
+... and then:
 
     $commit_range = $self->get_commits_range();
 
     $full_targets = $self->set_targets(\@target_args);
 
     $outputs = $self->run_test_files_on_one_commit($commit_range->[0]);
+
+... followed by methods specific to the child class.
 
 =head1 DESCRIPTION
 
@@ -44,7 +57,9 @@ fail?"> is insufficient.  We may want to capture the test output for each
 commit, or, more usefully, may want to capture the test output only at those
 commits where the output changed.
 
-F<Test::Multisect> provides methods to achieve that objective.
+F<Test::Multisect> provides methods to achieve that objective.  Its child
+classes, F<Test::Multisect::AllCommits> and F<Test::Multisect::Transitions>,
+provide different flavors of that functionality.
 
 =head1 METHODS
 
@@ -54,11 +69,15 @@ F<Test::Multisect> provides methods to achieve that objective.
 
 =item * Purpose
 
-Test::Multisect constructor.
+Constructor.
 
 =item * Arguments
 
-    $self = Test::Multisect->new(\%params);
+    $self = Test::Multisect::AllCommits->new(\%params);
+
+or
+
+    $self = Test::Multisect::Transitions->new(\%params);
 
 Reference to a hash, typically the return value of
 C<Test::Multisect::Opts::process_options()>.
@@ -69,9 +88,7 @@ these directories.
 
 =item * Return Value
 
-Test::Multisect object.
-
-=item * Comment
+Object of Test::Multisect child class.
 
 =back
 
@@ -150,8 +167,6 @@ None; all data needed is already in the object.
 
 Array reference, each element of which is a SHA.
 
-=item * Comment
-
 =back
 
 =cut
@@ -200,8 +215,6 @@ String composed by taking an element in the array ref passed as argument and sub
 ... becomes:
 
     t_44_func_hashes_mult_unsorted_t'
-
-=item * Comment
 
 =back
 

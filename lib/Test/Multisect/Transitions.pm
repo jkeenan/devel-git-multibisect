@@ -13,7 +13,7 @@ use Carp;
 use Cwd;
 use File::Temp;
 use List::Util qw(first sum);
-use Data::Dump qw( pp );
+#use Data::Dump qw( pp );
 
 our $VERSION = '0.01';
 
@@ -59,8 +59,6 @@ Hence, we have to do *two* instances of run_test_files_on_one_commit() at each
 bisection point.  For each of them we will stash the result in a cache.  That way,
 before calling run_test_files_on_one_commit(), we can check the cache to see
 whether we can skip the configure-build-test cycle for that particular commit.
-As a matter of fact, that cache will be nothing other than the 'bisected_outputs'
-array created in prepare_multisect().
 
 We have to account for the fact that the first transition is quite likely to be
 different for each of the test files targeted.  We are likely to have to keep on

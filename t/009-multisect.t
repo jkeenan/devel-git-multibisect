@@ -147,7 +147,7 @@ note("_prepare_for_multisection()");
 
 $bisected_outputs = $self2->_prepare_for_multisection();
 ok($bisected_outputs, "_prepare_for_multisection() returned true value");
-is(ref($bisected_outputs), 'HASH', "prepare_multisect() returned hash ref");
+is(ref($bisected_outputs), 'HASH', "_prepare_for_multisection() returned hash ref");
 for my $target (keys %{$bisected_outputs}) {
     ok(defined $bisected_outputs->{$target}->[0], "first element for $target is defined");
     ok(defined $bisected_outputs->{$target}->[-1], "last element for $target is defined");

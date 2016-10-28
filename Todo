@@ -24,7 +24,7 @@ its caller.  Coverage improvement needed for:
 8. Documentation: Test::Multisect::Auxiliary::validate_list_sequence() -- DONE.
 Several methods in Test::Muttisect.
 
-9. Better name for identify_transitions().
+9. Better name for identify_transitions() -- DONE.
 
 10. Method comparable to examine_transitions() to extract useful information
 transition points from 'bisected_outputs' or 'xall_outputs' once
@@ -33,4 +33,21 @@ identify_transitions() has been run.
 11. Consider placing methods needed for all commits versus bisected commits in
 separate packages -- DONE.
 
-12. Get better package names than Allcommits and Selectedcommits.
+12. Get better package names than Allcommits and Selectedcommits -- DONE.
+
+13. Test on Perl 5 source code.
+
+14. Test CPAN distros that only use Module::Build.
+
+15. Review all source code for locations where verbose output would be
+helpful; then implement and test.
+
+16. Assess all comments re request for naming advice on perl.module-authors.
+
+17.  See how much of this .git crap can be removed from MANIFEST.  Example.
+
+.git/modules/t/lib/dummyrepo/objects/00/62245858565cf094d92f81211e60517e1e1816
+.git/modules/t/lib/dummyrepo/objects/17/5ac99388aff7399bace6f9112b8fb57607797c
+.git/modules/t/lib/dummyrepo/objects/19/9494ee204dd78ed69490f9e54115b0e83e7d39
+.git/modules/t/lib/dummyrepo/objects/1c/8d83fcff7400da0f68d016e9018a5de134868e
+
