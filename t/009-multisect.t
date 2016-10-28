@@ -7,7 +7,7 @@ use Test::Multisect::Opts qw( process_options );
 use Test::Multisect::Auxiliary qw(
     validate_list_sequence
 );
-use Test::More tests => 53;
+use Test::More tests => 51;
 #use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
@@ -128,16 +128,6 @@ is_deeply(
     "Got expected full paths to target files for testing",
 );
 
-{
-    # error case: premature run of identify_transitions()
-    local $@;
-    eval { $rv = $self2->identify_transitions(); };
-    like($@,
-        qr/You must run prepare_multisect_hash\(\) before identify_transitions\(\)/,
-        "Got expected error message for premature identify_transitions()"
-    );
-}
-
 note("prepare_multisect()");
 
 $bisected_outputs = $self2->prepare_multisect();
@@ -193,48 +183,4 @@ for my $target (keys %{$bisected_outputs}) {
     }
 }
 
-$rv = $self2->identify_transitions();
-ok($rv, "identify_transitions() returned true value");
-
 __END__
-$rv = $self2->get_bisected_outputs();
-my $xtransitions = $self2->examine_transitions($rv);
-say STDERR "AAAA:";
-pp($xtransitions);
-say STDERR "BBBB:";
-pp($self2);
-my $xall_outputs = $self2->{xall_outputs};
-# for my $index (0 .. $#{$self2->{targets}}) 
-# for each target test file ($self2->{targets}->[$index]->{file_stub})
-# populate an array consisting of the md5_hex value for that target at each
-# commit where we have defined results; and 'undef' where for a given commit
-# we do not yet have defined results
-
-my %trans = ();
-for my $index (0 .. $#{$self2->{targets}}) {
-    my $stub = $self2->{targets}->[$index]->{stub};
-say STDERR "CCCC: $stub";
-    for my $o (@{$self2->{xall_outputs}}) {
-        #pp($o);
-        push @{$trans{$stub}},
-            defined $o ? $o->[$index]->{md5_hex} : 'undef';
-    }
-}
-say STDERR "DDDD:";
-pp(\%trans);
-for my $stub (sort keys %trans) {
-    my $rv = validate_list_sequence($trans{$stub});
-say STDERR "EEEE:";
-pp($rv);
-}
-
-# Since the different test targets are likely to achieve full multisection at
-# different cycles, we want to develop (a) a test for the completion of
-# multisection for each target independent of the others; and (b) a test that
-# *all* targets have completed multisection.
-
-# If we have a data structure named, say, 'sequences' at the object level,
-# that can be a hashref keyed on stubs.  Given the index of a target in
-# 'targets', we'll translate that into a stub and populate sequences on a
-# per-stub basis once each round, then test the sequence.
-

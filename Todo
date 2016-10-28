@@ -22,4 +22,10 @@ its caller.  Coverage improvement needed for:
     if (defined $list->[$j]) { $lpd = $list->[$j]; }
 
 8. Documentation: Test::Multisect::Auxiliary::validate_list_sequence() -- DONE.
-Several methods in Test::Muttisect.
+Several methods in Test::Multisect.
+
+9. Consider renaming prepare_multisect() and prepare_multisect_hash().
+They're not, strictly speaking, needed for multisection.
+
+10. Consider placing methods needed for all commits versus bisected commits in
+separate packages.
