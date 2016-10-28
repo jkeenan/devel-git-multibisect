@@ -26,7 +26,6 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     last_before => $good_last_before,
     last => $good_last,
     verbose => 1,
-    make_command => 'make -s',
 );
 $params = process_options(%args);
 $self = Test::Multisect->new($params);

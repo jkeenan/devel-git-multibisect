@@ -69,8 +69,8 @@ sub process_options {
        'short' => 7,
        'repository' => 'origin',
        'verbose' => 0,
-       'configure_command' => 'perl Makefile.PL',
-       'make_command' => 'make',
+       'configure_command' => 'perl Makefile.PL 1>/dev/null',
+       'make_command' => 'make 1>/dev/null',
        'test_command' => 'prove -vb',
    );
 

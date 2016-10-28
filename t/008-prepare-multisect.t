@@ -27,7 +27,6 @@ $good_last = 'efdd091cf3690010913b849dcf4fee290f399009';
     last_before => $good_last_before,
     last => $good_last,
     verbose => 0,
-    make_command => 'make -s',
 );
 $params = process_options(%args);
 $target_args = [ 't/001_load.t' ];

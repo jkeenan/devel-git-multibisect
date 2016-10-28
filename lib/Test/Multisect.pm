@@ -403,8 +403,8 @@ sub run_test_files_on_one_commit {
 
     my $outputsref = $self->_test_one_commit($commit, $current_targets);
 
-    system(qq|git checkout $current_branch|)
-        and croak "Unable to 'git checkout $current_branch";
+    system(qq|git checkout --quiet $current_branch|)
+        and croak "Unable to 'git checkout --quiet $current_branch";
 
     return $outputsref;
 }

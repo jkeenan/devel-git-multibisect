@@ -34,7 +34,6 @@ $good_last = '199494ee204dd78ed69490f9e54115b0e83e7d39';
     first => $good_first,
     last => $good_last,
     verbose => 0,
-    make_command => 'make -s',
 );
 $params = process_options(%args);
 $target_args = [
