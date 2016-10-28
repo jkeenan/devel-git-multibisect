@@ -128,20 +128,25 @@ is_deeply(
     "Got expected full paths to target files for testing",
 );
 
+note("prepare_for_multisection()");
+
+# This method, while publicly available and therefore warranting testing, is
+# now called within multisect_all_targets() and only needs to be explicitly
+# called if, for some reason (e.g., testing), you wish to call
+# multisect_one_target() by itself.
+
 {
-    # error case: premature run of identify_transitions()
+    # error case: premature run of multisect_one_target()
     local $@;
-    eval { $rv = $self2->identify_transitions(); };
+    eval { $rv = $self2->multisect_one_target(0); };
     like($@,
-        qr/You must run prepare_multisect_hash\(\) before identify_transitions\(\)/,
-        "Got expected error message for premature identify_transitions()"
+        qr/You must run prepare_for_multisection\(\) before any stand-alone run of multisect_one_target\(\)/,
+        "Got expected error message for premature multisect_one_target()"
     );
 }
 
-note("prepare_multisect_hash()");
-
-$bisected_outputs = $self2->prepare_multisect_hash();
-ok($bisected_outputs, "prepare_multisect_hash() returned true value");
+$bisected_outputs = $self2->prepare_for_multisection();
+ok($bisected_outputs, "prepare_for_multisection() returned true value");
 is(ref($bisected_outputs), 'HASH', "prepare_multisect() returned hash ref");
 for my $target (keys %{$bisected_outputs}) {
     ok(defined $bisected_outputs->{$target}->[0], "first element for $target is defined");
@@ -154,7 +159,7 @@ for my $target (keys %{$bisected_outputs}) {
             if defined $bisected_outputs->{$target}->[$idx];
     }
     ok(! $bisected_outputs_undef_count,
-        "After prepare_multisect_hash(), internal elements for $target are all as yet undefined");
+        "After prepare_for_multisection(), internal elements for $target are all as yet undefined");
 }
 
 {
@@ -172,8 +177,8 @@ for my $target (keys %{$bisected_outputs}) {
     }
 }
 
-$rv = $self2->identify_transitions();
-ok($rv, "identify_transitions() returned true value");
+$rv = $self2->multisect_all_targets();
+ok($rv, "multisect_all_targets() returned true value");
 
 __END__
 $rv = $self2->get_bisected_outputs();

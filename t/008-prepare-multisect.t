@@ -141,21 +141,3 @@ for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
 ok(! $bisected_outputs_undef_count,
     "After prepare_multisect(), internal elements are all as yet undefined");
 
-#note("prepare_multisect_hash()");
-#
-#$bisected_outputs = $self->prepare_multisect_hash();
-#ok($bisected_outputs, "prepare_multisect_hash() returned true value");
-#is(ref($bisected_outputs), 'HASH', "prepare_multisect_hash() returned hash ref");
-#$n = scalar(keys %{$bisected_outputs});
-#is($n, $m,
-#    "bisected_outputs hash has $m element(s) as expected");
-#$o = $bisected_outputs->{$self->{targets}->[$m - 1]->{stub}};
-#ok(defined $o->[0], "first element is defined");
-#ok(defined $o->[$#{$o}], "last element is defined");
-#$bisected_outputs_undef_count = 0;
-#for my $idx (1 .. ($#{$o} - 1)) {
-#    $bisected_outputs_undef_count++
-#        if defined $o->[$idx];
-#}
-#ok(! $bisected_outputs_undef_count,
-#    "After prepare_multisect_hash(), internal elements are all as yet undefined");

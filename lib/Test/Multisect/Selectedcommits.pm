@@ -45,24 +45,6 @@ Test::Multisect::Selectedcommits - Study test output over a range of git commits
 
 =cut
 
-sub prepare_multisect_hash {
-    my $self = shift;
-    my $all_commits = $self->get_commits_range();
-    $self->{xall_outputs} = [ (undef) x scalar(@{$all_commits}) ];
-    my %bisected_outputs;
-    for my $idx (0, $#{$all_commits}) {
-        my $outputs = $self->run_test_files_on_one_commit($all_commits->[$idx]);
-        $self->{xall_outputs}->[$idx] = $outputs;
-        for my $target (@{$outputs}) {
-            my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
-            $bisected_outputs{$target->{file_stub}}[$idx] =
-                { map { $_ => $target->{$_} } @other_keys };
-        }
-    }
-    $self->{bisected_outputs} = { %bisected_outputs };
-    return \%bisected_outputs;
-}
-
 =pod
 
 This is a first pass at multisection.  Here, we'll only try to identify the
@@ -89,10 +71,9 @@ we should check the status.
 
 =cut
 
-sub identify_transitions {
+sub multisect_all_targets {
     my ($self) = @_;
-    croak "You must run prepare_multisect_hash() before identify_transitions()"
-        unless exists $self->{bisected_outputs};
+    $self->prepare_for_multisection();
 
     my $target_count = scalar(@{$self->{targets}});
     my $max_target_idx = $#{$self->{targets}};
@@ -127,10 +108,30 @@ sub identify_transitions {
     } # END until loop
 }
 
+sub prepare_for_multisection {
+    my $self = shift;
+    my $all_commits = $self->get_commits_range();
+    $self->{xall_outputs} = [ (undef) x scalar(@{$all_commits}) ];
+    my %bisected_outputs_table;
+    for my $idx (0, $#{$all_commits}) {
+        my $outputs = $self->run_test_files_on_one_commit($all_commits->[$idx]);
+        $self->{xall_outputs}->[$idx] = $outputs;
+        for my $target (@{$outputs}) {
+            my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
+            $bisected_outputs_table{$target->{file_stub}}[$idx] =
+                { map { $_ => $target->{$_} } @other_keys };
+        }
+    }
+    $self->{bisected_outputs} = { %bisected_outputs_table };
+    return \%bisected_outputs_table;
+}
+
 sub multisect_one_target {
     my ($self, $target_idx) = @_;
     croak "Must supply index of test file within targets list"
         unless(defined $target_idx and $target_idx =~ m/^\d+$/);
+    croak "You must run prepare_for_multisection() before any stand-alone run of multisect_one_target()"
+        unless exists $self->{bisected_outputs};
     my $target  = $self->{targets}->[$target_idx];
     my $stub    = $target->{stub};
 
@@ -147,7 +148,7 @@ sub multisect_one_target {
 
     # For each run of multisect_one_target() over a given target, it will
     # return a true value (1) if the above condition(s) are met and 0
-    # otherwise.  The caller (identify_transitions()) will handle that return
+    # otherwise.  The caller (multisect_all_targets()) will handle that return
     # value appropriately.  The caller will then call multisect_one_target()
     # on the next target, if any.
 
@@ -168,7 +169,7 @@ sub multisect_one_target {
     # This entails checking out the source code at each commit calculated by
     # the bisection algorithm, configuring and building the code, running the
     # test targets at that commit, computing their md5_hex values and storing
-    # them in the 'bisected_outputs' structure.  The prepare_multisect_hash()
+    # them in the 'bisected_outputs' structure.  The prepare_for_multisection()
     # method will pre-populate that structure with md5_hexes for each test
     # file for each of the first and last commits in the commit range.
 
@@ -191,7 +192,6 @@ sub multisect_one_target {
     my $excluded_targets = {};
     my $n = 0;
 
-    #ABC: while ((! $this_target_status) or ($n <= scalar(@{$self->{targets}}))) {
     while (! $this_target_status) {
 
         # Start multisecting on this test target file: one transition point at
