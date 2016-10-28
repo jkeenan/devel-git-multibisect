@@ -102,6 +102,7 @@ sub new {
 
     $data{last_short} = substr($data{last}, 0, $data{short});
     $data{commits} = _get_commits(\%data);
+    $data{targets} //= [];
 
     return bless \%data, $class;
 }
@@ -215,18 +216,16 @@ String composed by taking an element in the array ref passed as argument and sub
 =cut
 
 sub set_targets {
-    my ($self, $targets) = @_;
+    my ($self, $explicit_targets) = @_;
 
-    my @raw_targets = ();
-    if (defined $self->{targets} and @{$self->{targets}}) {
-        @raw_targets = @{$self->{targets}};
-    }
+    my @raw_targets = @{$self->{targets}};
 
-    # If set_targets() is provided with an appropriate argument, override
-    # whatever may have been stored in the object by new().
+    # If set_targets() is provided with an appropriate argument
+    # ($explicit_targets), override whatever may have been stored in the
+    # object by new().
 
-    if (defined $targets and ref($targets) eq 'ARRAY') {
-        @raw_targets = @{$targets};
+    if (defined $explicit_targets and ref($explicit_targets) eq 'ARRAY') {
+        @raw_targets = @{$explicit_targets};
     }
 
     my @full_targets = ();
@@ -1104,11 +1103,6 @@ sub _run_one_commit_and_assign {
                 { map { $_ => $target->{$_} } @other_keys };
         }
     }
-}
-
-sub get_bisected_outputs {
-    my $self = shift;
-    return $self->{bisected_outputs};
 }
 
 1;
