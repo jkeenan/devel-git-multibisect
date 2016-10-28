@@ -2,12 +2,13 @@
 # t/009-multisect.t
 use strict;
 use warnings;
+use Test::Multisect::Allcommits;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
 use Test::Multisect::Auxiliary qw(
     validate_list_sequence
 );
-use Test::More tests => 53;
+use Test::More qw(no_plan); # tests => 53;
 #use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
@@ -43,9 +44,9 @@ $target_args = [
 
 note("First object");
 
-$self = Test::Multisect->new($params);
+$self = Test::Multisect::Allcommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect');
+isa_ok($self, 'Test::Multisect::Allcommits');
 
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -112,7 +113,6 @@ note("Second object");
 
 my ($self2, $commit_range, $idx, $bisected_outputs, $bisected_outputs_undef_count);
 
-#$self2 = Test::Multisect->new($params);
 $self2 = Test::Multisect->new({ %{$params}, verbose => 1 });
 ok($self2, "new() returned true value");
 isa_ok($self2, 'Test::Multisect');
@@ -138,26 +138,26 @@ is_deeply(
     );
 }
 
-note("prepare_multisect()");
-
-$bisected_outputs = $self2->prepare_multisect();
-ok($bisected_outputs, "prepare_multisect() returned true value");
-is(ref($bisected_outputs), 'ARRAY', "prepare_multisect() returned array ref");
-cmp_ok(
-    scalar(@{$bisected_outputs}),
-    '==',
-    scalar(@{$self2->get_commits_range}),
-    "Got expected number of elements in bisected outputs"
-);
-ok(scalar(@{$bisected_outputs->[0]}), "Array ref in first element is non-empty");
-ok(scalar(@{$bisected_outputs->[-1]}), "Array ref in last element is non-empty");
-$bisected_outputs_undef_count = 0;
-for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
-    $bisected_outputs_undef_count++
-        if defined $bisected_outputs->[$idx];
-}
-ok(! $bisected_outputs_undef_count,
-    "After prepare_multisect(), internal elements are all as yet undefined");
+#note("prepare_multisect()");
+#
+#$bisected_outputs = $self2->prepare_multisect();
+#ok($bisected_outputs, "prepare_multisect() returned true value");
+#is(ref($bisected_outputs), 'ARRAY', "prepare_multisect() returned array ref");
+#cmp_ok(
+#    scalar(@{$bisected_outputs}),
+#    '==',
+#    scalar(@{$self2->get_commits_range}),
+#    "Got expected number of elements in bisected outputs"
+#);
+#ok(scalar(@{$bisected_outputs->[0]}), "Array ref in first element is non-empty");
+#ok(scalar(@{$bisected_outputs->[-1]}), "Array ref in last element is non-empty");
+#$bisected_outputs_undef_count = 0;
+#for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
+#    $bisected_outputs_undef_count++
+#        if defined $bisected_outputs->[$idx];
+#}
+#ok(! $bisected_outputs_undef_count,
+#    "After prepare_multisect(), internal elements are all as yet undefined");
 
 note("prepare_multisect_hash()");
 
