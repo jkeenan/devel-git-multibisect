@@ -224,7 +224,9 @@ sub set_targets {
     # ($explicit_targets), override whatever may have been stored in the
     # object by new().
 
-    if (defined $explicit_targets and ref($explicit_targets) eq 'ARRAY') {
+    if (defined $explicit_targets) {
+        croak "Explicit targets passed to set_targets() must be in array ref"
+            unless ref($explicit_targets) eq 'ARRAY';
         @raw_targets = @{$explicit_targets};
     }
 

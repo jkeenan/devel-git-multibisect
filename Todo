@@ -7,4 +7,19 @@ can be accessed to look up results of multisecting.
 completed that target.
 
 4. Decide what to do with 'examine_transitions()', as its behavior depends on
-its caller.
+its caller.  Coverage improvement needed for:
+
+    next unless (defined $arr[$i] and defined $arr[$i-1]);
+
+5. Coverage:  need to cover non-verbose runs of prepare_multisect_hash().
+
+6. Coverage:  In run_test_files_on_one_commit(), need to cover a branch in:
+
+    $commit //= $self->{commits}->[0]->{sha};
+
+7. Coverage: Test::Multisect::Auxiliary::validate_list_sequence().
+
+    if (defined $list->[$j]) { $lpd = $list->[$j]; }
+
+8. Documentation: Test::Multisect::Auxiliary::validate_list_sequence().
+Several methods in Test::Muttisect.
