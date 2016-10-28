@@ -194,10 +194,10 @@
 .gitmodules
 Changes
 lib/Test/Multisect.pm
-lib/Test/Multisect/Allcommits.pm
+lib/Test/Multisect/AllCommits.pm
 lib/Test/Multisect/Auxiliary.pm
 lib/Test/Multisect/Opts.pm
-lib/Test/Multisect/Selectedcommits.pm
+lib/Test/Multisect/Transitions.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files

@@ -1,4 +1,4 @@
-package Test::Multisect::Selectedcommits;
+package Test::Multisect::Transitions;
 use strict;
 use warnings;
 use v5.10.0;
@@ -19,7 +19,7 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Test::Multisect::Selectedcommits - Study test output over a range of git commits
+Test::Multisect::Transitions - Study test output over a range of git commits
 
 =head1 SYNOPSIS
 

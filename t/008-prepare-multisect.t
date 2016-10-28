@@ -2,7 +2,7 @@
 # t/008-prepare-multisect.t
 use strict;
 use warnings;
-use Test::Multisect::Allcommits;
+use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 37;
 use List::Util qw( first );
@@ -33,9 +33,9 @@ $target_args = [ 't/001_load.t' ];
 
 note("First object");
 
-$self = Test::Multisect::Allcommits->new($params);
+$self = Test::Multisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::Allcommits');
+isa_ok($self, 'Test::Multisect::AllCommits');
 
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -106,9 +106,9 @@ note("Second object");
 
 my ($bisected_outputs, $bisected_outputs_undef_count, $m, $n, $o);
 
-$self = Test::Multisect::Allcommits->new($params);
+$self = Test::Multisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::Allcommits');
+isa_ok($self, 'Test::Multisect::AllCommits');
 
 $m = scalar(@{$target_args});
 $full_targets = $self->set_targets($target_args);

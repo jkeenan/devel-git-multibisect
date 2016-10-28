@@ -2,8 +2,8 @@
 # t/009-multisect.t
 use strict;
 use warnings;
-use Test::Multisect::Allcommits;
-use Test::Multisect::Selectedcommits;
+use Test::Multisect::AllCommits;
+use Test::Multisect::Transitions;
 use Test::Multisect::Opts qw( process_options );
 use Test::Multisect::Auxiliary qw(
     validate_list_sequence
@@ -44,9 +44,9 @@ $target_args = [
 
 note("First object");
 
-$self = Test::Multisect::Allcommits->new($params);
+$self = Test::Multisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::Allcommits');
+isa_ok($self, 'Test::Multisect::AllCommits');
 
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -113,9 +113,9 @@ note("Second object");
 
 my ($self2, $commit_range, $idx, $bisected_outputs, $bisected_outputs_undef_count);
 
-$self2 = Test::Multisect::Selectedcommits->new({ %{$params}, verbose => 1 });
+$self2 = Test::Multisect::Transitions->new({ %{$params}, verbose => 1 });
 ok($self2, "new() returned true value");
-isa_ok($self2, 'Test::Multisect::Selectedcommits');
+isa_ok($self2, 'Test::Multisect::Transitions');
 
 $commit_range = $self2->get_commits_range;
 

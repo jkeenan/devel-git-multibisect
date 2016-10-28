@@ -1,4 +1,4 @@
-package Test::Multisect::Allcommits;
+package Test::Multisect::AllCommits;
 use strict;
 use warnings;
 use v5.10.0;
@@ -19,13 +19,13 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Test::Multisect::Allcommits - Study test output over an entire range of git commits
+Test::Multisect::AllCommits - Study test output over an entire range of git commits
 
 =head1 SYNOPSIS
 
-    use Test::Multisect::Allcommits;
+    use Test::Multisect::AllCommits;
 
-    $self = Test::Multisect::Allcommits->new(\%parameters);
+    $self = Test::Multisect::AllCommits->new(\%parameters);
 
     $commit_range = $self->get_commits_range();
 
@@ -55,7 +55,7 @@ F<Test::Multisect> provides methods to achieve that objective.
 
 =head1 METHODS
 
-This package inherits methods from F<Test::Multisect>.  Only methods unique to F<Test::Multisect::Allcommits> are documented here.
+This package inherits methods from F<Test::Multisect>.  Only methods unique to F<Test::Multisect::AllCommits> are documented here.
 
 =head2 C<run_test_files_on_all_commits()>
 
