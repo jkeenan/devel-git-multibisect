@@ -2,9 +2,9 @@
 # t/008-prepare-multisect.t
 use strict;
 use warnings;
-use Test::Multisect;
+use Test::Multisect::Allcommits;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 43;
+use Test::More qw(no_plan); # tests => 43;
 use List::Util qw( first );
 use Cwd;
 #use Data::Dump qw(pp);
@@ -33,9 +33,9 @@ $target_args = [ 't/001_load.t' ];
 
 note("First object");
 
-$self = Test::Multisect->new($params);
+$self = Test::Multisect::Allcommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect');
+isa_ok($self, 'Test::Multisect::Allcommits');
 
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -106,9 +106,9 @@ note("Second object");
 
 my ($bisected_outputs, $bisected_outputs_undef_count, $m, $n, $o);
 
-$self = Test::Multisect->new($params);
+$self = Test::Multisect::Allcommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect');
+isa_ok($self, 'Test::Multisect::Allcommits');
 
 $m = scalar(@{$target_args});
 $full_targets = $self->set_targets($target_args);
@@ -141,21 +141,21 @@ for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
 ok(! $bisected_outputs_undef_count,
     "After prepare_multisect(), internal elements are all as yet undefined");
 
-note("prepare_multisect_hash()");
-
-$bisected_outputs = $self->prepare_multisect_hash();
-ok($bisected_outputs, "prepare_multisect_hash() returned true value");
-is(ref($bisected_outputs), 'HASH', "prepare_multisect_hash() returned hash ref");
-$n = scalar(keys %{$bisected_outputs});
-is($n, $m,
-    "bisected_outputs hash has $m element(s) as expected");
-$o = $bisected_outputs->{$self->{targets}->[$m - 1]->{stub}};
-ok(defined $o->[0], "first element is defined");
-ok(defined $o->[$#{$o}], "last element is defined");
-$bisected_outputs_undef_count = 0;
-for my $idx (1 .. ($#{$o} - 1)) {
-    $bisected_outputs_undef_count++
-        if defined $o->[$idx];
-}
-ok(! $bisected_outputs_undef_count,
-    "After prepare_multisect_hash(), internal elements are all as yet undefined");
+#note("prepare_multisect_hash()");
+#
+#$bisected_outputs = $self->prepare_multisect_hash();
+#ok($bisected_outputs, "prepare_multisect_hash() returned true value");
+#is(ref($bisected_outputs), 'HASH', "prepare_multisect_hash() returned hash ref");
+#$n = scalar(keys %{$bisected_outputs});
+#is($n, $m,
+#    "bisected_outputs hash has $m element(s) as expected");
+#$o = $bisected_outputs->{$self->{targets}->[$m - 1]->{stub}};
+#ok(defined $o->[0], "first element is defined");
+#ok(defined $o->[$#{$o}], "last element is defined");
+#$bisected_outputs_undef_count = 0;
+#for my $idx (1 .. ($#{$o} - 1)) {
+#    $bisected_outputs_undef_count++
+#        if defined $o->[$idx];
+#}
+#ok(! $bisected_outputs_undef_count,
+#    "After prepare_multisect_hash(), internal elements are all as yet undefined");

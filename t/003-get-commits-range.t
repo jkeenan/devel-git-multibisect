@@ -2,7 +2,7 @@
 # t/003-get-commits-range.t
 use strict;
 use warnings;
-use Test::Multisect;
+use Test::Multisect::Allcommits;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 10;
 use Cwd;
@@ -27,9 +27,9 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     last => $good_last,
 );
 $params = process_options(%args);
-$self = Test::Multisect->new($params);
+$self = Test::Multisect::Allcommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect');
+isa_ok($self, 'Test::Multisect::Allcommits');
 $this_commit_range = $self->get_commits_range();
 ok($this_commit_range, "get_commits_range() returned true value");
 is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
@@ -56,9 +56,9 @@ delete $args{last_before};
 $good_first = '2a2e54af709f17cc6186b42840549c46478b6467';
 $args{first} = $good_first;
 $params = process_options(%args);
-$self = Test::Multisect->new($params);
+$self = Test::Multisect::Allcommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect');
+isa_ok($self, 'Test::Multisect::Allcommits');
 $this_commit_range = $self->get_commits_range();
 ok($this_commit_range, "get_commits_range() returned true value");
 is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");

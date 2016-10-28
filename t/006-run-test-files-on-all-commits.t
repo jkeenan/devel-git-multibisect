@@ -2,7 +2,7 @@
 # t/006-run-test-files-on-all-commits.t
 use strict;
 use warnings;
-use Test::Multisect;
+use Test::Multisect::Allcommits;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 29;
 #use Data::Dump qw(pp);
@@ -28,9 +28,9 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     verbose => 1,
 );
 $params = process_options(%args);
-$self = Test::Multisect->new($params);
+$self = Test::Multisect::Allcommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect');
+isa_ok($self, 'Test::Multisect::Allcommits');
 
 $target_args = [
     't/44_func_hashes_mult_unsorted.t',
