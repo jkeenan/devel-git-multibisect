@@ -31,4 +31,6 @@ transition points from 'bisected_outputs' or 'xall_outputs' once
 identify_transitions() has been run.
 
 11. Consider placing methods needed for all commits versus bisected commits in
-separate packages.
+separate packages -- DONE.
+
+12. Get better package names than Allcommits and Selectedcommits.
