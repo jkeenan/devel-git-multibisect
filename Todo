@@ -23,3 +23,12 @@ its caller.  Coverage improvement needed for:
 
 8. Documentation: Test::Multisect::Auxiliary::validate_list_sequence() -- DONE.
 Several methods in Test::Muttisect.
+
+9. Better name for identify_transitions().
+
+10. Method comparable to examine_transitions() to extract useful information
+transition points from 'bisected_outputs' or 'xall_outputs' once
+identify_transitions() has been run.
+
+11. Consider placing methods needed for all commits versus bisected commits in
+separate packages.
