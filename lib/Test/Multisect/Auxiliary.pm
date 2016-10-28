@@ -124,6 +124,121 @@ sub hexdigest_one_file {
     return $hexdigest;
 }
 
+=head2 C<validate_list_sequence()>
+
+=over 4
+
+=item * Purpose
+
+Determine whether a given list consists of one or more sub-lists, each of
+which conforms to the following properties:
+
+=over 4
+
+=item 1
+
+The sub-list consists of one or more elements, the first and last of which are
+defined and identical.  Elements between the first and last (if any) are
+either identical to the first and last or are undefined.
+
+=item 2
+
+The sole defined value in any sub-list is not found in any other sub-list.
+
+=back
+
+Examples:
+
+=over 4
+
+=item * C<['alpha', 'alpha', undef, 'alpha', undef, 'beta']>
+
+Does not qualify, as the sub-list terminating with C<beta> starts with an C<undef>.
+
+=item * C<['alpha', 'alpha', undef, 'alpha', 'beta', undef]>
+
+Does not qualify, as the sub-list starting with C<beta> ends with an C<undef>.
+
+=item * C<['alpha', 'alpha', undef, 'alpha', 'beta', undef, 'beta', 'alpha', 'alpha']>
+
+Does not qualify, as C<alpha> occurs in both the first and third sub-lists.
+
+Qualifies.
+
+=item * C<['alpha', 'alpha', undef, 'alpha', 'beta', undef, 'beta']>
+
+Qualifies.
+
+=back
+
+=item * Arguments
+
+    my $vls = validate_list_sequence( [
+        'alpha', 'alpha', undef, 'alpha', 'beta', undef, 'beta'
+    ] );
+
+Reference to an array holding scalars.
+
+=item * Return Value
+
+Array reference consisting of either 1 or 3 elements.  If the list qualifies,
+the array holds just one element which is a Perl-true value.  If the list qualifies, the array hold 3 elements as follows:
+
+=over 4
+
+=item * Element 0
+
+Perl-false value, indicating that the list does not qualify.
+
+=item * Element 1
+
+Index of the array element at which the first non-conforming value was observed.
+
+=item * Element 2
+
+String holding explanation for failure to qualify.
+
+=back
+
+Examples:
+
+=over 4
+
+=item 1
+
+Qualifying list:
+
+    use Data::Dumper; $Data::Dumper::Indent = 0;
+    my $vls;
+
+    my $good =
+        ['alpha', 'alpha', undef, 'alpha', 'beta', undef, 'beta', 'gamma'];
+    $vls = validate_list_sequence($good);
+    print Dumper($vls);
+
+    #####
+
+    $VAR1 = [1];
+
+=item 2
+
+Non-qualifying list:
+
+    my $bad =
+        ['alpha', 'alpha', undef, 'alpha', 'beta', undef, 'beta', 'alpha', 'alpha'];
+    $vls = validate_list_sequence($bad);
+    print Dumper($vls);
+
+    #####
+
+	$VAR1 = [0,7,'alpha previously observed']
+
+=back
+
+=back
+
+=cut
+
 sub validate_list_sequence {
     my $list = shift;
     croak "Must provide array ref to validate_list_sequence()"
