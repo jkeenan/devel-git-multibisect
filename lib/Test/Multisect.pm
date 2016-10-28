@@ -878,6 +878,70 @@ sub prepare_multisect_hash {
     return \%bisected_outputs;
 }
 
+=pod
+
+This is a first pass at multisection.  Here, we'll only try to identify the
+very first transition for each test file targeted.
+
+To establish that, for each target, we have to find the commit whose md5_hex
+first differs from that of the very first commit in the range.  How will we
+know when we've found it?  Its md5_hex will be different from the very first's,
+but the immediately preceding commit will have the same md5_hex as the very first.
+
+Hence, we have to do *two* instances of run_test_files_on_one_commit() at each
+bisection point.  For each of them we will stash the result in a cache.  That way,
+before calling run_test_files_on_one_commit(), we can check the cache to see
+whether we can skip the configure-build-test cycle for that particular commit.
+As a matter of fact, that cache will be nothing other than the 'bisected_outputs'
+array created in prepare_multisect().
+
+We have to account for the fact that the first transition is quite likely to be
+different for each of the test files targeted.  We are likely to have to keep on
+bisecting for one file after we've completed another.  Hence, we'll need a hash
+keyed on file_stub in which to record the Boolean status of our progress for each
+target and before embarking on a given round of run_test_files_on_one_commit()
+we should check the status.
+
+=cut
+
+sub identify_transitions {
+    my ($self) = @_;
+    croak "You must run prepare_multisect_hash() before identify_transitions()"
+        unless exists $self->{bisected_outputs};
+
+    my $target_count = scalar(@{$self->{targets}});
+    my $max_target_idx = $#{$self->{targets}};
+
+    # 1 element per test target file, keyed on stub, value 0 or 1
+    my %overall_status = map { $self->{targets}->[$_]->{stub} => 0 } (0 .. $max_target_idx);
+
+    # Overall success criterion:  We must have completed multisection for each
+    # targeted test file and recorded that completion with a '1' in its
+    # element in %overall_status.  If we have achieved that, then each element
+    # in %overall_status will have the value '1' and they will sum up to the
+    # total number of test files being targeted.
+
+    until (sum(values(%overall_status)) == $target_count) {
+        if ($self->{verbose}) {
+            say "target count|sum of status values: ",
+                join('|' => $target_count, sum(values(%overall_status)));
+        }
+
+        # Target and process one file at a time.
+
+        for my $target_idx (0 .. $max_target_idx) {
+            my $target = $self->{targets}->[$target_idx];
+            if ($self->{verbose}) {
+                say "Targeting file: $target->{path}";
+            }
+            my $rv = $self->multisect_one_target($target_idx);
+            if ($rv) {
+                $overall_status{$target->{stub}}++;
+            }
+        }
+    } # END until loop
+}
+
 sub multisect_one_target {
     my ($self, $target_idx) = @_;
     croak "Must supply index of test file within targets list"
