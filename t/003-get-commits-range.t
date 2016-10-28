@@ -48,18 +48,18 @@ d304a207329e6bd7e62354df4f561d9a7ce1c8c2
 is_deeply($this_commit_range, $expect,
 	"Got expected commit range");
 push @commit_ranges, $this_commit_range;
+undef $self;
 
 
-my ($nextself, );
 my ($good_first);
 delete $args{last_before};
 $good_first = '2a2e54af709f17cc6186b42840549c46478b6467';
 $args{first} = $good_first;
 $params = process_options(%args);
-$nextself = Test::Multisect->new($params);
-ok($nextself, "new() returned true value");
-isa_ok($nextself, 'Test::Multisect');
-$this_commit_range = $nextself->get_commits_range();
+$self = Test::Multisect->new($params);
+ok($self, "new() returned true value");
+isa_ok($self, 'Test::Multisect');
+$this_commit_range = $self->get_commits_range();
 ok($this_commit_range, "get_commits_range() returned true value");
 is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
 push @commit_ranges, $this_commit_range;

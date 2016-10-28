@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use Test::Multisect;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 39;
-#use Data::Dump qw(pp);
+use Test::More tests => 43;
 use List::Util qw( first );
 use Cwd;
+#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 
@@ -98,17 +98,20 @@ for my $k ( qw| older newer compare | ) {
 
 #pp($transitions);
 
+undef $self;
+
 #######################################
 
 note("Second object");
 
-my ($dself, $bisected_outputs, $bisected_outputs_undef_count);
+my ($bisected_outputs, $bisected_outputs_undef_count, $m, $n, $o);
 
-$dself = Test::Multisect->new($params);
-ok($dself, "new() returned true value");
-isa_ok($dself, 'Test::Multisect');
+$self = Test::Multisect->new($params);
+ok($self, "new() returned true value");
+isa_ok($self, 'Test::Multisect');
 
-$full_targets = $dself->set_targets($target_args);
+$m = scalar(@{$target_args});
+$full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
@@ -119,13 +122,13 @@ is_deeply(
 
 note("prepare_multisect()");
 
-$bisected_outputs = $dself->prepare_multisect();
+$bisected_outputs = $self->prepare_multisect();
 ok($bisected_outputs, "prepare_multisect() returned true value");
 is(ref($bisected_outputs), 'ARRAY', "prepare_multisect() returned array ref");
 cmp_ok(
     scalar(@{$bisected_outputs}),
     '==',
-    scalar(@{$dself->get_commits_range}),
+    scalar(@{$self->get_commits_range}),
     "Got expected number of elements in bisected outputs"
 );
 ok(scalar(@{$bisected_outputs->[0]}), "Array ref in first element is non-empty");
@@ -133,7 +136,6 @@ ok(scalar(@{$bisected_outputs->[-1]}), "Array ref in last element is non-empty")
 $bisected_outputs_undef_count = 0;
 for my $idx (1 .. ($#{$bisected_outputs} - 1)) {
     $bisected_outputs_undef_count++
-    #if scalar(@{$bisected_outputs->[$idx]});
         if defined $bisected_outputs->[$idx];
 }
 ok(! $bisected_outputs_undef_count,
@@ -141,6 +143,19 @@ ok(! $bisected_outputs_undef_count,
 
 note("prepare_multisect_hash()");
 
-$bisected_outputs = $dself->prepare_multisect_hash();
-ok($bisected_outputs, "prepare_multisect() returned true value");
-is(ref($bisected_outputs), 'HASH', "prepare_multisect() returned hash ref");
+$bisected_outputs = $self->prepare_multisect_hash();
+ok($bisected_outputs, "prepare_multisect_hash() returned true value");
+is(ref($bisected_outputs), 'HASH', "prepare_multisect_hash() returned hash ref");
+$n = scalar(keys %{$bisected_outputs});
+is($n, $m,
+    "bisected_outputs hash has $m element(s) as expected");
+$o = $bisected_outputs->{$self->{targets}->[$m - 1]->{stub}};
+ok(defined $o->[0], "first element is defined");
+ok(defined $o->[$#{$o}], "last element is defined");
+$bisected_outputs_undef_count = 0;
+for my $idx (1 .. ($#{$o} - 1)) {
+    $bisected_outputs_undef_count++
+        if defined $o->[$idx];
+}
+ok(! $bisected_outputs_undef_count,
+    "After prepare_multisect_hash(), internal elements are all as yet undefined");

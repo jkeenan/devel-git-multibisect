@@ -21,5 +21,5 @@ its caller.  Coverage improvement needed for:
 
     if (defined $list->[$j]) { $lpd = $list->[$j]; }
 
-8. Documentation: Test::Multisect::Auxiliary::validate_list_sequence().
+8. Documentation: Test::Multisect::Auxiliary::validate_list_sequence() -- DONE.
 Several methods in Test::Muttisect.
