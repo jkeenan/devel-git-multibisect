@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect::Allcommits;
 use Test::Multisect::Opts qw( process_options );
-use Test::More qw(no_plan); # tests => 43;
+use Test::More tests => 37;
 use List::Util qw( first );
 use Cwd;
 #use Data::Dump qw(pp);

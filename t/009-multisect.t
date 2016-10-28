@@ -8,7 +8,7 @@ use Test::Multisect::Opts qw( process_options );
 use Test::Multisect::Auxiliary qw(
     validate_list_sequence
 );
-use Test::More qw(no_plan); # tests => 53;
+use Test::More tests => 47;
 #use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
