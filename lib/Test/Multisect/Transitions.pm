@@ -55,45 +55,119 @@ When the number of commits in the specified range is large and you only need
 the test output at those commits where the output materially changed, you can
 use this package, F<Test::Multisect::Transitions>.
 
+=item *
+
 When you want to capture the test output for each commit in a specified range,
 you can use another package in this library, F<Test::Multisect::AllCommits>.
-
-=item *
 
 =back
 
 =head1 METHODS
 
-    TK
+=head2 C<multisect_all_targets()>
 
-=cut
+=over 4
 
-=pod
+=item * Purpose
 
-This is a first pass at multisection.  Here, we'll only try to identify the
-very first transition for each test file targeted.
+For selected files within an application's test suite, determine the points
+within a specified range of F<git> commits where the output of a run of each
+test materially changes.  Store the test output at those transition points for
+human inspection.
 
-To establish that, for each target, we have to find the commit whose md5_hex
-first differs from that of the very first commit in the range.  How will we
-know when we've found it?  Its md5_hex will be different from the very first's,
-but the immediately preceding commit will have the same md5_hex as the very first.
+=item * Glossary
 
-Hence, we have to do *two* instances of run_test_files_on_one_commit() at each
-bisection point.  For each of them we will stash the result in a cache.  That way,
-before calling run_test_files_on_one_commit(), we can check the cache to see
-whether we can skip the configure-build-test cycle for that particular commit.
+=over 4
 
-We have to account for the fact that the first transition is quite likely to be
-different for each of the test files targeted.  We are likely to have to keep on
-bisecting for one file after we've completed another.  Hence, we'll need a hash
-keyed on file_stub in which to record the Boolean status of our progress for each
-target and before embarking on a given round of run_test_files_on_one_commit()
-we should check the status.
+=item * B<commit>
+
+An individual commit to a F<git> repository, which takes the form of a SHA.
+
+=item * B<commit range>
+
+The range of commits requested for analysis in the sequence determined by F<git log>.
+
+=item * B<target>
+
+A target is a test file from the test suite of the application or library under study.
+
+=item * B<test output>
+
+What is sent to STDOUT or STDERR as a result of calling a test program such as
+F<prove> or F<t/harness> on an individual target file.
+
+=item * B<transitional commit>
+
+A commit at which the test output for a given target changes from that of the
+commit immediately preceding.
+
+=item * B<digest>
+
+A string holding the output of a cryptographic process run on test output
+which uniquely identifies that output.  (Currently, we use the
+C<Digest::SHA::md5_hex> algorithm.)  We assume that if the test output does
+not change between one or more commits, then that commit is not a transitional
+commit.
+
+Note:  Before taking a digest on a particular test output, we exclude text
+such as timings which are highly likely to change from one run to the next and
+which would introduce spurious variability into the digest calculations.
+
+=item * B<multisection>
+
+A series of configure-build-test sequences at commits within the commit range
+which are selected by a bisection algorithm.
+
+Normally, when we bisect (via F<git bisect>, F<Porting/bisect.pl> or
+otherwise), we are seeking a single point where a Boolean result -- yes/no,
+true/false, pass/fail -- is returned.  What the test run outputs to STDOUT or
+STDERR is a lesser concern.
+
+In multisection we bisect repeatedly to determine all points where the output
+of the test command changes -- regardless of whether that change is a C<PASS>,
+C<FAIL> or whatever.  We capture the output for later human examination.
+
+=back
+
+=item * Arguments
+
+    $self->multisect_all_targets();
+
+None; all data needed is already present in the object.
+
+=item * Return Value
+
+Implicitly returns true value upon success.
+
+=item * Comment
+
+As C<multisect_all_targets()> runs it does two kinds of things:
+
+=over 4
+
+=item *
+
+It stores results data within the object which you can subsequently access through method calls.
+
+=item *
+
+It captures each test output and writes it to a file on disk for later human inspection.
+
+=back
+
+=back
 
 =cut
 
 sub multisect_all_targets {
     my ($self) = @_;
+
+    # Prepare data structures in the object to hold results of test runs on a
+    # per target, per commit basis.
+    # Also, "prime" the data structure by performing test runs for each target
+    # on the first and last commits in the commit range, storing that test
+    # output on disk as well.
+
     $self->_prepare_for_multisection();
 
     my $target_count = scalar(@{$self->{targets}});
@@ -102,11 +176,12 @@ sub multisect_all_targets {
     # 1 element per test target file, keyed on stub, value 0 or 1
     my %overall_status = map { $self->{targets}->[$_]->{stub} => 0 } (0 .. $max_target_idx);
 
-    # Overall success criterion:  We must have completed multisection for each
-    # targeted test file and recorded that completion with a '1' in its
-    # element in %overall_status.  If we have achieved that, then each element
-    # in %overall_status will have the value '1' and they will sum up to the
-    # total number of test files being targeted.
+    # Overall success criterion:  We must have completed multisection --
+    # identified all transitional commits -- for each target and recorded that
+    # completion with a '1' in its element in %overall_status.  If we have
+    # achieved that, then each element in %overall_status will have the value
+    # '1' and they will sum up to the total number of test files being
+    # targeted.
 
     until (sum(values(%overall_status)) == $target_count) {
         if ($self->{verbose}) {
@@ -114,13 +189,15 @@ sub multisect_all_targets {
                 join('|' => $target_count, sum(values(%overall_status)));
         }
 
-        # Target and process one file at a time.
+        # Target and process one file at a time.  To multisect a target is to
+        # identify all its transitional commits over the commit range.
 
         for my $target_idx (0 .. $max_target_idx) {
             my $target = $self->{targets}->[$target_idx];
             if ($self->{verbose}) {
                 say "Targeting file: $target->{path}";
             }
+
             my $rv = $self->_multisect_one_target($target_idx);
             if ($rv) {
                 $overall_status{$target->{stub}}++;
@@ -131,12 +208,19 @@ sub multisect_all_targets {
 
 sub _prepare_for_multisection {
     my $self = shift;
+
+    # get_commits_range is inherited from parent
+
     my $all_commits = $self->get_commits_range();
-    $self->{xall_outputs} = [ (undef) x scalar(@{$all_commits}) ];
+    $self->{all_outputs} = [ (undef) x scalar(@{$all_commits}) ];
+
     my %bisected_outputs_table;
     for my $idx (0, $#{$all_commits}) {
+
+        # run_test_files_on_one_commit is inherited from parent
+
         my $outputs = $self->run_test_files_on_one_commit($all_commits->[$idx]);
-        $self->{xall_outputs}->[$idx] = $outputs;
+        $self->{all_outputs}->[$idx] = $outputs;
         for my $target (@{$outputs}) {
             my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
             $bisected_outputs_table{$target->{file_stub}}[$idx] =
@@ -174,7 +258,7 @@ sub _multisect_one_target {
     # on the next target, if any.
 
     # The objective of multisection is to identify the git commits at which
-    # the output of the test file targeted materially changed.  We are using
+    # the test output targeted materially changed.  We are using
     # an md5_hex value for that test file as a presumably valid unique
     # identifier for that file's content.  A transition point is a commit at
     # which the output file's md5_hex differs from that of the immediately
@@ -223,7 +307,7 @@ sub _multisect_one_target {
         # $current_end_idx
         # $n
         # $excluded_targets
-        # $self->{xall_outputs}
+        # $self->{all_outputs}
         # $self->{bisected_outputs}
 
         my $h = sprintf("%d" => (($current_start_idx + $current_end_idx) / 2));
@@ -278,32 +362,28 @@ sub _evaluate_status_one_target_run {
     my ($self, $target_idx) = @_;
     my $stub = $self->{targets}->[$target_idx]->{stub};
     my @trans = ();
-    for my $o (@{$self->{xall_outputs}}) {
+    for my $o (@{$self->{all_outputs}}) {
         push @trans,
             defined $o ? $o->[$target_idx]->{md5_hex} : undef;
     }
     my $vls = validate_list_sequence(\@trans);
-    (
-        (ref($vls) eq 'ARRAY') and
-        (scalar(@{$vls}) == 1 ) and
-        ($vls->[0])
-    ) ? 1 : 0;
+    return ( (scalar(@{$vls}) == 1 ) and ($vls->[0])) ? 1 : 0;
 }
 
 sub _run_one_commit_and_assign {
 
     # If we've already stashed a particular commit's outputs in
-    # xall_outputs (and, simultaneously) in bisected_outputs,
+    # all_outputs (and, simultaneously) in bisected_outputs,
     # then we don't need to actually perform a run.
 
-    # This internal method assigns to xall_outputs and bisected_outputs in
+    # This internal method assigns to all_outputs and bisected_outputs in
     # place.
 
     my ($self, $idx) = @_;
     my $this_commit = $self->{commits}->[$idx]->{sha};
-    unless (defined $self->{xall_outputs}->[$idx]) {
+    unless (defined $self->{all_outputs}->[$idx]) {
         my $these_outputs = $self->run_test_files_on_one_commit($this_commit);
-        $self->{xall_outputs}->[$idx] = $these_outputs;
+        $self->{all_outputs}->[$idx] = $these_outputs;
 
         for my $target (@{$these_outputs}) {
             my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};

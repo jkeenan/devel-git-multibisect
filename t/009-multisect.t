@@ -187,7 +187,7 @@ say STDERR "AAAA:";
 pp($xtransitions);
 say STDERR "BBBB:";
 pp($self2);
-my $xall_outputs = $self2->{xall_outputs};
+my $all_outputs = $self2->{all_outputs};
 # for my $index (0 .. $#{$self2->{targets}}) 
 # for each target test file ($self2->{targets}->[$index]->{file_stub})
 # populate an array consisting of the md5_hex value for that target at each
@@ -198,7 +198,7 @@ my %trans = ();
 for my $index (0 .. $#{$self2->{targets}}) {
     my $stub = $self2->{targets}->[$index]->{stub};
 say STDERR "CCCC: $stub";
-    for my $o (@{$self2->{xall_outputs}}) {
+    for my $o (@{$self2->{all_outputs}}) {
         #pp($o);
         push @{$trans{$stub}},
             defined $o ? $o->[$index]->{md5_hex} : 'undef';
