@@ -128,25 +128,25 @@ is_deeply(
     "Got expected full paths to target files for testing",
 );
 
-note("prepare_for_multisection()");
+note("_prepare_for_multisection()");
 
 # This method, while publicly available and therefore warranting testing, is
 # now called within multisect_all_targets() and only needs to be explicitly
 # called if, for some reason (e.g., testing), you wish to call
-# multisect_one_target() by itself.
+# _multisect_one_target() by itself.
 
 {
-    # error case: premature run of multisect_one_target()
+    # error case: premature run of _multisect_one_target()
     local $@;
-    eval { $rv = $self2->multisect_one_target(0); };
+    eval { $rv = $self2->_multisect_one_target(0); };
     like($@,
-        qr/You must run prepare_for_multisection\(\) before any stand-alone run of multisect_one_target\(\)/,
-        "Got expected error message for premature multisect_one_target()"
+        qr/You must run _prepare_for_multisection\(\) before any stand-alone run of _multisect_one_target\(\)/,
+        "Got expected error message for premature _multisect_one_target()"
     );
 }
 
-$bisected_outputs = $self2->prepare_for_multisection();
-ok($bisected_outputs, "prepare_for_multisection() returned true value");
+$bisected_outputs = $self2->_prepare_for_multisection();
+ok($bisected_outputs, "_prepare_for_multisection() returned true value");
 is(ref($bisected_outputs), 'HASH', "prepare_multisect() returned hash ref");
 for my $target (keys %{$bisected_outputs}) {
     ok(defined $bisected_outputs->{$target}->[0], "first element for $target is defined");
@@ -159,21 +159,21 @@ for my $target (keys %{$bisected_outputs}) {
             if defined $bisected_outputs->{$target}->[$idx];
     }
     ok(! $bisected_outputs_undef_count,
-        "After prepare_for_multisection(), internal elements for $target are all as yet undefined");
+        "After _prepare_for_multisection(), internal elements for $target are all as yet undefined");
 }
 
 {
     {
         local $@;
-        eval { my $rv = $self2->multisect_one_target(); };
+        eval { my $rv = $self2->_multisect_one_target(); };
         like($@, qr/Must supply index of test file within targets list/,
-            "multisect_one_target: got expected failure message for lack of argument");
+            "_multisect_one_target: got expected failure message for lack of argument");
     }
     {
         local $@;
-        eval { my $rv = $self2->multisect_one_target('not a number'); };
+        eval { my $rv = $self2->_multisect_one_target('not a number'); };
         like($@, qr/Must supply index of test file within targets list/,
-            "multisect_one_target: got expected failure message for lack of argument");
+            "_multisect_one_target: got expected failure message for lack of argument");
     }
 }
 

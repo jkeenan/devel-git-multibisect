@@ -73,7 +73,7 @@ we should check the status.
 
 sub multisect_all_targets {
     my ($self) = @_;
-    $self->prepare_for_multisection();
+    $self->_prepare_for_multisection();
 
     my $target_count = scalar(@{$self->{targets}});
     my $max_target_idx = $#{$self->{targets}};
@@ -100,7 +100,7 @@ sub multisect_all_targets {
             if ($self->{verbose}) {
                 say "Targeting file: $target->{path}";
             }
-            my $rv = $self->multisect_one_target($target_idx);
+            my $rv = $self->_multisect_one_target($target_idx);
             if ($rv) {
                 $overall_status{$target->{stub}}++;
             }
@@ -108,7 +108,7 @@ sub multisect_all_targets {
     } # END until loop
 }
 
-sub prepare_for_multisection {
+sub _prepare_for_multisection {
     my $self = shift;
     my $all_commits = $self->get_commits_range();
     $self->{xall_outputs} = [ (undef) x scalar(@{$all_commits}) ];
@@ -126,11 +126,11 @@ sub prepare_for_multisection {
     return \%bisected_outputs_table;
 }
 
-sub multisect_one_target {
+sub _multisect_one_target {
     my ($self, $target_idx) = @_;
     croak "Must supply index of test file within targets list"
         unless(defined $target_idx and $target_idx =~ m/^\d+$/);
-    croak "You must run prepare_for_multisection() before any stand-alone run of multisect_one_target()"
+    croak "You must run _prepare_for_multisection() before any stand-alone run of _multisect_one_target()"
         unless exists $self->{bisected_outputs};
     my $target  = $self->{targets}->[$target_idx];
     my $stub    = $target->{stub};
@@ -146,10 +146,10 @@ sub multisect_one_target {
     # the sub-sequence's unique defined value never reoccurs in any subsequent
     # sub-sequence.
 
-    # For each run of multisect_one_target() over a given target, it will
+    # For each run of _multisect_one_target() over a given target, it will
     # return a true value (1) if the above condition(s) are met and 0
     # otherwise.  The caller (multisect_all_targets()) will handle that return
-    # value appropriately.  The caller will then call multisect_one_target()
+    # value appropriately.  The caller will then call _multisect_one_target()
     # on the next target, if any.
 
     # The objective of multisection is to identify the git commits at which
@@ -169,7 +169,7 @@ sub multisect_one_target {
     # This entails checking out the source code at each commit calculated by
     # the bisection algorithm, configuring and building the code, running the
     # test targets at that commit, computing their md5_hex values and storing
-    # them in the 'bisected_outputs' structure.  The prepare_for_multisection()
+    # them in the 'bisected_outputs' structure.  The _prepare_for_multisection()
     # method will pre-populate that structure with md5_hexes for each test
     # file for each of the first and last commits in the commit range.
 
