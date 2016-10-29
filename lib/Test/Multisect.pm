@@ -183,7 +183,8 @@ sub get_commits_range {
 =item * Purpose
 
 Identify the test files which will be run at different points in the commits
-range.
+range.  We shall assume that the test file has existed with its name unchanged
+over the entire commit range.
 
 =item * Arguments
 

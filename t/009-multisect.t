@@ -8,8 +8,8 @@ use Test::Multisect::Opts qw( process_options );
 use Test::Multisect::Auxiliary qw(
     validate_list_sequence
 );
-use Test::More qw(no_plan); # tests => 47;
-use Data::Dump qw(pp);
+use Test::More;
+#use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
 
@@ -112,6 +112,7 @@ for my $k ( qw| older newer compare | ) {
 note("Second object");
 
 my ($self2, $commit_range, $idx, $initial_multisected_outputs, $initial_multisected_outputs_undef_count);
+my ($multisected_outputs);
 
 $self2 = Test::Multisect::Transitions->new({ %{$params}, verbose => 1 });
 ok($self2, "new() returned true value");
@@ -177,18 +178,74 @@ for my $target (keys %{$initial_multisected_outputs}) {
     }
 }
 
+note("multisect_all_targets()");
+
 $rv = $self2->multisect_all_targets();
 ok($rv, "multisect_all_targets() returned true value");
-say STDERR "AA: multisect_all_targets";
-pp($self2);
-say STDERR "AA1: ", scalar(@{$self2->{all_outputs}}), " elements";
 
-$rv = $self2->get_multisected_outputs();
-say STDERR "BB: get_multisected_outputs";
-pp($rv);
+note("get_multisected_outputs()");
 
-my $v = $self2->inspect_transitions($rv);
-say STDERR "CC: inspect_transitions";
-pp($v);
+$multisected_outputs = $self2->get_multisected_outputs();
+is(ref($multisected_outputs), 'HASH',
+    "get_multisected_outputs() returned hash reference");
+is(scalar(keys %{$multisected_outputs}), scalar(@{$target_args}),
+    "get_multisected_outputs() has one element for each target");
+for my $target (keys %{$multisected_outputs}) {
+    my @reports = @{$multisected_outputs->{$target}};
+    is(scalar(@reports), scalar(@{$commit_range}),
+        "Array for $target has " . scalar(@{$commit_range}) . " elements, as expected");
+    for my $r (@reports) {
+        ok(test_report($r),
+            "Each element is either undefined or a hash ref with expected keys");
+    }
+}
+
+note("inspect_transitions()");
+
+$transitions = $self2->inspect_transitions();
+is(ref($transitions), 'HASH',
+    "get_multisected_outputs() returned hash reference");
+is(scalar(keys %{$transitions}), scalar(@{$target_args}),
+    "get_multisected_outputs() has one element for each target");
+for my $target (keys %{$transitions}) {
+    for my $k ( qw| newest oldest transitions | ) {
+        ok(exists $transitions->{$target}->{$k},
+            "Got '$k' element for '$target', as expected");
+    }
+    for my $k ( qw| newest oldest | ) {
+        is(ref($transitions->{$target}->{$k}), 'HASH',
+            "Got hashref as value for '$k' for '$target'");
+        for my $l ( qw| idx md5_hex | ) {
+            ok(exists $transitions->{$target}->{$k}->{$l},
+                "Got key '$l' for '$k' for '$target'");
+        }
+    }
+    is(ref($transitions->{$target}->{transitions}), 'ARRAY',
+        "Got arrayref as value for 'transitions' for $target");
+    my @arr = @{$transitions->{$target}->{transitions}};
+    for my $t (@arr) {
+        is(ref($t), 'HASH',
+            "Got hashref as value for element in 'transitions' array");
+        for my $m ( qw| newer older | ) {
+            ok(exists $t->{$m}, "Got key '$m'");
+            is(ref($t->{$m}), 'HASH', "Got hashref");
+            for my $n ( qw| idx md5_hex | ) {
+                ok(exists $t->{$m}->{$n},
+                    "Got key '$n'");
+            }
+        }
+    }
+}
+
+sub test_report {
+    my $r = shift;
+    return 1 if not defined $r;
+    for my $k ( qw| commit commit_short file md5_hex | ) {
+        return 0 unless exists $r->{$k};
+    }
+    return 1;
+}
+
+done_testing();
 
 __END__
