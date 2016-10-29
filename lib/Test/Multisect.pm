@@ -182,7 +182,8 @@ sub get_commits_range {
 
 =item * Purpose
 
-Identify the test files which will be run at different points in the commits range.
+Identify the test files which will be run at different points in the commits
+range.
 
 =item * Arguments
 
@@ -208,13 +209,15 @@ tested for its existence.
 
 =item * C<stub>
 
-String composed by taking an element in the array ref passed as argument and substituting underscores C(<_>) for forward slash (C</>) and dot (C<.>) characters.  So,
+String composed by taking an element in the array ref passed as argument and
+substituting underscores C(<_>) for forward slash (C</>) and dot (C<.>)
+characters.  So,
 
     t/44_func_hashes_mult_unsorted.t
 
 ... becomes:
 
-    t_44_func_hashes_mult_unsorted_t'
+    t_44_func_hashes_mult_unsorted_t
 
 =back
 

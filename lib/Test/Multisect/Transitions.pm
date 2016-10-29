@@ -31,7 +31,12 @@ Test::Multisect::Transitions - Gather test output where it changes over a range 
 
     $full_targets = $self->set_targets(\@target_args);
 
-    $self->multisect_all_targets()
+    $self->multisect_all_targets();
+
+    $multisected_outputs = $self->get_multisected_outputs();
+
+    $transitions = $self->inspect_transitions();
+}
 
 =head1 DESCRIPTION
 
@@ -63,6 +68,14 @@ you can use another package in this library, F<Test::Multisect::AllCommits>.
 =back
 
 =head1 METHODS
+
+This package inherits methods from F<Test::Multisect>.  Only methods unique to
+F<Test::Multisect::AllCommits> are documented here.  See the documentation for
+F<Test::Multisect> for all other methods, including:
+
+    new()
+    get_commits_range()
+    set_targets()
 
 =head2 C<multisect_all_targets()>
 
@@ -399,11 +412,103 @@ sub _run_one_commit_and_assign {
 
 =item * Purpose
 
+Get results of C<multisect_all_targets()> (other than test output files
+created) reported on a per target/per commit basis.
+
 =item * Arguments
+
+    my $multisected_outputs = $self->get_multisected_outputs();
+
+None; all data needed is already present in the object.
 
 =item * Return Value
 
-=item * Comment
+Reference to a hash with one element for each targeted test file.
+
+Each element's key is a "stub" version of the target's relative path below the
+F<git> checkout directory in which forward slashes and dot characters have
+been replaced with underscores.  So,
+
+    t/44_func_hashes_mult_unsorted.t
+
+... becomes:
+
+    t_44_func_hashes_mult_unsorted_t
+
+Each element's value is a reference to an array with one element for each
+commit in the commit range.
+
+=over 4
+
+=item *
+
+If a particular commit B<was not visited> in the course of
+C<multisect_all_targets()>, then the array element is undefined.  (The point
+of multisection, of course, is to B<not> have to visit every commit in the
+commit range in order to figure out the commits at which test output changed.)
+
+=item *
+
+If a particular commit B<was visited> in the course of
+C<multisect_all_targets()>, then the array element is a hash reference whose
+elements have the following keys:
+
+    commit
+    commit_short
+    file
+    md5_hex
+
+=back
+
+Example:
+
+    {
+      t_001_load_t => [
+          {
+            commit => "d2bd2c75a2fd9afd3ac65a808eea2886d0e41d01",
+            commit_short => "d2bd2c7",
+            file => "/tmp/LHEG4uXfj1/d2bd2c7.t_001_load_t.output.txt",
+            md5_hex => "318ce8b2ccb3e92a6e516e18d1481066",
+          },
+          undef,
+          {
+            commit => "f2bc0ec377776b42928a29cebe04954975a30eb2",
+            commit_short => "f2bc0ec",
+            file => "/tmp/LHEG4uXfj1/f2bc0ec.t_001_load_t.output.txt",
+            md5_hex => "318ce8b2ccb3e92a6e516e18d1481066",
+          },
+          # ...
+          },
+          {
+            commit => "199494ee204dd78ed69490f9e54115b0e83e7d39",
+            commit_short => "199494e",
+            file => "/tmp/LHEG4uXfj1/199494e.t_001_load_t.output.txt",
+            md5_hex => "d7125615b2e5dbb4750ff107bbc1bad3",
+          },
+        ],
+      t_002_add_t  => [
+          {
+            commit => "d2bd2c75a2fd9afd3ac65a808eea2886d0e41d01",
+            commit_short => "d2bd2c7",
+            file => "/tmp/LHEG4uXfj1/d2bd2c7.t_002_add_t.output.txt",
+            md5_hex => "0823e5d7628802e5a489661090109c56",
+          },
+          undef,
+          {
+            commit => "f2bc0ec377776b42928a29cebe04954975a30eb2",
+            commit_short => "f2bc0ec",
+            file => "/tmp/LHEG4uXfj1/f2bc0ec.t_002_add_t.output.txt",
+            md5_hex => "0823e5d7628802e5a489661090109c56",
+          },
+          # ...
+          {
+            commit => "199494ee204dd78ed69490f9e54115b0e83e7d39",
+            commit_short => "199494e",
+            file => "/tmp/LHEG4uXfj1/199494e.t_002_add_t.output.txt",
+            md5_hex => "7716009f1af9a562a3edad9e2af7dedc",
+          },
+        ],
+    }
 
 =back
 
@@ -420,11 +525,110 @@ sub get_multisected_outputs {
 
 =item * Purpose
 
+Get a data structure which reports on the most meaningful results of
+C<multisect_all_targets()>, namely, the first commit, the last commit and all
+transitional commits.
+
 =item * Arguments
+
+    my $transitions = $self->inspect_transitions();
+
+None; all data needed is already present in the object.
 
 =item * Return Value
 
+Reference to a hash with one element per target.  Each element's key is a
+"stub" version of the target's relative path below the F<git> checkout
+directory.  (See example in documentation for C<get_multisected_outputs>
+above.)
+
+Each element's value is another hash reference.  The elements of that hash
+will have the following keys:
+
+=over 4
+
+=item * C<oldest>
+
+Value is reference to hash keyed on C<idx> and C<md5_hex>, whose values are,
+respectively, the index position of the very first commit in the commit range
+and the digest of that commit's test output.
+
+=item * C<newest>
+
+Value is reference to hash keyed on C<idx> and C<md5_hex>, whose values are,
+respectively, the index position of the very last commit in the commit range
+and the digest of that commit's test output.
+
+=item * C<transitions>
+
+Value is reference to an array with one element for each transitional commit.
+Each such element is a reference to a hash with keys C<older> and C<newer>.
+In this context C<older> refers to the last commit in a sub-sequence with a
+particular digest; C<newer> refers to the next immediate commit which is the
+first commit in a new sub-sequence with a new digest.
+
+The values of C<older> and C<newer> are, in turn, references to hashes with
+keys C<idx> and C<md5_hex>.  Their values are, respectively, the index
+position of the particular commit in the commit range and the digest of that
+commit's test output.
+
+=back
+
+Example:
+
+    {
+      t_001_load_t => {
+          newest => { idx => 13, md5_hex => "d7125615b2e5dbb4750ff107bbc1bad3" },
+          oldest => { idx => 0, md5_hex => "318ce8b2ccb3e92a6e516e18d1481066" },
+          transitions => [
+            {
+              newer => { idx => 5, md5_hex => "e5a839ea2e34b8976000c78c258299b0" },
+              older => { idx => 4, md5_hex => "318ce8b2ccb3e92a6e516e18d1481066" },
+            },
+            {
+              newer => { idx => 8, md5_hex => "f4920ddfdd9f1e6fc21ebfab09b5fcfe" },
+              older => { idx => 7, md5_hex => "e5a839ea2e34b8976000c78c258299b0" },
+            },
+            {
+              newer => { idx => 12, md5_hex => "d7125615b2e5dbb4750ff107bbc1bad3" },
+              older => { idx => 11, md5_hex => "f4920ddfdd9f1e6fc21ebfab09b5fcfe" },
+            },
+          ],
+        },
+      t_002_add_t  => {
+          newest => { idx => 13, md5_hex => "7716009f1af9a562a3edad9e2af7dedc" },
+          oldest => { idx => 0, md5_hex => "0823e5d7628802e5a489661090109c56" },
+          transitions => [
+            {
+              newer => { idx => 3, md5_hex => "dbd8c7a70877b3c8d3fd93a7a66d8468" },
+              older => { idx => 2, md5_hex => "0823e5d7628802e5a489661090109c56" },
+            },
+            {
+              newer => { idx => 7, md5_hex => "50aac31686ac930aad7fdd23df679f28" },
+              older => { idx => 6, md5_hex => "dbd8c7a70877b3c8d3fd93a7a66d8468" },
+            },
+            {
+              newer => { idx => 8, md5_hex => "256f466d35533555dce93a838ba5ab9d" },
+              older => { idx => 7, md5_hex => "50aac31686ac930aad7fdd23df679f28" },
+            },
+            {
+              newer => { idx => 9, md5_hex => "037be971470cb5d96a7a7f9764a6f3aa" },
+              older => { idx => 8, md5_hex => "256f466d35533555dce93a838ba5ab9d" },
+            },
+            {
+              newer => { idx => 11, md5_hex => "7716009f1af9a562a3edad9e2af7dedc" },
+              older => { idx => 10, md5_hex => "037be971470cb5d96a7a7f9764a6f3aa" },
+            },
+          ],
+        },
+    }
+
 =item * Comment
+
+The return value of C<inspect_transitions()> should be useful to the developer
+trying to determine the various points in a long series of commits where a
+target's test output changed in meaningful ways.  Hence, it is really the
+whole point of F<Test::Multisect::Transitions>.
 
 =back
 

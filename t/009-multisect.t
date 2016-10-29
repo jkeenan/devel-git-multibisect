@@ -183,17 +183,6 @@ say STDERR "AA: multisect_all_targets";
 pp($self2);
 say STDERR "AA1: ", scalar(@{$self2->{all_outputs}}), " elements";
 
-#$rv = $self2->get_digests_by_file_and_commit();
-#say STDERR "BB: get_digests_by_file_and_commit";
-#pp($rv);
-#for my $target (sort keys %$rv) {
-#    say STDERR "BB1: $target: ", scalar(@{$rv->{$target}}), " elements";
-#}
-#
-#$rv = $self2->inspect_transitions($rv);
-#say STDERR "CC: inspect_transitions";
-#pp($rv);
-
 $rv = $self2->get_multisected_outputs();
 say STDERR "BB: get_multisected_outputs";
 pp($rv);
@@ -201,8 +190,5 @@ pp($rv);
 my $v = $self2->inspect_transitions($rv);
 say STDERR "CC: inspect_transitions";
 pp($v);
-
-
-
 
 __END__
