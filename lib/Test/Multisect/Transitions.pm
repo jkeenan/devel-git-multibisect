@@ -641,6 +641,7 @@ sub inspect_transitions {
     for my $k (sort keys %{$multisected_outputs}) {
         my $arr = $multisected_outputs->{$k};
         my $max_index = $#{$arr};
+        $transitions{$k}{transitions} = [];
         $transitions{$k}{oldest} = {
             idx     => 0,
             md5_hex => $arr->[0]->{md5_hex},

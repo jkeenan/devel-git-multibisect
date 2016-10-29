@@ -15,10 +15,10 @@ use Cwd;
 
 my $cwd = cwd();
 
-my (%args, $params, $self);
+my (%args, $params);
 my ($good_gitdir, $good_first, $good_last);
 my ($target_args, $full_targets);
-my ($rv, $transitions, $all_outputs, $all_outputs_count, $expected_count, $first_element);
+my ($rv, $all_outputs, $all_outputs_count, $expected_count, $first_element);
 
 # In this test file we'll use a different (newer) range of commits in the
 # 'dummyrepo' repository.  In this range there will exist 2 test files for
@@ -44,20 +44,21 @@ $target_args = [
 
 note("First object");
 
-$self = Test::Multisect::AllCommits->new($params);
-ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+my ($ACself, $ACtransitions);
+$ACself = Test::Multisect::AllCommits->new($params);
+ok($ACself, "new() returned true value");
+isa_ok($ACself, 'Test::Multisect::AllCommits');
 
-$full_targets = $self->set_targets($target_args);
+$full_targets = $ACself->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    [ map { "$ACself->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
-$all_outputs = $self->run_test_files_on_all_commits();
+$all_outputs = $ACself->run_test_files_on_all_commits();
 ok($all_outputs, "run_test_files_on_all_commits() returned true value");
 is(ref($all_outputs), 'ARRAY', "run_test_files_on_all_commits() returned array ref");
 $all_outputs_count = 0;
@@ -68,11 +69,11 @@ for my $c (@{$all_outputs}) {
 }
 is(
     $all_outputs_count,
-    scalar(@{$self->get_commits_range}) * scalar(@{$target_args}),
+    scalar(@{$ACself->get_commits_range}) * scalar(@{$target_args}),
     "Got expected number of output files"
 );
 
-$rv = $self->get_digests_by_file_and_commit();
+$rv = $ACself->get_digests_by_file_and_commit();
 ok($rv, "get_digests_by_file_and_commit() returned true value");
 is(ref($rv), 'HASH', "get_digests_by_file_and_commit() returned hash ref");
 cmp_ok(scalar(keys %{$rv}), '==', scalar(@{$target_args}),
@@ -81,51 +82,51 @@ $first_element = first { $_ } keys %{$rv};
 is(ref($rv->{$first_element}), 'ARRAY', "Records are array references");
 is(
     scalar(@{$rv->{$first_element}}),
-    scalar(@{$self->get_commits_range}),
-    "Got 1 element for each of " . scalar(@{$self->get_commits_range}) . " commits"
+    scalar(@{$ACself->get_commits_range}),
+    "Got 1 element for each of " . scalar(@{$ACself->get_commits_range}) . " commits"
 );
 is(ref($rv->{$first_element}->[0]), 'HASH', "Records are hash references");
 for my $k ( qw| commit file md5_hex | ) {
     ok(exists $rv->{$first_element}->[0]->{$k}, "Record has '$k' element");
 }
 
-$transitions = $self->examine_transitions($rv);
-ok($transitions, "examine_transitions() returned true value");
-is(ref($transitions), 'HASH', "examine_transitions() returned hash ref");
-cmp_ok(scalar(keys %{$transitions}), '==', scalar(@{$target_args}),
+$ACtransitions = $ACself->examine_transitions($rv);
+ok($ACtransitions, "examine_transitions() returned true value");
+is(ref($ACtransitions), 'HASH', "examine_transitions() returned hash ref");
+cmp_ok(scalar(keys %{$ACtransitions}), '==', scalar(@{$target_args}),
     "Got expected number of elements: one for each of " . scalar(@{$target_args}) . " test files targeted");
-$first_element = first { $_ } keys %{$transitions};
-is(ref($transitions->{$first_element}), 'ARRAY', "Records are array references");
-$expected_count = scalar(@{$self->get_commits_range}) - 1;
+$first_element = first { $_ } keys %{$ACtransitions};
+is(ref($ACtransitions->{$first_element}), 'ARRAY', "Records are array references");
+$expected_count = scalar(@{$ACself->get_commits_range}) - 1;
 is(
-    scalar(@{$transitions->{$first_element}}),
+    scalar(@{$ACtransitions->{$first_element}}),
     $expected_count,
     "Got 1 element for each of $expected_count transitions between commits"
 );
-is(ref($transitions->{$first_element}->[0]), 'HASH', "Records are hash references");
+is(ref($ACtransitions->{$first_element}->[0]), 'HASH', "Records are hash references");
 for my $k ( qw| older newer compare | ) {
-    ok(exists $transitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
+    ok(exists $ACtransitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
 }
 
 #######################################
 
 note("Second object");
 
-my ($self2, $commit_range, $idx, $initial_multisected_outputs, $initial_multisected_outputs_undef_count);
+my ($Tself, $Ttransitions, $commit_range, $idx, $initial_multisected_outputs, $initial_multisected_outputs_undef_count);
 my ($multisected_outputs);
 
-$self2 = Test::Multisect::Transitions->new({ %{$params}, verbose => 1 });
-ok($self2, "new() returned true value");
-isa_ok($self2, 'Test::Multisect::Transitions');
+$Tself = Test::Multisect::Transitions->new({ %{$params}, verbose => 1 });
+ok($Tself, "new() returned true value");
+isa_ok($Tself, 'Test::Multisect::Transitions');
 
-$commit_range = $self2->get_commits_range;
+$commit_range = $Tself->get_commits_range;
 
-$full_targets = $self2->set_targets($target_args);
+$full_targets = $Tself->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self2->{gitdir}/$_" } @{$target_args} ],
+    [ map { "$Tself->{gitdir}/$_" } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
@@ -139,14 +140,14 @@ note("_prepare_for_multisection()");
 {
     # error case: premature run of _multisect_one_target()
     local $@;
-    eval { $rv = $self2->_multisect_one_target(0); };
+    eval { $rv = $Tself->_multisect_one_target(0); };
     like($@,
         qr/You must run _prepare_for_multisection\(\) before any stand-alone run of _multisect_one_target\(\)/,
         "Got expected error message for premature _multisect_one_target()"
     );
 }
 
-$initial_multisected_outputs = $self2->_prepare_for_multisection();
+$initial_multisected_outputs = $Tself->_prepare_for_multisection();
 ok($initial_multisected_outputs, "_prepare_for_multisection() returned true value");
 is(ref($initial_multisected_outputs), 'HASH', "_prepare_for_multisection() returned hash ref");
 for my $target (keys %{$initial_multisected_outputs}) {
@@ -166,13 +167,13 @@ for my $target (keys %{$initial_multisected_outputs}) {
 {
     {
         local $@;
-        eval { my $rv = $self2->_multisect_one_target(); };
+        eval { my $rv = $Tself->_multisect_one_target(); };
         like($@, qr/Must supply index of test file within targets list/,
             "_multisect_one_target: got expected failure message for lack of argument");
     }
     {
         local $@;
-        eval { my $rv = $self2->_multisect_one_target('not a number'); };
+        eval { my $rv = $Tself->_multisect_one_target('not a number'); };
         like($@, qr/Must supply index of test file within targets list/,
             "_multisect_one_target: got expected failure message for lack of argument");
     }
@@ -180,12 +181,12 @@ for my $target (keys %{$initial_multisected_outputs}) {
 
 note("multisect_all_targets()");
 
-$rv = $self2->multisect_all_targets();
+$rv = $Tself->multisect_all_targets();
 ok($rv, "multisect_all_targets() returned true value");
 
 note("get_multisected_outputs()");
 
-$multisected_outputs = $self2->get_multisected_outputs();
+$multisected_outputs = $Tself->get_multisected_outputs();
 is(ref($multisected_outputs), 'HASH',
     "get_multisected_outputs() returned hash reference");
 is(scalar(keys %{$multisected_outputs}), scalar(@{$target_args}),
@@ -202,7 +203,107 @@ for my $target (keys %{$multisected_outputs}) {
 
 note("inspect_transitions()");
 
-$transitions = $self2->inspect_transitions();
+$Ttransitions = $Tself->inspect_transitions();
+is(ref($Ttransitions), 'HASH',
+    "get_multisected_outputs() returned hash reference");
+is(scalar(keys %{$Ttransitions}), scalar(@{$target_args}),
+    "get_multisected_outputs() has one element for each target");
+for my $target (keys %{$Ttransitions}) {
+    for my $k ( qw| newest oldest transitions | ) {
+        ok(exists $Ttransitions->{$target}->{$k},
+            "Got '$k' element for '$target', as expected");
+    }
+    for my $k ( qw| newest oldest | ) {
+        is(ref($Ttransitions->{$target}->{$k}), 'HASH',
+            "Got hashref as value for '$k' for '$target'");
+        for my $l ( qw| idx md5_hex | ) {
+            ok(exists $Ttransitions->{$target}->{$k}->{$l},
+                "Got key '$l' for '$k' for '$target'");
+        }
+    }
+    is(ref($Ttransitions->{$target}->{transitions}), 'ARRAY',
+        "Got arrayref as value for 'transitions' for $target");
+    my @arr = @{$Ttransitions->{$target}->{transitions}};
+    for my $t (@arr) {
+        is(ref($t), 'HASH',
+            "Got hashref as value for element in 'transitions' array");
+        for my $m ( qw| newer older | ) {
+            ok(exists $t->{$m}, "Got key '$m'");
+            is(ref($t->{$m}), 'HASH', "Got hashref");
+            for my $n ( qw| idx md5_hex | ) {
+                ok(exists $t->{$m}->{$n},
+                    "Got key '$n'");
+            }
+        }
+    }
+}
+
+note("Comparison of AllCommits vs. Transitions on same repository and commit range");
+
+my (%AC, %T);
+for my $target (sort keys %{$ACtransitions}) {
+    for my $commit (@{$ACtransitions->{$target}}) {
+        $AC{$commit->{newer}->{idx}}++
+            if $commit->{compare} eq 'different';
+    }
+}
+for my $target (sort keys %{$Ttransitions}) {
+    for my $commit (@{$Ttransitions->{$target}->{transitions}}) {
+        $T{$commit->{newer}->{idx}}++
+    }
+}
+is_deeply(\%AC, \%T, "Same list of indexes of transitional commits via both classes");
+
+note("Using Test::Multisect::Transitions on a commit range with no transitions");
+
+my ($self, $good_last_before, $transitions);
+
+$good_gitdir = "$cwd/t/lib/list-compare";
+$good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
+$good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
+%args = (
+    gitdir => $good_gitdir,
+    last_before => $good_last_before,
+    last => $good_last,
+);
+$params = process_options(%args);
+
+$self = Test::Multisect::Transitions->new($params);
+ok($self, "new() returned true value");
+isa_ok($self, 'Test::Multisect::Transitions');
+
+$target_args = [
+    't/44_func_hashes_mult_unsorted.t',
+    't/45_func_hashes_alt_dual_sorted.t',
+];
+$full_targets = $self->set_targets($target_args);
+ok($full_targets, "set_targets() returned true value");
+is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
+is_deeply(
+    [ map { $_->{path} } @{$full_targets} ],
+    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    "Got expected full paths to target files for testing",
+);
+
+$rv = $self->multisect_all_targets();
+ok($rv, "multisect_all_targets() returned true value");
+
+note("get_multisected_outputs()");
+
+$multisected_outputs = $self->get_multisected_outputs();
+is(ref($multisected_outputs), 'HASH',
+    "get_multisected_outputs() returned hash reference");
+is(scalar(keys %{$multisected_outputs}), scalar(@{$target_args}),
+    "get_multisected_outputs() has one element for each target");
+for my $target (keys %{$multisected_outputs}) {
+    my @reports = @{$multisected_outputs->{$target}};
+    for my $r (@reports) {
+        ok(test_report($r),
+            "Each element is either undefined or a hash ref with expected keys");
+    }
+}
+
+$transitions = $self->inspect_transitions();
 is(ref($transitions), 'HASH',
     "get_multisected_outputs() returned hash reference");
 is(scalar(keys %{$transitions}), scalar(@{$target_args}),
@@ -222,19 +323,8 @@ for my $target (keys %{$transitions}) {
     }
     is(ref($transitions->{$target}->{transitions}), 'ARRAY',
         "Got arrayref as value for 'transitions' for $target");
-    my @arr = @{$transitions->{$target}->{transitions}};
-    for my $t (@arr) {
-        is(ref($t), 'HASH',
-            "Got hashref as value for element in 'transitions' array");
-        for my $m ( qw| newer older | ) {
-            ok(exists $t->{$m}, "Got key '$m'");
-            is(ref($t->{$m}), 'HASH', "Got hashref");
-            for my $n ( qw| idx md5_hex | ) {
-                ok(exists $t->{$m}->{$n},
-                    "Got key '$n'");
-            }
-        }
-    }
+    ok(! scalar(@{$transitions->{$target}->{transitions}}),
+        "There were no changes for '$target' in commit range, hence no transitions");
 }
 
 sub test_report {
