@@ -291,7 +291,9 @@ C<$self->get_commits_range()>.
 
 =item 2
 
-Reference to array of target test files to be excluded from a particular invocation of this method.  Optional, but will die if argument is not an array reference.
+Reference to array of target test files to be excluded from a particular
+invocation of this method.  Optional, but will die if argument is not an array
+reference.
 
 =back
 
@@ -385,6 +387,11 @@ This implementation is very much subject to change.
 
 If a true value for C<verbose> has been passed to the constructor, the method
 prints C<Created [outputfile]> to STDOUT before returning.
+
+B<Note:>  While this method is publicly documented, in actual use you probably
+will not need to call it directly.  Instead, you will probably use either
+C<Test::Multisect::AllCommits::run_test_files_on_all_commits()> or
+C<Test::Multisect::Transitions::multisect_all_targets()>.
 
 =back
 

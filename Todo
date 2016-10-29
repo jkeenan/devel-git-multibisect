@@ -1,15 +1,27 @@
 TODO list for Perl module Test::Multisect
 
 2. Create a data structure in the object similar to 'transitions' that
-can be accessed to look up results of multisecting.
+can be accessed to look up results of multisecting -- DONE.
 
 3. Use 'excluded_targets' to avoid re-running particular test files once we've
 completed that target.
+
+Follow-up (2016-10-30):  This exclusion probably is not relevant under AllCommits, since
+our objective there is to be comprehensive rather than selective.  Hence, we
+probably don't need to change AllCommits::run_test_files_on_all_commits().
+The exclusion would probably be better used in
+Transitions::multisect_all_targets().  There, each invocation of 
+run_test_files_on_one_commit() needs to be told what targets should now be
+excluded.  This would have to be determined within multisect_all_targets().
+This feature will be nice to have, but probably can wait until a later
+release.
 
 4. Decide what to do with 'examine_transitions()', as its behavior depends on
 its caller.  Coverage improvement needed for:
 
     next unless (defined $arr[$i] and defined $arr[$i-1]);
+
+-- DONE
 
 5. Coverage:  need to cover non-verbose runs of prepare_multisect_hash().
 
@@ -28,7 +40,7 @@ Several methods in Test::Multisect.
 
 10. Method comparable to examine_transitions() to extract useful information
 transition points from 'bisected_outputs' or 'xall_outputs' once
-identify_transitions() has been run.
+identify_transitions() has been run. -- DONE.
 
 11. Consider placing methods needed for all commits versus bisected commits in
 separate packages -- DONE.
