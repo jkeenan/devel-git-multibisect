@@ -214,7 +214,7 @@ sub _prepare_for_multisection {
     my $all_commits = $self->get_commits_range();
     $self->{all_outputs} = [ (undef) x scalar(@{$all_commits}) ];
 
-    my %bisected_outputs_table;
+    my %multisected_outputs_table;
     for my $idx (0, $#{$all_commits}) {
 
         # run_test_files_on_one_commit is inherited from parent
@@ -223,12 +223,12 @@ sub _prepare_for_multisection {
         $self->{all_outputs}->[$idx] = $outputs;
         for my $target (@{$outputs}) {
             my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
-            $bisected_outputs_table{$target->{file_stub}}[$idx] =
+            $multisected_outputs_table{$target->{file_stub}}[$idx] =
                 { map { $_ => $target->{$_} } @other_keys };
         }
     }
-    $self->{bisected_outputs} = { %bisected_outputs_table };
-    return \%bisected_outputs_table;
+    $self->{multisected_outputs} = { %multisected_outputs_table };
+    return \%multisected_outputs_table;
 }
 
 sub _multisect_one_target {
@@ -236,7 +236,7 @@ sub _multisect_one_target {
     croak "Must supply index of test file within targets list"
         unless(defined $target_idx and $target_idx =~ m/^\d+$/);
     croak "You must run _prepare_for_multisection() before any stand-alone run of _multisect_one_target()"
-        unless exists $self->{bisected_outputs};
+        unless exists $self->{multisected_outputs};
     my $target  = $self->{targets}->[$target_idx];
     my $stub    = $target->{stub};
 
@@ -274,13 +274,13 @@ sub _multisect_one_target {
     # This entails checking out the source code at each commit calculated by
     # the bisection algorithm, configuring and building the code, running the
     # test targets at that commit, computing their md5_hex values and storing
-    # them in the 'bisected_outputs' structure.  The _prepare_for_multisection()
+    # them in the 'multisected_outputs' structure.  The _prepare_for_multisection()
     # method will pre-populate that structure with md5_hexes for each test
     # file for each of the first and last commits in the commit range.
 
     # Since the configuration and build at a particular commit may be
     # time-consuming, once we have completed those steps we will run all the
-    # test files at once and store their results in 'bisected_outputs'
+    # test files at once and store their results in 'multisected_outputs'
     # immediately.  We will make our bisection decision based only on analysis
     # of the current target.  But when we come to the second target file we
     # will be able to skip configuration, build and test-running at commits
@@ -291,9 +291,9 @@ sub _multisect_one_target {
     my $current_start_idx       = $min_idx;
     my $current_end_idx         = $max_idx;
     my $overall_start_md5_hex   =
-            $self->{bisected_outputs}->{$stub}->[$min_idx]->{md5_hex};
+            $self->{multisected_outputs}->{$stub}->[$min_idx]->{md5_hex};
     my $overall_end_md5_hex     =
-            $self->{bisected_outputs}->{$stub}->[$max_idx]->{md5_hex};
+            $self->{multisected_outputs}->{$stub}->[$max_idx]->{md5_hex};
     my $excluded_targets = {};
     my $n = 0;
 
@@ -308,15 +308,15 @@ sub _multisect_one_target {
         # $n
         # $excluded_targets
         # $self->{all_outputs}
-        # $self->{bisected_outputs}
+        # $self->{multisected_outputs}
 
         my $h = sprintf("%d" => (($current_start_idx + $current_end_idx) / 2));
         $self->_run_one_commit_and_assign($h);
 
         my $current_start_md5_hex =
-            $self->{bisected_outputs}->{$stub}->[$current_start_idx]->{md5_hex};
+            $self->{multisected_outputs}->{$stub}->[$current_start_idx]->{md5_hex};
         my $target_h_md5_hex  =
-            $self->{bisected_outputs}->{$stub}->[$h]->{md5_hex};
+            $self->{multisected_outputs}->{$stub}->[$h]->{md5_hex};
 
         # Decision criteria:
         # If $target_h_md5_hex eq $current_start_md5_hex, then the first
@@ -332,7 +332,7 @@ sub _multisect_one_target {
         if ($target_h_md5_hex ne $current_start_md5_hex) {
             my $g = $h - 1;
             $self->_run_one_commit_and_assign($g);
-            my $target_g_md5_hex  = $self->{bisected_outputs}->{$stub}->[$g]->{md5_hex};
+            my $target_g_md5_hex  = $self->{multisected_outputs}->{$stub}->[$g]->{md5_hex};
             if ($target_g_md5_hex eq $current_start_md5_hex) {
                 if ($target_h_md5_hex eq $overall_end_md5_hex) {
                 }
@@ -373,10 +373,10 @@ sub _evaluate_status_one_target_run {
 sub _run_one_commit_and_assign {
 
     # If we've already stashed a particular commit's outputs in
-    # all_outputs (and, simultaneously) in bisected_outputs,
+    # all_outputs (and, simultaneously) in multisected_outputs,
     # then we don't need to actually perform a run.
 
-    # This internal method assigns to all_outputs and bisected_outputs in
+    # This internal method assigns to all_outputs and multisected_outputs in
     # place.
 
     my ($self, $idx) = @_;
@@ -387,10 +387,78 @@ sub _run_one_commit_and_assign {
 
         for my $target (@{$these_outputs}) {
             my @other_keys = grep { $_ ne 'file_stub' } keys %{$target};
-            $self->{bisected_outputs}->{$target->{file_stub}}->[$idx] =
+            $self->{multisected_outputs}->{$target->{file_stub}}->[$idx] =
                 { map { $_ => $target->{$_} } @other_keys };
         }
     }
+}
+
+=head2 C<get_multisected_outputs()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
+
+sub get_multisected_outputs {
+    my $self = shift;
+    return $self->{multisected_outputs};
+}
+
+=head2 C<inspect_transitions()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
+
+sub inspect_transitions {
+    my ($self) = @_;
+    my $multisected_outputs = $self->get_multisected_outputs();
+    my %transitions;
+    for my $k (sort keys %{$multisected_outputs}) {
+        my $arr = $multisected_outputs->{$k};
+        my $max_index = $#{$arr};
+        $transitions{$k}{oldest} = {
+            idx     => 0,
+            md5_hex => $arr->[0]->{md5_hex},
+        };
+        $transitions{$k}{newest} = {
+            idx     => $max_index,
+            md5_hex => $arr->[$max_index]->{md5_hex},
+        };
+        for (my $j = 1; $j <= $max_index; $j++) {
+            my $i = $j - 1;
+            next unless ((defined $arr->[$i]) and (defined $arr->[$j]));
+            my $older = $arr->[$i]->{md5_hex};
+            my $newer = $arr->[$j]->{md5_hex};
+            unless ($older eq $newer) {
+                push @{$transitions{$k}{transitions}}, {
+                    older => { idx => $i, md5_hex => $older },
+                    newer => { idx => $j, md5_hex => $newer },
+                }
+            }
+        }
+    }
+    return \%transitions;
 }
 
 1;

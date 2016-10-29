@@ -8,8 +8,8 @@ use Test::Multisect::Opts qw( process_options );
 use Test::Multisect::Auxiliary qw(
     validate_list_sequence
 );
-use Test::More tests => 47;
-#use Data::Dump qw(pp);
+use Test::More qw(no_plan); # tests => 47;
+use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
 
@@ -111,7 +111,7 @@ for my $k ( qw| older newer compare | ) {
 
 note("Second object");
 
-my ($self2, $commit_range, $idx, $bisected_outputs, $bisected_outputs_undef_count);
+my ($self2, $commit_range, $idx, $initial_multisected_outputs, $initial_multisected_outputs_undef_count);
 
 $self2 = Test::Multisect::Transitions->new({ %{$params}, verbose => 1 });
 ok($self2, "new() returned true value");
@@ -145,20 +145,20 @@ note("_prepare_for_multisection()");
     );
 }
 
-$bisected_outputs = $self2->_prepare_for_multisection();
-ok($bisected_outputs, "_prepare_for_multisection() returned true value");
-is(ref($bisected_outputs), 'HASH', "_prepare_for_multisection() returned hash ref");
-for my $target (keys %{$bisected_outputs}) {
-    ok(defined $bisected_outputs->{$target}->[0], "first element for $target is defined");
-    ok(defined $bisected_outputs->{$target}->[-1], "last element for $target is defined");
-    is(ref($bisected_outputs->{$target}->[0]), 'HASH', "first element for $target is a hash ref");
-    is(ref($bisected_outputs->{$target}->[-1]), 'HASH', "last element for $target is a hash ref");
-    $bisected_outputs_undef_count = 0;
-    for my $idx (1 .. ($#{$bisected_outputs->{$target}} - 1)) {
-        $bisected_outputs_undef_count++
-            if defined $bisected_outputs->{$target}->[$idx];
+$initial_multisected_outputs = $self2->_prepare_for_multisection();
+ok($initial_multisected_outputs, "_prepare_for_multisection() returned true value");
+is(ref($initial_multisected_outputs), 'HASH', "_prepare_for_multisection() returned hash ref");
+for my $target (keys %{$initial_multisected_outputs}) {
+    ok(defined $initial_multisected_outputs->{$target}->[0], "first element for $target is defined");
+    ok(defined $initial_multisected_outputs->{$target}->[-1], "last element for $target is defined");
+    is(ref($initial_multisected_outputs->{$target}->[0]), 'HASH', "first element for $target is a hash ref");
+    is(ref($initial_multisected_outputs->{$target}->[-1]), 'HASH', "last element for $target is a hash ref");
+    $initial_multisected_outputs_undef_count = 0;
+    for my $idx (1 .. ($#{$initial_multisected_outputs->{$target}} - 1)) {
+        $initial_multisected_outputs_undef_count++
+            if defined $initial_multisected_outputs->{$target}->[$idx];
     }
-    ok(! $bisected_outputs_undef_count,
+    ok(! $initial_multisected_outputs_undef_count,
         "After _prepare_for_multisection(), internal elements for $target are all as yet undefined");
 }
 
@@ -179,46 +179,30 @@ for my $target (keys %{$bisected_outputs}) {
 
 $rv = $self2->multisect_all_targets();
 ok($rv, "multisect_all_targets() returned true value");
+say STDERR "AA: multisect_all_targets";
+pp($self2);
+say STDERR "AA1: ", scalar(@{$self2->{all_outputs}}), " elements";
+
+#$rv = $self2->get_digests_by_file_and_commit();
+#say STDERR "BB: get_digests_by_file_and_commit";
+#pp($rv);
+#for my $target (sort keys %$rv) {
+#    say STDERR "BB1: $target: ", scalar(@{$rv->{$target}}), " elements";
+#}
+#
+#$rv = $self2->inspect_transitions($rv);
+#say STDERR "CC: inspect_transitions";
+#pp($rv);
+
+$rv = $self2->get_multisected_outputs();
+say STDERR "BB: get_multisected_outputs";
+pp($rv);
+
+my $v = $self2->inspect_transitions($rv);
+say STDERR "CC: inspect_transitions";
+pp($v);
+
+
+
 
 __END__
-$rv = $self2->get_bisected_outputs();
-my $xtransitions = $self2->examine_transitions($rv);
-say STDERR "AAAA:";
-pp($xtransitions);
-say STDERR "BBBB:";
-pp($self2);
-my $all_outputs = $self2->{all_outputs};
-# for my $index (0 .. $#{$self2->{targets}}) 
-# for each target test file ($self2->{targets}->[$index]->{file_stub})
-# populate an array consisting of the md5_hex value for that target at each
-# commit where we have defined results; and 'undef' where for a given commit
-# we do not yet have defined results
-
-my %trans = ();
-for my $index (0 .. $#{$self2->{targets}}) {
-    my $stub = $self2->{targets}->[$index]->{stub};
-say STDERR "CCCC: $stub";
-    for my $o (@{$self2->{all_outputs}}) {
-        #pp($o);
-        push @{$trans{$stub}},
-            defined $o ? $o->[$index]->{md5_hex} : 'undef';
-    }
-}
-say STDERR "DDDD:";
-pp(\%trans);
-for my $stub (sort keys %trans) {
-    my $rv = validate_list_sequence($trans{$stub});
-say STDERR "EEEE:";
-pp($rv);
-}
-
-# Since the different test targets are likely to achieve full multisection at
-# different cycles, we want to develop (a) a test for the completion of
-# multisection for each target independent of the others; and (b) a test that
-# *all* targets have completed multisection.
-
-# If we have a data structure named, say, 'sequences' at the object level,
-# that can be a hashref keyed on stubs.  Given the index of a target in
-# 'targets', we'll translate that into a stub and populate sequences on a
-# per-stub basis once each round, then test the sequence.
-

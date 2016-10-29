@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
-use Test::More qw(no_plan); # tests => 37;
+use Test::More tests => 31;
 use List::Util qw( first );
 use Cwd;
 #use Data::Dump qw(pp);
@@ -104,13 +104,10 @@ undef $self;
 
 note("Second object");
 
-my ($bisected_outputs, $bisected_outputs_undef_count, $m, $n, $o);
-
 $self = Test::Multisect::AllCommits->new($params);
 ok($self, "new() returned true value");
 isa_ok($self, 'Test::Multisect::AllCommits');
 
-$m = scalar(@{$target_args});
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
