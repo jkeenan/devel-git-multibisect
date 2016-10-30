@@ -187,13 +187,28 @@ sub run_test_files_on_all_commits {
     my $self = shift;
     my $all_commits = $self->get_commits_range();
     my @all_outputs;
+    my $start_time = time();
     for my $commit (@{$all_commits}) {
         my $outputs = $self->run_test_files_on_one_commit($commit);
         push @all_outputs, $outputs;
     }
-    $self->{all_outputs} = [ @all_outputs ];
+    my $end_time = time();
+    my %timings = (
+	elapsed	=> $end_time - $start_time,
+	runs	=> scalar(@{$all_commits}),
+    );
+    $timings{mean} = sprintf("%.02f" => $timings{elapsed} / $timings{runs});
+    $self->{all_outputs}  = [ @all_outputs ];
+    $self->{timings}	  = \%timings;
     return \@all_outputs;
 }
+
+sub get_timings {
+	my $self = shift;
+	return unless exists $self->{timings};
+	return $self->{timings};
+}
+
 
 =head2 C<get_digests_by_file_and_commit()>
 

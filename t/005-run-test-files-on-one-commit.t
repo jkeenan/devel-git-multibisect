@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 29;
+use Test::More tests => 30;
 #use Data::Dump qw(pp);
 use Cwd;
 
@@ -41,7 +41,7 @@ is_deeply(
     "Got expected full paths to target files for testing",
 );
 
-my ($commits, $outputs);
+my ($commits, $outputs, $timings);
 $commits = $self->get_commits_range();
 $outputs = $self->run_test_files_on_one_commit($commits->[0]);
 ok($outputs, "run_test_files_on_one_commit() returned true value");
@@ -50,6 +50,8 @@ is(scalar(@{$outputs}), scalar(@{$target_args}), "Got expected number of output 
 for my $f (map { $_->{file} } @{$outputs}) {
     ok(-f $f, "run_test_files_on_one_commit generated $f");
 }
+ok(! defined($self->get_timings()),
+    "get_timings() returned undefined value");
 
 # Try with no arg to run_test_files_on_one_commit
 $target_args = [ 't/46_func_hashes_alt_dual_unsorted.t' ];
