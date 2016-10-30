@@ -447,7 +447,9 @@ sub _configure_build_one_commit {
     my $starting_branch = get_current_branch();
 
     system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
+    say "Running '$self->{configure_command}'" if $self->{verbose};
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
+    say "Running '$self->{make_command}'" if $self->{verbose};
     system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
     return $starting_branch;
 }
