@@ -184,7 +184,6 @@ note("multisect_all_targets()");
 $rv = $Tself->multisect_all_targets();
 ok($rv, "multisect_all_targets() returned true value");
 $timings = $Tself->get_timings();
-pp($timings);
 ok(exists $timings->{elapsed}, "get_timings(): elapsed time recorded");
 ok(exists $timings->{runs},
     "get_timings(): number of runs recorded: $timings->{runs}");
