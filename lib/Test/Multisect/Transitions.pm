@@ -226,6 +226,9 @@ sub multisect_all_targets {
     );
     delete $self->{runs};
     $timings{mean} = sprintf("%.02f" => $timings{elapsed} / $timings{runs});
+    if ($self->{verbose}) {
+        say "Ran $timings{runs} runs; elapsed: $timings{elapsed} sec; mean: $timings{mean} sec";
+    }
     $self->{timings}	  = \%timings;
 }
 
