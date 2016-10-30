@@ -7,11 +7,12 @@ use Test::Multisect::Auxiliary qw(
     clean_outputfile
     hexdigest_one_file
     validate_list_sequence
+    get_current_branch
 );
 use Carp;
 use Cwd;
 use File::Temp;
-use List::Util qw(first sum);
+use List::Util qw(sum);
 use Data::Dump qw( pp );
 
 our $VERSION = '0.01';
@@ -403,6 +404,9 @@ C<Test::Multisect::Transitions::multisect_all_targets()>.
 
 sub run_test_files_on_one_commit {
     my ($self, $commit, $excluded_targets) = @_;
+    $commit //= $self->{commits}->[0]->{sha};
+    say "Testing commit '$commit'" if ($self->{verbose});
+
     if (defined $excluded_targets) {
         if (ref($excluded_targets) ne 'ARRAY') {
             croak "excluded_targets, if defined, must be in array reference";
@@ -420,14 +424,18 @@ sub run_test_files_on_one_commit {
         grep { ! exists $excluded_targets{$_->{path}} }
         @{$self->{targets}}
     ];
-    $commit //= $self->{commits}->[0]->{sha};
 
-    my $current_branch = $self->_configure_build_one_commit($commit);
+    my $starting_branch = $self->_configure_build_one_commit($commit);
 
     my $outputsref = $self->_test_one_commit($commit, $current_targets);
+    say "Tested commit '$commit'; returning to '$starting_branch'"
+        if ($self->{verbose});
 
-    system(qq|git checkout --quiet $current_branch|)
-        and croak "Unable to 'git checkout --quiet $current_branch";
+    # We want to return to our basic branch (e.g., 'master', 'blead')
+    # before checking out a new commit.
+
+    system(qq|git checkout --quiet $starting_branch|)
+        and croak "Unable to 'git checkout --quiet $starting_branch";
 
     return $outputsref;
 }
@@ -436,16 +444,12 @@ sub _configure_build_one_commit {
     my ($self, $commit) = @_;
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
     system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
-    my @branches = qx{git branch};
-    chomp(@branches);
-    my ($cb, $current_branch);
-    $cb = first { m/^\*\s+?/ } @branches;
-    ($current_branch) = $cb =~ m{^\*\s+?(.*)};
+    my $starting_branch = get_current_branch();
 
     system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
     system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
-    return $current_branch;
+    return $starting_branch;
 }
 
 sub _test_one_commit {

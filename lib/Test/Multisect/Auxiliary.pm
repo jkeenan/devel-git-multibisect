@@ -8,10 +8,12 @@ our @EXPORT_OK = qw(
     clean_outputfile
     hexdigest_one_file
     validate_list_sequence
+    get_current_branch
 );
 use Carp;
 use Digest::MD5;
 use File::Copy;
+use List::Util qw(first);
 
 =head1 NAME
 
@@ -295,6 +297,15 @@ sub validate_list_sequence {
         }
     }
     return [$status];
+}
+
+sub get_current_branch {
+    my @branches = qx{git branch};
+    chomp(@branches);
+    my ($cb, $current_branch);
+    $cb = first { m/^\*\s+?/ } @branches;
+    ($current_branch) = $cb =~ m{^\*\s+?(.*)};
+    return $current_branch;
 }
 
 1;
