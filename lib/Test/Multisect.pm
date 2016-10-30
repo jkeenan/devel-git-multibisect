@@ -45,6 +45,10 @@ be called from either child class.
 
 ... followed by methods specific to the child class.
 
+... and then perhaps also:
+
+    $timings = $self->get_timings();
+
 =head1 DESCRIPTION
 
 Given a Perl library or application kept in F<git> for version control, it is
@@ -471,6 +475,58 @@ sub _test_one_commit {
         say "Created $outputfile" if $self->{verbose};
     }
     return \@outputs;
+}
+
+=head2 C<get_timings()>
+
+=over 4
+
+=item * Purpose
+
+Get information on the time a multisection took to run.
+
+=item * Arguments
+
+None; all data needed is already in the object.
+
+=item * Return Value
+
+Hash reference.  The selection of elements in this hashref will depend on
+which subclass of F<Test::Multisect> you are using and may differ among
+subclasses.  Example:
+
+
+Will return undefined value if not yet available in the object.
+
+=over 4
+
+=item * C<path>
+
+Absolute paths to the test files selected for examination.  Test file is
+tested for its existence.
+
+=item * C<stub>
+
+String composed by taking an element in the array ref passed as argument and
+substituting underscores C(<_>) for forward slash (C</>) and dot (C<.>)
+characters.  So,
+
+    t/44_func_hashes_mult_unsorted.t
+
+... becomes:
+
+    t_44_func_hashes_mult_unsorted_t
+
+=back
+
+=back
+
+=cut
+
+sub get_timings {
+	my $self = shift;
+	return unless exists $self->{timings};
+	return $self->{timings};
 }
 
 1;

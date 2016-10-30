@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 29;
+use Test::More tests => 33;
 #use Data::Dump qw(pp);
 use List::Util qw( first );
 use Cwd;
@@ -17,6 +17,7 @@ my (%args, $params, $self);
 my ($good_gitdir, $good_last_before, $good_last);
 my ($target_args, $full_targets);
 my ($rv, $transitions, $all_outputs, $all_outputs_count, $expected_count, $first_element);
+my ($timings);
 
 $good_gitdir = "$cwd/t/lib/list-compare";
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
@@ -69,8 +70,12 @@ is(
     scalar(@{$self->get_commits_range}) * scalar(@{$target_args}),
     "Got expected number of output files"
 );
-
-
+$timings = $self->get_timings();
+ok(exists $timings->{elapsed}, "get_timings(): elapsed time recorded");
+ok(exists $timings->{runs}, "get_timings(): number of runs recorded");
+is($timings->{runs}, scalar(@{$self->get_commits_range}),
+    "Got expected number of runs: " . scalar(@{$self->get_commits_range}));
+ok(exists $timings->{mean}, "get_timings(): mean time recorded");
 
 ##### get_digests_by_file_and_commit() #####
 

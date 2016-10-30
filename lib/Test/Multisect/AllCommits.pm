@@ -203,12 +203,6 @@ sub run_test_files_on_all_commits {
     return \@all_outputs;
 }
 
-sub get_timings {
-	my $self = shift;
-	return unless exists $self->{timings};
-	return $self->{timings};
-}
-
 
 =head2 C<get_digests_by_file_and_commit()>
 
