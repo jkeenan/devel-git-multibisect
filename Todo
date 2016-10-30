@@ -63,3 +63,6 @@ helpful; then implement and test.
 .git/modules/t/lib/dummyrepo/objects/19/9494ee204dd78ed69490f9e54115b0e83e7d39
 .git/modules/t/lib/dummyrepo/objects/1c/8d83fcff7400da0f68d016e9018a5de134868e
 
+18. Created option such that, during configure_command and make_command,
+errors will be written to a per-commit error file rather than to STDERR.  For
+future release.
