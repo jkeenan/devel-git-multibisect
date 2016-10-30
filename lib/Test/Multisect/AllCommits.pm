@@ -194,8 +194,8 @@ sub run_test_files_on_all_commits {
     }
     my $end_time = time();
     my %timings = (
-	elapsed	=> $end_time - $start_time,
-	runs	=> scalar(@{$all_commits}),
+	    elapsed	=> $end_time - $start_time,
+	    runs	=> scalar(@{$all_commits}),
     );
     $timings{mean} = sprintf("%.02f" => $timings{elapsed} / $timings{runs});
     $self->{all_outputs}  = [ @all_outputs ];

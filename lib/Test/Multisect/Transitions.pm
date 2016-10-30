@@ -196,6 +196,8 @@ sub multisect_all_targets {
     # '1' and they will sum up to the total number of test files being
     # targeted.
 
+    $self->{runs} = 0;
+    my $start_time = time();
     until (sum(values(%overall_status)) == $target_count) {
         if ($self->{verbose}) {
             say "target count|sum of status values: ",
@@ -217,6 +219,14 @@ sub multisect_all_targets {
             }
         }
     } # END until loop
+    my $end_time = time();
+    my %timings = (
+	    elapsed	=> $end_time - $start_time,
+	    runs	=> $self->{runs},
+    );
+    delete $self->{runs};
+    $timings{mean} = sprintf("%.02f" => $timings{elapsed} / $timings{runs});
+    $self->{timings}	  = \%timings;
 }
 
 sub _prepare_for_multisection {
@@ -396,6 +406,7 @@ sub _run_one_commit_and_assign {
     my $this_commit = $self->{commits}->[$idx]->{sha};
     unless (defined $self->{all_outputs}->[$idx]) {
         my $these_outputs = $self->run_test_files_on_one_commit($this_commit);
+        $self->{runs}++;
         $self->{all_outputs}->[$idx] = $these_outputs;
 
         for my $target (@{$these_outputs}) {

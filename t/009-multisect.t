@@ -113,7 +113,7 @@ for my $k ( qw| older newer compare | ) {
 note("Second object");
 
 my ($Tself, $Ttransitions, $commit_range, $idx, $initial_multisected_outputs, $initial_multisected_outputs_undef_count);
-my ($multisected_outputs);
+my ($multisected_outputs, $timings);
 
 $Tself = Test::Multisect::Transitions->new({ %{$params}, verbose => 1 });
 ok($Tself, "new() returned true value");
@@ -183,6 +183,12 @@ note("multisect_all_targets()");
 
 $rv = $Tself->multisect_all_targets();
 ok($rv, "multisect_all_targets() returned true value");
+$timings = $Tself->get_timings();
+pp($timings);
+ok(exists $timings->{elapsed}, "get_timings(): elapsed time recorded");
+ok(exists $timings->{runs},
+    "get_timings(): number of runs recorded: $timings->{runs}");
+ok(exists $timings->{mean}, "get_timings(): mean time recorded");
 
 note("get_multisected_outputs()");
 
