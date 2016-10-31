@@ -416,6 +416,8 @@ sub _run_one_commit_and_assign {
     my ($self, $idx) = @_;
     my $this_commit = $self->{commits}->[$idx]->{sha};
     unless (defined $self->{all_outputs}->[$idx]) {
+        say "Preparing to test commit ", $idx + 1, " of ", scalar(@{$self->{commits}})
+            if $self->{verbose};
         my $these_outputs = $self->run_test_files_on_one_commit($this_commit);
         $self->{all_outputs}->[$idx] = $these_outputs;
 
