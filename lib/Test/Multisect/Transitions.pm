@@ -150,7 +150,7 @@ None; all data needed is already present in the object.
 
 =item * Return Value
 
-Implicitly returns true value upon success.
+Returns true value upon success.
 
 =item * Comment
 
@@ -230,6 +230,7 @@ sub multisect_all_targets {
         say "Ran $timings{runs} runs; elapsed: $timings{elapsed} sec; mean: $timings{mean} sec";
     }
     $self->{timings}	  = \%timings;
+    return 1;
 }
 
 sub _prepare_for_multisection {
