@@ -74,3 +74,6 @@ checked out?
 
 20. Use File::Spec functions to make paths, directory separators safe for
 Windows.
+
+21. Consider adding to verbose output in Transitions info on index within
+commit range of commit being tested, etc.

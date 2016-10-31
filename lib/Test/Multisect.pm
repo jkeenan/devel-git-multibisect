@@ -474,7 +474,7 @@ sub _test_one_commit {
             $cmd = qq|$command_raw $target->{path} >$outputfile 2>&1|;
         }
         else {
-            $cmd = qq|cd t; ./perl harness -v ../$target->{path} >$outputfile 2>&1; cd -|;
+            $cmd = qq|cd t; ./perl harness -v $target->{path} >$outputfile 2>&1; cd -|;
         }
         say "Running '$cmd'" if $self->{verbose};
         system($cmd) and croak "Unable to run test_command";
