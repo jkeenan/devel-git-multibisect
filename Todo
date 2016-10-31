@@ -66,3 +66,6 @@ helpful; then implement and test.
 18. Created option such that, during configure_command and make_command,
 errors will be written to a per-commit error file rather than to STDERR.  For
 future release.
+
+19. Considering adding something to Opts to designate the fundamental branch
+and then doing a checkout of that branch in preparations for multisecting.

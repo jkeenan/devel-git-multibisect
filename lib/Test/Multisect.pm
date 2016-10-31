@@ -405,7 +405,7 @@ C<Test::Multisect::Transitions::multisect_all_targets()>.
 sub run_test_files_on_one_commit {
     my ($self, $commit, $excluded_targets) = @_;
     $commit //= $self->{commits}->[0]->{sha};
-    say "Testing commit '$commit'" if ($self->{verbose});
+    say "\nTesting commit: $commit" if ($self->{verbose});
 
     if (defined $excluded_targets) {
         if (ref($excluded_targets) ne 'ARRAY') {
@@ -428,7 +428,7 @@ sub run_test_files_on_one_commit {
     my $starting_branch = $self->_configure_build_one_commit($commit);
 
     my $outputsref = $self->_test_one_commit($commit, $current_targets);
-    say "Tested commit '$commit'; returning to '$starting_branch'"
+    say "Tested commit:  $commit; returning to: $starting_branch"
         if ($self->{verbose});
 
     # We want to return to our basic branch (e.g., 'master', 'blead')
