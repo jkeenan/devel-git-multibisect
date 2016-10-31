@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 19;
+use Test::More tests => 20;
 use Capture::Tiny qw( :all );
 #use Data::Dump qw( pp );
 
@@ -91,6 +91,7 @@ for my $k ( qw|
     make_command
     outputdir
     repository
+    branch
     short
     test_command
     verbose

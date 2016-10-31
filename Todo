@@ -69,3 +69,8 @@ future release.
 
 19. Considering adding something to Opts to designate the fundamental branch
 and then doing a checkout of that branch in preparations for multisecting.
+For instance, should new() guarantee that the "fundamental branch" can be
+checked out?
+
+20. Use File::Spec functions to make paths, directory separators safe for
+Windows.

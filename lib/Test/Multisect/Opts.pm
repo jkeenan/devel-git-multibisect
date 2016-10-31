@@ -68,6 +68,7 @@ sub process_options {
        'workdir' => cwd(),
        'short' => 7,
        'repository' => 'origin',
+       'branch' => 'master',
        'verbose' => 0,
        'configure_command' => 'perl Makefile.PL 1>/dev/null',
        'make_command' => 'make 1>/dev/null',
@@ -89,6 +90,7 @@ sub process_options {
         "outputdir=s" => \$opts{outputdir},
         "short=i" => \$opts{short},
         "repository=s" => \$opts{repository},
+        "branch=s" => \$opts{branch},
         "verbose"  => \$opts{verbose}, # flag
     ) or croak("Error in command line arguments\n");
 
@@ -134,6 +136,7 @@ sub process_options {
         workdir
         short
         repository
+        branch
         configure_command
         make_command
         test_command
