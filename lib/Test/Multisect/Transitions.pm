@@ -181,6 +181,7 @@ sub multisect_all_targets {
     # on the first and last commits in the commit range, storing that test
     # output on disk as well.
 
+    my $start_time = time();
     $self->_prepare_for_multisection();
 
     my $target_count = scalar(@{$self->{targets}});
@@ -196,7 +197,6 @@ sub multisect_all_targets {
     # '1' and they will sum up to the total number of test files being
     # targeted.
 
-    my $start_time = time();
     until (sum(values(%overall_status)) == $target_count) {
         if ($self->{verbose}) {
             say "target count|sum of status values: ",

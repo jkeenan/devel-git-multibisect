@@ -4,8 +4,9 @@ use strict;
 use warnings;
 use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests =>  8;
+use Test::More tests => 10;
 use Cwd;
+#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 
@@ -84,3 +85,8 @@ isa_ok($self, 'Test::Multisect::AllCommits');
     $args{first} = $good_first;
 }
 
+$args{verbose} = 1;
+$params = process_options(%args);
+$self = Test::Multisect::AllCommits->new($params);
+ok($self, "new() returned true value");
+isa_ok($self, 'Test::Multisect::AllCommits');

@@ -468,7 +468,15 @@ sub _test_one_commit {
                 'txt'
             )),
         ));
-        my $cmd = qq|$self->{test_command} $target->{path} >$outputfile 2>&1|;
+        my $command_raw = $self->{test_command};
+        my $cmd;
+        unless ($command_raw eq 'harness') {
+            $cmd = qq|$command_raw $target->{path} >$outputfile 2>&1|;
+        }
+        else {
+            $cmd = qq|cd t; ./perl harness -v ../$target->{path} >$outputfile 2>&1; cd -|;
+        }
+        say "Running '$cmd'" if $self->{verbose};
         system($cmd) and croak "Unable to run test_command";
         $outputfile = clean_outputfile($outputfile);
         push @outputs, {
