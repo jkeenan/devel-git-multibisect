@@ -119,6 +119,7 @@ sub new {
     $data{last_short} = substr($data{last}, 0, $data{short});
     $data{commits} = _get_commits(\%data);
     $data{targets} //= [];
+    $data{commit_counter} = 0;
 
     return bless \%data, $class;
 }
@@ -405,7 +406,7 @@ C<Test::Multisect::Transitions::multisect_all_targets()>.
 sub run_test_files_on_one_commit {
     my ($self, $commit, $excluded_targets) = @_;
     $commit //= $self->{commits}->[0]->{sha};
-    say "\nTesting commit: $commit" if ($self->{verbose});
+    say "Testing commit: $commit" if ($self->{verbose});
 
     if (defined $excluded_targets) {
         if (ref($excluded_targets) ne 'ARRAY') {
@@ -436,6 +437,9 @@ sub run_test_files_on_one_commit {
 
     system(qq|git checkout --quiet $starting_branch|)
         and croak "Unable to 'git checkout --quiet $starting_branch";
+
+    $self->{commit_counter}++;
+    say "Commit counter: $self->{commit_counter}" if $self->{verbose};
 
     return $outputsref;
 }
