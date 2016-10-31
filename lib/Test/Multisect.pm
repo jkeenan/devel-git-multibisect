@@ -120,6 +120,10 @@ sub new {
     $data{commits} = _get_commits(\%data);
     $data{targets} //= [];
 
+
+    system(qq|git checkout --quiet $data{branch}|)
+        and croak "Unable to 'git checkout --quiet $data{branch}";
+
     return bless \%data, $class;
 }
 
