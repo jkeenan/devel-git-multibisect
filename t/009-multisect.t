@@ -221,7 +221,7 @@ for my $target (keys %{$Ttransitions}) {
     for my $k ( qw| newest oldest | ) {
         is(ref($Ttransitions->{$target}->{$k}), 'HASH',
             "Got hashref as value for '$k' for '$target'");
-        for my $l ( qw| idx md5_hex | ) {
+        for my $l ( qw| idx md5_hex file | ) {
             ok(exists $Ttransitions->{$target}->{$k}->{$l},
                 "Got key '$l' for '$k' for '$target'");
         }
@@ -235,7 +235,7 @@ for my $target (keys %{$Ttransitions}) {
         for my $m ( qw| newer older | ) {
             ok(exists $t->{$m}, "Got key '$m'");
             is(ref($t->{$m}), 'HASH', "Got hashref");
-            for my $n ( qw| idx md5_hex | ) {
+            for my $n ( qw| idx md5_hex file | ) {
                 ok(exists $t->{$m}->{$n},
                     "Got key '$n'");
             }
@@ -321,7 +321,7 @@ for my $target (keys %{$transitions}) {
     for my $k ( qw| newest oldest | ) {
         is(ref($transitions->{$target}->{$k}), 'HASH',
             "Got hashref as value for '$k' for '$target'");
-        for my $l ( qw| idx md5_hex | ) {
+        for my $l ( qw| idx md5_hex file | ) {
             ok(exists $transitions->{$target}->{$k}->{$l},
                 "Got key '$l' for '$k' for '$target'");
         }

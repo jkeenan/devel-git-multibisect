@@ -572,15 +572,17 @@ will have the following keys:
 
 =item * C<oldest>
 
-Value is reference to hash keyed on C<idx> and C<md5_hex>, whose values are,
-respectively, the index position of the very first commit in the commit range
-and the digest of that commit's test output.
+Value is reference to hash keyed on C<idx>, C<md5_hex> and C<file>, whose
+values are, respectively, the index position of the very first commit in the
+commit range, the digest of that commit's test output and the path to the file
+holding that output.
 
 =item * C<newest>
 
-Value is reference to hash keyed on C<idx> and C<md5_hex>, whose values are,
-respectively, the index position of the very last commit in the commit range
-and the digest of that commit's test output.
+Value is reference to hash keyed on C<idx>, C<md5_hex> and C<file>, whose
+values are, respectively, the index position of the very last commit in the
+commit range, the digest of that commit's test output and the path to the file
+holding that output.
 
 =item * C<transitions>
 
@@ -591,9 +593,9 @@ particular digest; C<newer> refers to the next immediate commit which is the
 first commit in a new sub-sequence with a new digest.
 
 The values of C<older> and C<newer> are, in turn, references to hashes with
-keys C<idx> and C<md5_hex>.  Their values are, respectively, the index
-position of the particular commit in the commit range and the digest of that
-commit's test output.
+keys C<idx>, C<md5_hex> and C<file>.  Their values are, respectively, the index
+position of the particular commit in the commit range, the digest of that
+commit's test output and the path to the file holding that output.
 
 =back
 
@@ -601,49 +603,129 @@ Example:
 
     {
       t_001_load_t => {
-          newest => { idx => 13, md5_hex => "d7125615b2e5dbb4750ff107bbc1bad3" },
-          oldest => { idx => 0, md5_hex => "318ce8b2ccb3e92a6e516e18d1481066" },
+          newest => {
+            file => "/tmp/IvD3Zwn3FJ/199494e.t_001_load_t.output.txt",
+            idx => 13,
+            md5_hex => "d7125615b2e5dbb4750ff107bbc1bad3",
+          },
+          oldest => {
+            file => "/tmp/IvD3Zwn3FJ/d2bd2c7.t_001_load_t.output.txt",
+            idx => 0,
+            md5_hex => "318ce8b2ccb3e92a6e516e18d1481066",
+          },
           transitions => [
             {
-              newer => { idx => 5, md5_hex => "e5a839ea2e34b8976000c78c258299b0" },
-              older => { idx => 4, md5_hex => "318ce8b2ccb3e92a6e516e18d1481066" },
+              newer => {
+                         file => "/tmp/IvD3Zwn3FJ/1debd8a.t_001_load_t.output.txt",
+                         idx => 5,
+                         md5_hex => "e5a839ea2e34b8976000c78c258299b0",
+                       },
+              older => {
+                         file => "/tmp/IvD3Zwn3FJ/707da97.t_001_load_t.output.txt",
+                         idx => 4,
+                         md5_hex => "318ce8b2ccb3e92a6e516e18d1481066",
+                       },
             },
             {
-              newer => { idx => 8, md5_hex => "f4920ddfdd9f1e6fc21ebfab09b5fcfe" },
-              older => { idx => 7, md5_hex => "e5a839ea2e34b8976000c78c258299b0" },
+              newer => {
+                         file => "/tmp/IvD3Zwn3FJ/6653d84.t_001_load_t.output.txt",
+                         idx => 8,
+                         md5_hex => "f4920ddfdd9f1e6fc21ebfab09b5fcfe",
+                       },
+              older => {
+                         file => "/tmp/IvD3Zwn3FJ/b35b4d7.t_001_load_t.output.txt",
+                         idx => 7,
+                         md5_hex => "e5a839ea2e34b8976000c78c258299b0",
+                       },
             },
             {
-              newer => { idx => 12, md5_hex => "d7125615b2e5dbb4750ff107bbc1bad3" },
-              older => { idx => 11, md5_hex => "f4920ddfdd9f1e6fc21ebfab09b5fcfe" },
+              newer => {
+                         file => "/tmp/IvD3Zwn3FJ/aa1ed28.t_001_load_t.output.txt",
+                         idx => 12,
+                         md5_hex => "d7125615b2e5dbb4750ff107bbc1bad3",
+                       },
+              older => {
+                         file => "/tmp/IvD3Zwn3FJ/65bf77c.t_001_load_t.output.txt",
+                         idx => 11,
+                         md5_hex => "f4920ddfdd9f1e6fc21ebfab09b5fcfe",
+                       },
             },
           ],
-        },
+      },
       t_002_add_t  => {
-          newest => { idx => 13, md5_hex => "7716009f1af9a562a3edad9e2af7dedc" },
-          oldest => { idx => 0, md5_hex => "0823e5d7628802e5a489661090109c56" },
+          newest => {
+            file => "/tmp/IvD3Zwn3FJ/199494e.t_002_add_t.output.txt",
+            idx => 13,
+            md5_hex => "7716009f1af9a562a3edad9e2af7dedc",
+          },
+          oldest => {
+            file => "/tmp/IvD3Zwn3FJ/d2bd2c7.t_002_add_t.output.txt",
+            idx => 0,
+            md5_hex => "0823e5d7628802e5a489661090109c56",
+          },
           transitions => [
             {
-              newer => { idx => 3, md5_hex => "dbd8c7a70877b3c8d3fd93a7a66d8468" },
-              older => { idx => 2, md5_hex => "0823e5d7628802e5a489661090109c56" },
+              newer => {
+                         file => "/tmp/IvD3Zwn3FJ/646fd8a.t_002_add_t.output.txt",
+                         idx => 3,
+                         md5_hex => "dbd8c7a70877b3c8d3fd93a7a66d8468",
+                       },
+              older => {
+                         file => "/tmp/IvD3Zwn3FJ/f2bc0ec.t_002_add_t.output.txt",
+                         idx => 2,
+                         md5_hex => "0823e5d7628802e5a489661090109c56",
+                       },
             },
             {
-              newer => { idx => 7, md5_hex => "50aac31686ac930aad7fdd23df679f28" },
-              older => { idx => 6, md5_hex => "dbd8c7a70877b3c8d3fd93a7a66d8468" },
+              newer => {
+                         file => "/tmp/IvD3Zwn3FJ/b35b4d7.t_002_add_t.output.txt",
+                         idx => 7,
+                         md5_hex => "50aac31686ac930aad7fdd23df679f28",
+                       },
+              older => {
+                         file => "/tmp/IvD3Zwn3FJ/55ab1f9.t_002_add_t.output.txt",
+                         idx => 6,
+                         md5_hex => "dbd8c7a70877b3c8d3fd93a7a66d8468",
+                       },
             },
             {
-              newer => { idx => 8, md5_hex => "256f466d35533555dce93a838ba5ab9d" },
-              older => { idx => 7, md5_hex => "50aac31686ac930aad7fdd23df679f28" },
+              newer => {
+                         file => "/tmp/IvD3Zwn3FJ/6653d84.t_002_add_t.output.txt",
+                         idx => 8,
+                         md5_hex => "256f466d35533555dce93a838ba5ab9d",
+                       },
+              older => {
+                         file => "/tmp/IvD3Zwn3FJ/b35b4d7.t_002_add_t.output.txt",
+                         idx => 7,
+                         md5_hex => "50aac31686ac930aad7fdd23df679f28",
+                       },
             },
             {
-              newer => { idx => 9, md5_hex => "037be971470cb5d96a7a7f9764a6f3aa" },
-              older => { idx => 8, md5_hex => "256f466d35533555dce93a838ba5ab9d" },
+              newer => {
+                         file => "/tmp/IvD3Zwn3FJ/abc336e.t_002_add_t.output.txt",
+                         idx => 9,
+                         md5_hex => "037be971470cb5d96a7a7f9764a6f3aa",
+                       },
+              older => {
+                         file => "/tmp/IvD3Zwn3FJ/6653d84.t_002_add_t.output.txt",
+                         idx => 8,
+                         md5_hex => "256f466d35533555dce93a838ba5ab9d",
+                       },
             },
             {
-              newer => { idx => 11, md5_hex => "7716009f1af9a562a3edad9e2af7dedc" },
-              older => { idx => 10, md5_hex => "037be971470cb5d96a7a7f9764a6f3aa" },
+              newer => {
+                         file => "/tmp/IvD3Zwn3FJ/65bf77c.t_002_add_t.output.txt",
+                         idx => 11,
+                         md5_hex => "7716009f1af9a562a3edad9e2af7dedc",
+                       },
+              older => {
+                         file => "/tmp/IvD3Zwn3FJ/bbe25f4.t_002_add_t.output.txt",
+                         idx => 10,
+                         md5_hex => "037be971470cb5d96a7a7f9764a6f3aa",
+                       },
             },
           ],
-        },
+      },
     }
 
 =item * Comment
@@ -668,20 +750,24 @@ sub inspect_transitions {
         $transitions{$k}{oldest} = {
             idx     => 0,
             md5_hex => $arr->[0]->{md5_hex},
+            file    => $arr->[0]->{file},
         };
         $transitions{$k}{newest} = {
             idx     => $max_index,
             md5_hex => $arr->[$max_index]->{md5_hex},
+            file    => $arr->[$max_index]->{file},
         };
         for (my $j = 1; $j <= $max_index; $j++) {
             my $i = $j - 1;
             next unless ((defined $arr->[$i]) and (defined $arr->[$j]));
-            my $older = $arr->[$i]->{md5_hex};
-            my $newer = $arr->[$j]->{md5_hex};
-            unless ($older eq $newer) {
+            my $older_md5_hex   = $arr->[$i]->{md5_hex};
+            my $newer_md5_hex   = $arr->[$j]->{md5_hex};
+            my $older_file      = $arr->[$i]->{file};
+            my $newer_file      = $arr->[$j]->{file};
+            unless ($older_md5_hex eq $newer_md5_hex) {
                 push @{$transitions{$k}{transitions}}, {
-                    older => { idx => $i, md5_hex => $older },
-                    newer => { idx => $j, md5_hex => $newer },
+                    older => { idx => $i, md5_hex => $older_md5_hex, file => $older_file },
+                    newer => { idx => $j, md5_hex => $newer_md5_hex, file => $newer_file },
                 }
             }
         }
