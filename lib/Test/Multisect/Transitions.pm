@@ -196,7 +196,6 @@ sub multisect_all_targets {
     # '1' and they will sum up to the total number of test files being
     # targeted.
 
-    $self->{runs} = 0;
     my $start_time = time();
     until (sum(values(%overall_status)) == $target_count) {
         if ($self->{verbose}) {
@@ -220,16 +219,24 @@ sub multisect_all_targets {
         }
     } # END until loop
     my $end_time = time();
+    my %distinct_commits = ();
+    for my $target (keys %{$self->{multisected_outputs}}) {
+        for my $el (@{$self->{multisected_outputs}->{$target}}) {
+            if (defined $el) {
+                $distinct_commits{$el->{commit}} = 1;
+            }
+        }
+    }
     my %timings = (
 	    elapsed	=> $end_time - $start_time,
-	    runs	=> $self->{runs},
+        runs => scalar(keys(%distinct_commits)),
     );
-    delete $self->{runs};
     $timings{mean} = sprintf("%.02f" => $timings{elapsed} / $timings{runs});
     if ($self->{verbose}) {
         say "Ran $timings{runs} runs; elapsed: $timings{elapsed} sec; mean: $timings{mean} sec";
     }
     $self->{timings}	  = \%timings;
+
     return 1;
 }
 
@@ -410,7 +417,6 @@ sub _run_one_commit_and_assign {
     my $this_commit = $self->{commits}->[$idx]->{sha};
     unless (defined $self->{all_outputs}->[$idx]) {
         my $these_outputs = $self->run_test_files_on_one_commit($this_commit);
-        $self->{runs}++;
         $self->{all_outputs}->[$idx] = $these_outputs;
 
         for my $target (@{$these_outputs}) {
