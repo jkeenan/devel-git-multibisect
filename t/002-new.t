@@ -4,9 +4,8 @@ use strict;
 use warnings;
 use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
-use Test::More tests => 12;
+use Test::More tests => 10;
 use Cwd;
-use Capture::Tiny qw( :all );
 #use Data::Dump qw(pp);
 
 my $cwd = cwd();
@@ -91,19 +90,3 @@ $params = process_options(%args);
 $self = Test::Multisect::AllCommits->new($params);
 ok($self, "new() returned true value");
 isa_ok($self, 'Test::Multisect::AllCommits');
-
-{
-    local $@;
-    my $bad_branch = 'foobar';
-    local $args{branch} = $bad_branch;
-    $params = process_options(%args);
-    my ($stderr, @result);
-    ($stderr, @result) = capture_stderr {
-        eval { $self = Test::Multisect::AllCommits->new($params); };
-    };
-    like($stderr, qr/error: pathspec '$bad_branch' did not match/s,
-        "Got expected git error message re bad branch");
-    like($@, qr/Unable to 'git checkout --quiet $bad_branch/s,
-        "Got expected error message re bad branch");
-}
-
