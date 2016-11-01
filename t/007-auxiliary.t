@@ -11,17 +11,18 @@ use Test::Multisect::Auxiliary qw(
 use Test::More tests => 45;
 use Cwd;
 use File::Copy;
+use File::Spec;
 use File::Temp qw(tempfile tempdir);
 #use Data::Dump qw(pp);
 
 my $cwd = cwd();
-my $datadir = "$cwd/t/lib";
+my $datadir = File::Spec->catfile($cwd, qw| t lib | );
 
 ##### clean_outputfile() #####
 
 {
     my ($f1, $f2) = map { "output${_}.txt" } (1..2);
-    my ($in1, $in2) = map { "$datadir/$_" } ($f1, $f2);
+    my ($in1, $in2) = map { File::Spec->catfile($datadir, $_) } ($f1, $f2);
     my (@sizes_before, @digests_before);
     for ($in1, $in2) {
         push @sizes_before, (stat($_))[7];
@@ -34,10 +35,12 @@ my $datadir = "$cwd/t/lib";
 
     my $tdir1 = tempdir( CLEANUP => 1 );
     my $tdir2 = tempdir( CLEANUP => 1 );
-    copy($in1 => "$tdir1/$f1") or croak "Unable to copy $in1";
-    copy($in2 => "$tdir2/$f2") or croak "Unable to copy $in2";
-    my $out1 = clean_outputfile("$tdir1/$f1");
-    my $out2 = clean_outputfile("$tdir2/$f2");
+    my $x1 = File::Spec->catfile($tdir1, $f1);
+    my $x2 = File::Spec->catfile($tdir2, $f2);
+    copy($in1 => $x1) or croak "Unable to copy $in1";
+    copy($in2 => $x2) or croak "Unable to copy $in2";
+    my $out1 = clean_outputfile($x1);
+    my $out2 = clean_outputfile($x2);
     my (@sizes_after, @digests_after);
     for ($out1, $out2) {
         push @sizes_after, (stat($_))[7];

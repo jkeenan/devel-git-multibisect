@@ -24,6 +24,7 @@ my %WriteMakefileArgs = (
         'Data::Dumper' => 0,
         'Digest::MD5' => 0,
         'File::Copy' => 0,
+        'File::Spec' => 0,
         'File::Temp' => 0,
         'Getopt::Long' => 0,
         'List::Util' => 0,

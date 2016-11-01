@@ -5,8 +5,9 @@ use warnings;
 use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 31;
-use List::Util qw( first );
 use Cwd;
+use File::Spec;
+use List::Util qw( first );
 #use Data::Dump qw(pp);
 
 my $cwd = cwd();
@@ -19,7 +20,7 @@ my ($rv, $transitions, $all_outputs, $all_outputs_count, $expected_count, $first
 # So that we have a basis for comparison, we'll first run already tested
 # methods over the 'dummyrepo'.
 
-$good_gitdir = "$cwd/t/lib/dummyrepo";
+$good_gitdir = File::Spec->catdir($cwd, qw| t lib dummyrepo |);
 $good_last_before = '92a79a3dc5bba45930a52e4affd91551aa6c78fc';
 $good_last = 'efdd091cf3690010913b849dcf4fee290f399009';
 %args = (
@@ -42,7 +43,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
@@ -113,7 +114,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 

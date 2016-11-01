@@ -6,6 +6,7 @@ use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 10;
 use Cwd;
+use File::Spec;
 
 my $cwd = cwd();
 
@@ -13,7 +14,7 @@ my (%args, $params, $self);
 my ($this_commit_range, @commit_ranges, $expect);
 
 my ($good_gitdir, @good_targets, $good_last_before, $good_last);
-$good_gitdir = "$cwd/t/lib/list-compare";
+$good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
 @good_targets = (
     't/44_func_hashes_mult_unsorted.t',
     't/45_func_hashes_alt_dual_sorted.t',

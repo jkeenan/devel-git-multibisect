@@ -5,7 +5,11 @@ use warnings;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 20;
 use Capture::Tiny qw( :all );
+use File::Spec;
 #use Data::Dump qw( pp );
+
+my $ptg = File::Spec->catfile('', qw| path to gitdir |);
+my $pttf = File::Spec->catfile('', qw| path to test file |);
 
 {
     local $@;
@@ -49,8 +53,8 @@ use Capture::Tiny qw( :all );
     eval {
         process_options(
             last_before => '12345ab',
-            # gitdir => '/path/to/gitdir',
-            targets => [ '/path/to/test/file' ],
+            # gitdir => $ptg,
+            targets => [ $pttf ],
             last => '67890ab',
         );
     };
@@ -64,8 +68,8 @@ use Capture::Tiny qw( :all );
     eval {
         process_options(
             last_before => '12345ab',
-            gitdir => '/path/to/gitdir',
-            targets => [ '/path/to/test/file' ],
+            gitdir => $ptg,
+            targets => [ $pttf ],
             # last => '67890ab',
         );
     };
@@ -78,8 +82,8 @@ my (%args, $params);
 
 %args = (
     last_before => '12345ab',
-    gitdir => '/path/to/gitdir',
-    targets => [ '/path/to/test/file' ],
+    gitdir => $ptg,
+    targets => [ $pttf ],
     last => '67890ab',
 );
 $params = process_options(%args);
@@ -112,7 +116,7 @@ $args{verbose} = undef;
 my @cl_opts = (
     "--verbose",
     "--last_before" => '12345ab',
-    "--gitdir" => '/path/to/gitdir',
+    "--gitdir" => $ptg,
     "--last" => '67890ab',
 );
 {

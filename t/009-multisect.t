@@ -10,8 +10,9 @@ use Test::Multisect::Auxiliary qw(
 );
 use Test::More;
 #use Data::Dump qw(pp);
-use List::Util qw( first );
 use Cwd;
+use File::Spec;
+use List::Util qw( first );
 
 my $cwd = cwd();
 
@@ -27,7 +28,7 @@ my ($rv, $all_outputs, $all_outputs_count, $expected_count, $first_element);
 # So that we have a basis for comparison, we'll first run already tested
 # methods over the 'dummyrepo'.
 
-$good_gitdir = "$cwd/t/lib/dummyrepo";
+$good_gitdir = File::Spec->catdir($cwd, qw| t lib dummyrepo |);
 $good_first = 'd2bd2c75a2fd9afd3ac65a808eea2886d0e41d01';
 $good_last = '199494ee204dd78ed69490f9e54115b0e83e7d39';
 %args = (
@@ -54,7 +55,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$ACself->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($ACself->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
@@ -126,7 +127,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$Tself->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($Tself->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
@@ -263,7 +264,7 @@ note("Using Test::Multisect::Transitions on a commit range with no transitions")
 
 my ($self, $good_last_before, $transitions);
 
-$good_gitdir = "$cwd/t/lib/list-compare";
+$good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
 $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
 %args = (
@@ -286,7 +287,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 

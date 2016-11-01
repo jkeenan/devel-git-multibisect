@@ -6,6 +6,7 @@ use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 10;
 use Cwd;
+use File::Spec;
 #use Data::Dump qw(pp);
 
 my $cwd = cwd();
@@ -13,7 +14,7 @@ my $cwd = cwd();
 my (%args, $params, $self);
 
 my ($good_gitdir, $good_last_before, $good_last);
-$good_gitdir = "$cwd/t/lib/list-compare";
+$good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
 $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
 %args = (
@@ -30,7 +31,7 @@ isa_ok($self, 'Test::Multisect::AllCommits');
 my ($bad_gitdir, $bad_last_before, $bad_last);
 {
     local $@;
-    $bad_gitdir = '/home/jkeenan/gitwork/mist-compare';
+    $bad_gitdir = File::Spec->catdir('', qw| home jkeenan gitwork mist-compare |);
     $args{gitdir} = $bad_gitdir;
     $params = process_options(%args);
     eval { $self = Test::Multisect::AllCommits->new($params); };

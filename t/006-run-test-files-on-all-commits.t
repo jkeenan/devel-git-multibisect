@@ -6,8 +6,9 @@ use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 33;
 #use Data::Dump qw(pp);
-use List::Util qw( first );
 use Cwd;
+use File::Spec;
+use List::Util qw( first );
 
 my $cwd = cwd();
 
@@ -19,7 +20,7 @@ my ($target_args, $full_targets);
 my ($rv, $transitions, $all_outputs, $all_outputs_count, $expected_count, $first_element);
 my ($timings);
 
-$good_gitdir = "$cwd/t/lib/list-compare";
+$good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
 $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
 %args = (
@@ -42,7 +43,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 

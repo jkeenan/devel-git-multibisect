@@ -11,6 +11,7 @@ use Test::Multisect::Auxiliary qw(
 );
 use Carp;
 use Cwd;
+use File::Spec;
 use File::Temp;
 use List::Util qw(sum);
 use Data::Dump qw( pp );
@@ -250,7 +251,7 @@ sub set_targets {
     my @full_targets = ();
     my @missing_files = ();
     for my $rt (@raw_targets) {
-        my $ft = "$self->{gitdir}/$rt";
+        my $ft = File::Spec->catfile($self->{gitdir}, $rt);
         if (! -e $ft) { push @missing_files, $ft; next }
         my $stub;
         ($stub = $rt) =~ s{[./]}{_}g;
@@ -418,7 +419,8 @@ sub run_test_files_on_one_commit {
     }
     my %excluded_targets;
     for my $t (@{$excluded_targets}) {
-        $excluded_targets{"$self->{gitdir}/$t"}++;
+        my $ft = File::Spec->catfile($self->{gitdir}, $t);
+        $excluded_targets{$ft}++;
     }
 
     my $current_targets = [
@@ -463,7 +465,7 @@ sub _test_one_commit {
     my $short = substr($commit,0,$self->{short});
     my @outputs;
     for my $target (@{$current_targets}) {
-        my $outputfile = join('/' => (
+        my $outputfile = File::Spec->catfile(
             $self->{outputdir},
             join('.' => (
                 $short,
@@ -471,7 +473,7 @@ sub _test_one_commit {
                 'output',
                 'txt'
             )),
-        ));
+        );
         my $command_raw = $self->{test_command};
         my $cmd;
         unless ($command_raw eq 'harness') {

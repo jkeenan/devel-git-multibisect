@@ -6,6 +6,7 @@ use Test::Multisect::AllCommits;
 use Test::Multisect::Opts qw( process_options );
 use Test::More tests => 20;
 use Cwd;
+use File::Spec;
 #use Data::Dump qw(pp);
 
 my $cwd = cwd();
@@ -17,7 +18,7 @@ my $bad_target_args;
 
 note("Test use of 'last_before' option");
 
-$good_gitdir = "$cwd/t/lib/list-compare";
+$good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
 $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
 %args = (
@@ -40,7 +41,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
@@ -71,7 +72,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
@@ -112,7 +113,7 @@ $self = Test::Multisect::AllCommits->new($params);
 ok($self, "new() returned true value");
 isa_ok($self, 'Test::Multisect::AllCommits');
 
-$good_gitdir = "$cwd/t/lib/list-compare";
+$good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
 $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
 %args = (
@@ -138,7 +139,7 @@ ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 is_deeply(
     [ map { $_->{path} } @{$full_targets} ],
-    [ map { "$self->{gitdir}/$_" } @{$target_args} ],
+    [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
     "Got expected full paths to target files for testing",
 );
 
