@@ -9,10 +9,10 @@ use Devel::Git::MultiBisect::Auxiliary qw(
     validate_list_sequence
 );
 use Test::More;
-#use Data::Dump qw(pp);
 use Cwd;
 use File::Spec;
 use List::Util qw( first );
+#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 
@@ -39,8 +39,8 @@ $good_last = '199494ee204dd78ed69490f9e54115b0e83e7d39';
 );
 $params = process_options(%args);
 $target_args = [
-    't/001_load.t',
-    't/002_add.t',
+    File::Spec->catdir( qw| t 001_load.t | ),
+    File::Spec->catdir( qw| t 002_add.t  | ),
 ];
 
 note("First object");
@@ -279,8 +279,8 @@ ok($self, "new() returned true value");
 isa_ok($self, 'Devel::Git::MultiBisect::Transitions');
 
 $target_args = [
-    't/44_func_hashes_mult_unsorted.t',
-    't/45_func_hashes_alt_dual_sorted.t',
+    File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
+    File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
 ];
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");

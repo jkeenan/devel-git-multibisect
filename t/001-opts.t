@@ -107,8 +107,6 @@ for my $k ( qw|
 $args{verbose} = 1;
 my ($stdout, @result);
 ($stdout, @result) = capture_stdout {process_options(%args);};
-#say STDERR "AAA: <$stdout>";
-#pp(\@result);
 like($stdout, qr/Arguments provided to process_options\(\):/s,
     "Got expected verbose output with 'verbose' in arguments to process_options()");
 $args{verbose} = undef;

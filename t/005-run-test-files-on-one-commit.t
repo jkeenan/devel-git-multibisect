@@ -5,9 +5,9 @@ use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 30;
-#use Data::Dump qw(pp);
 use Cwd;
 use File::Spec;
+#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 
@@ -30,8 +30,8 @@ ok($self, "new() returned true value");
 isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $target_args = [
-    't/44_func_hashes_mult_unsorted.t',
-    't/45_func_hashes_alt_dual_sorted.t',
+    File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
+    File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
 ];
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -55,7 +55,7 @@ ok(! defined($self->get_timings()),
     "get_timings() returned undefined value");
 
 # Try with no arg to run_test_files_on_one_commit
-$target_args = [ 't/46_func_hashes_alt_dual_unsorted.t' ];
+$target_args = [ File::Spec->catdir( qw| t 46_func_hashes_alt_dual_unsorted.t | ) ];
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
 is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
@@ -75,8 +75,8 @@ for my $f (map { $_->{file} } @{$outputs}) {
 note("Test excluded targets argument");
 
 $target_args = [
-    't/44_func_hashes_mult_unsorted.t',
-    't/45_func_hashes_alt_dual_sorted.t',
+    File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
+    File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
 ];
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -85,7 +85,7 @@ is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
 my $excluded_targets;
 
 $excluded_targets = [
-    't/45_func_hashes_alt_dual_sorted.t',
+    File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
 ];
 $outputs = $self->run_test_files_on_one_commit($commits->[0], $excluded_targets);
 ok($outputs, "run_test_files_on_one_commit() returned true value");
@@ -114,7 +114,7 @@ for my $f (map { $_->{file} } @{$outputs}) {
 
 {
 
-    $excluded_targets = { 't/45_func_hashes_alt_dual_sorted.t' => 1 };
+    $excluded_targets = { File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |) => 1 };
     local $@;
     eval {
         $outputs = $self->run_test_files_on_one_commit($commits->[0], $excluded_targets);

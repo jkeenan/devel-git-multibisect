@@ -16,8 +16,8 @@ my ($this_commit_range, @commit_ranges, $expect);
 my ($good_gitdir, @good_targets, $good_last_before, $good_last);
 $good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
 @good_targets = (
-    't/44_func_hashes_mult_unsorted.t',
-    't/45_func_hashes_alt_dual_sorted.t',
+    File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
+    File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
 );
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
 $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';

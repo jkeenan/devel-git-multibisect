@@ -213,7 +213,7 @@ t/004-set-targets.t
 t/005-run-test-files-on-one-commit.t
 t/006-run-test-files-on-all-commits.t
 t/007-auxiliary.t
-t/008-prepare-multisect.t
+t/008-allcommits.t
 t/009-multisect.t
 t/lib/dummyrepo/.git
 t/lib/dummyrepo/.gitignore

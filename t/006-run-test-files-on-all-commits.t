@@ -5,10 +5,10 @@ use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 33;
-#use Data::Dump qw(pp);
 use Cwd;
 use File::Spec;
 use List::Util qw( first );
+#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 
@@ -35,8 +35,8 @@ ok($self, "new() returned true value");
 isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $target_args = [
-    't/44_func_hashes_mult_unsorted.t',
-    't/45_func_hashes_alt_dual_sorted.t',
+    File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
+    File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
 ];
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");

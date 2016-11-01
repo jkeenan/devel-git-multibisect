@@ -1,5 +1,5 @@
 # -*- perl -*-
-# t/008-prepare-multisect.t
+# t/008-allcommits.t
 use strict;
 use warnings;
 use Devel::Git::MultiBisect::AllCommits;
@@ -30,7 +30,7 @@ $good_last = 'efdd091cf3690010913b849dcf4fee290f399009';
     verbose => 0,
 );
 $params = process_options(%args);
-$target_args = [ 't/001_load.t' ];
+$target_args = [ File::Spec->catdir( qw| t 001_load.t | ) ];
 
 note("First object");
 

@@ -17,6 +17,8 @@ release.
 
 * Testing and Test Coverage
 
+** Inspect contents and naming of each t/*.t file for consistency.
+
 ** Need to cover non-verbose runs of prepare_multisect_hash().
 
 ** In run_test_files_on_one_commit(), need to cover a branch in:
@@ -27,9 +29,13 @@ release.
 
     if (defined $list->[$j]) { $lpd = $list->[$j]; }
 
+** Capture verbose output and test that it matches expectations.
+
 ** Test CPAN distros that only use Module::Build.
 
 * Documentation
+
+** Update README(.md).
 
 * Architecture
 
@@ -46,18 +52,3 @@ future release.
 
 ** Write scripts multibisect.
 
-19. Considering adding something to Opts to designate the fundamental branch
-and then doing a checkout of that branch in preparations for multisecting.
-For instance, should new() guarantee that the "fundamental branch" can be
-checked out?
-REJECTED: wasn't dwimming.
-
-20. Use File::Spec functions to make paths, directory separators safe for
-Windows.
-DONE
-
-21. Consider adding to verbose output in Transitions info on index within
-commit range of commit being tested, etc.
-DONE
-
-22. Update README(.md).

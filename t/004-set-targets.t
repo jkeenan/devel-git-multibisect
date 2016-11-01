@@ -33,8 +33,8 @@ ok($self, "new() returned true value");
 isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $target_args = [
-    't/44_func_hashes_mult_unsorted.t',
-    't/45_func_hashes_alt_dual_sorted.t',
+    File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
+    File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
 ];
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -48,8 +48,8 @@ is_deeply(
 {
     local $@;
     $bad_target_args = [
-        't/44_func_hashes_mult_unsorted.t',
-        '45_func_hashes_alt_dual_sorted.t',
+        File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
+        File::Spec->catdir( qw|   45_func_hashes_alt_dual_sorted.t |),
     ];
     eval { $full_targets = $self->set_targets($bad_target_args); };
     like($@, qr/Cannot find file\(s\) to be tested:.*$bad_target_args->[1]/,
