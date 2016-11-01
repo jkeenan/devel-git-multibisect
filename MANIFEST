@@ -193,6 +193,7 @@
 .git/refs/remotes/origin/master
 .git/refs/remotes/origin/subtree_experiment_2
 .git/refs/stash
+.git/refs/tags/v0.01
 .gitignore
 .gitmodules
 Changes
