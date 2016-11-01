@@ -622,6 +622,22 @@ Creation date:  November 01 2016. Last modification date:  November 01 2016.
 
 Development repository: L<https://github.com/jkeenan/devel-git-multibisect>
 
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to the following contributors and reviewers:
+
+=over 4
+
+=item * Smylers
+
+For naming suggestion: L<http://www.nntp.perl.org/group/perl.module-authors/2016/10/msg10851.html>
+
+=item * Ricardo Signes
+
+For feedback during inital development.
+
+=back
+
 =head1 COPYRIGHT
 
 Copyright (c) 2016 James E. Keenan.  United States.  All rights reserved.
