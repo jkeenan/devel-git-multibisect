@@ -88,60 +88,6 @@ within a specified range of F<git> commits where the output of a run of each
 test materially changes.  Store the test output at those transition points for
 human inspection.
 
-=item * Glossary
-
-=over 4
-
-=item * B<commit>
-
-An individual commit to a F<git> repository, which takes the form of a SHA.
-
-=item * B<commit range>
-
-The range of commits requested for analysis in the sequence determined by F<git log>.
-
-=item * B<target>
-
-A target is a test file from the test suite of the application or library under study.
-
-=item * B<test output>
-
-What is sent to STDOUT or STDERR as a result of calling a test program such as
-F<prove> or F<t/harness> on an individual target file.
-
-=item * B<transitional commit>
-
-A commit at which the test output for a given target changes from that of the
-commit immediately preceding.
-
-=item * B<digest>
-
-A string holding the output of a cryptographic process run on test output
-which uniquely identifies that output.  (Currently, we use the
-C<Digest::SHA::md5_hex> algorithm.)  We assume that if the test output does
-not change between one or more commits, then that commit is not a transitional
-commit.
-
-Note:  Before taking a digest on a particular test output, we exclude text
-such as timings which are highly likely to change from one run to the next and
-which would introduce spurious variability into the digest calculations.
-
-=item * B<multisection>
-
-A series of configure-build-test sequences at commits within the commit range
-which are selected by a bisection algorithm.
-
-Normally, when we bisect (via F<git bisect>, F<Porting/bisect.pl> or
-otherwise), we are seeking a single point where a Boolean result -- yes/no,
-true/false, pass/fail -- is returned.  What the test run outputs to STDOUT or
-STDERR is a lesser concern.
-
-In multisection we bisect repeatedly to determine all points where the output
-of the test command changes -- regardless of whether that change is a C<PASS>,
-C<FAIL> or whatever.  We capture the output for later human examination.
-
-=back
-
 =item * Arguments
 
     $self->multisect_all_targets();

@@ -71,6 +71,61 @@ F<Devel::Git::MultiBisect::Transitions>, provide different flavors of that
 functionality for objectives (a) and (b), respectively.  Please refer to their
 documentation for further discussion.
 
+=head2 GLOSSARY
+
+=over 4
+
+=item * B<commit>
+
+An individual commit to a F<git> repository as denoted by a SHA.  When a commit is
+called for as the argument to a function, you can also use a F<git tag>.
+
+=item * B<commit range>
+
+The range of sequential commits (determined by F<git log>) requested for analysis.
+
+=item * B<target>
+
+A test file from the test suite of the application or library under study.
+
+=item * B<test output>
+
+What is sent to STDOUT or STDERR as a result of calling a test program such as
+F<prove> or F<t/harness> on an individual target file.
+
+=item * B<transitional commit>
+
+A commit at which the test output for a given target changes from that of the
+commit immediately preceding.
+
+=item * B<digest>
+
+A string holding the output of a cryptographic process run on test output
+which uniquely identifies that output.  (Currently, we use the
+C<Digest::SHA::md5_hex> algorithm.)  We assume that if the test output does
+not change between one or more commits, then that commit is not a transitional
+commit.
+
+Note:  Before taking a digest on a particular test output, we exclude text
+such as timings which are highly likely to change from one run to the next and
+which would introduce spurious variability into the digest calculations.
+
+=item * B<multisection> or B<multibisection>
+
+A series of configure-build-test process sequences at those commits within the
+commit range which are selected by a bisection algorithm.
+
+Normally, when we bisect (via F<git bisect>, F<Porting/bisect.pl> or
+otherwise), we are seeking a single point where a Boolean result -- yes/no,
+true/false, pass/fail -- is returned.  What the test run outputs to STDOUT or
+STDERR is a lesser concern.
+
+In multisection we bisect repeatedly to determine all points where the output
+of the test command changes -- regardless of whether that change is a C<PASS>,
+C<FAIL> or whatever.  We capture the output for later human examination.
+
+=back
+
 =head1 METHODS
 
 =head2 C<new()>
