@@ -47,3 +47,4 @@ nytprof.out
 ^t/lib/dummyrepo/MYMETA.*
 ^t/lib/dummyrepo/.cvsignore
 ^.git/objects/
+^README.md
