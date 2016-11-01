@@ -48,11 +48,13 @@ separate packages -- DONE.
 12. Get better package names than Allcommits and Selectedcommits -- DONE.
 
 13. Test on Perl 5 source code.
+DONE
 
 14. Test CPAN distros that only use Module::Build.
 
 15. Review all source code for locations where verbose output would be
 helpful; then implement and test.
+DONE
 
 16. Assess all comments re request for naming advice on perl.module-authors.
 
@@ -71,9 +73,14 @@ future release.
 and then doing a checkout of that branch in preparations for multisecting.
 For instance, should new() guarantee that the "fundamental branch" can be
 checked out?
+REJECTED: wasn't dwimming.
 
 20. Use File::Spec functions to make paths, directory separators safe for
 Windows.
+DONE
 
 21. Consider adding to verbose output in Transitions info on index within
 commit range of commit being tested, etc.
+DONE
+
+22. Update README(.md).
