@@ -1,7 +1,9 @@
-Revision history for Perl module Test::Multisect
+Revision history for Perl module Devel::Git::MultiBisect
 
 0.01 Wed Oct 12 19:33:35 2016
     - original version; created by ExtUtils::ModuleMaker 0.55
     - first CPAN upload: Nov 01 2016
 
+0.02 Tue Nov  1 14:14:37 EDT 2016
+    - Correct POD formatting errors in Devel::Git::MultiBisect.
 
