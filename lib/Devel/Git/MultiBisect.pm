@@ -26,8 +26,8 @@ Devel::Git::MultiBisect - Study test output over a range of F<git> commits
 
 You will typically construct an object of a class which is a child of
 F<Devel::Git::MultiBisect>, such as F<Devel::Git::MultiBisect::AllCommits> or
-F<Devel::Git::MultiBisect::Transitions>.  All methods documented in this package may
-be called from either child class.
+F<Devel::Git::MultiBisect::Transitions>.  All methods documented in this
+parent package may be called from either child class.
 
     use Devel::Git::MultiBisect::AllCommits;
     $self = Devel::Git::MultiBisect::AllCommits->new(\%parameters);
@@ -59,13 +59,17 @@ several test files over a range of F<git> commits.  If that range is sufficientl
 large, a test may fail in B<more than one way> over that range.
 
 If that is the case, then simply asking, I<"When did this file start to
-fail?"> is insufficient.  We may want to capture the test output for each
-commit, or, more usefully, may want to capture the test output only at those
-commits where the output changed.
+fail?"> is insufficient.  We may want to (a) capture the test output for each
+commit; or, (b) capture the test output only at those commits where the output
+changed.  The output of a run of a test file may change for a variety of
+reasons:  test failures, segfaults, changes in the number or content of tests,
+etc.)
 
-F<Devel::Git::MultiBisect> provides methods to achieve that objective.  Its child
-classes, F<Devel::Git::MultiBisect::AllCommits> and F<Devel::Git::MultiBisect::Transitions>,
-provide different flavors of that functionality.
+F<Devel::Git::MultiBisect> provides methods to achieve that objective.  Its
+child classes, F<Devel::Git::MultiBisect::AllCommits> and
+F<Devel::Git::MultiBisect::Transitions>, provide different flavors of that
+functionality for objectives (a) and (b), respectively.  Please refer to their
+documentation for further discussion.
 
 =head1 METHODS
 
