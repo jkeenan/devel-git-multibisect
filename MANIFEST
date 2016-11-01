@@ -196,11 +196,11 @@
 .gitignore
 .gitmodules
 Changes
-lib/Test/Multisect.pm
-lib/Test/Multisect/AllCommits.pm
-lib/Test/Multisect/Auxiliary.pm
-lib/Test/Multisect/Opts.pm
-lib/Test/Multisect/Transitions.pm
+lib/Devel/Git/MultiBisect.pm
+lib/Devel/Git/MultiBisect/AllCommits.pm
+lib/Devel/Git/MultiBisect/Auxiliary.pm
+lib/Devel/Git/MultiBisect/Opts.pm
+lib/Devel/Git/MultiBisect/Transitions.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files

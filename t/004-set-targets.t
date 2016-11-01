@@ -2,8 +2,8 @@
 # t/004-set-targets-t
 use strict;
 use warnings;
-use Test::Multisect::AllCommits;
-use Test::Multisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::AllCommits;
+use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 20;
 use Cwd;
 use File::Spec;
@@ -28,9 +28,9 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     last => $good_last,
 );
 $params = process_options(%args);
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $target_args = [
     't/44_func_hashes_mult_unsorted.t',
@@ -63,9 +63,9 @@ delete $args{last_before};
 $good_first = '2a2e54af709f17cc6186b42840549c46478b6467';
 $args{first} = $good_first;
 $params = process_options(%args);
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -109,9 +109,9 @@ note("targets provided via new()");
     last => $good_last,
 );
 $params = process_options(%args);
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
@@ -127,12 +127,12 @@ $target_args = [
     't/44_func_hashes_mult_unsorted.t',
     't/45_func_hashes_alt_dual_sorted.t',
 ];
-$self = Test::Multisect::AllCommits->new( {
+$self = Devel::Git::MultiBisect::AllCommits->new( {
     %{$params},
     targets => $target_args,
 } );
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $full_targets = $self->set_targets();
 ok($full_targets, "set_targets() returned true value");

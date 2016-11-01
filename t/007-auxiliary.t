@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Carp;
-use Test::Multisect::Auxiliary qw(
+use Devel::Git::MultiBisect::Auxiliary qw(
     clean_outputfile
     hexdigest_one_file
     validate_list_sequence

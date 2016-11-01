@@ -2,8 +2,8 @@
 # t/002-new.t
 use strict;
 use warnings;
-use Test::Multisect::AllCommits;
-use Test::Multisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::AllCommits;
+use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 10;
 use Cwd;
 use File::Spec;
@@ -24,9 +24,9 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     last => $good_last,
 );
 $params = process_options(%args);
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 my ($bad_gitdir, $bad_last_before, $bad_last);
 {
@@ -34,7 +34,7 @@ my ($bad_gitdir, $bad_last_before, $bad_last);
     $bad_gitdir = File::Spec->catdir('', qw| home jkeenan gitwork mist-compare |);
     $args{gitdir} = $bad_gitdir;
     $params = process_options(%args);
-    eval { $self = Test::Multisect::AllCommits->new($params); };
+    eval { $self = Devel::Git::MultiBisect::AllCommits->new($params); };
     like($@, qr/Cannot find directory\(ies\): $bad_gitdir/,
         "Got expected error: missing directory $bad_gitdir"
     );
@@ -46,7 +46,7 @@ my ($bad_gitdir, $bad_last_before, $bad_last);
     $bad_last_before = 'xxxxx';
     $args{last_before} = $bad_last_before;
     $params = process_options(%args);
-    eval { $self = Test::Multisect::AllCommits->new($params); };
+    eval { $self = Devel::Git::MultiBisect::AllCommits->new($params); };
     like($@, qr/fatal:/s,
         "Got expected error: bad last_before"
     );
@@ -58,7 +58,7 @@ my ($bad_gitdir, $bad_last_before, $bad_last);
     $bad_last = 'xxxxx';
     $args{last} = $bad_last;
     $params = process_options(%args);
-    eval { $self = Test::Multisect::AllCommits->new($params); };
+    eval { $self = Devel::Git::MultiBisect::AllCommits->new($params); };
     like($@, qr/fatal:/s,
         "Got expected error: bad last"
     );
@@ -70,16 +70,16 @@ delete $args{last_before};
 $good_first = '2a2e54af709f17cc6186b42840549c46478b6467';
 $args{first} = $good_first;
 $params = process_options(%args);
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 {
     local $@;
     $bad_first = 'yyyyy';
     $args{first} = $bad_first;
     $params = process_options(%args);
-    eval { $self = Test::Multisect::AllCommits->new($params); };
+    eval { $self = Devel::Git::MultiBisect::AllCommits->new($params); };
     like($@, qr/fatal:/s,
         "Got expected error: bad first"
     );
@@ -88,6 +88,6 @@ isa_ok($self, 'Test::Multisect::AllCommits');
 
 $args{verbose} = 1;
 $params = process_options(%args);
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');

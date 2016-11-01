@@ -2,8 +2,8 @@
 # t/005-run-test_files-on-one-commit.t
 use strict;
 use warnings;
-use Test::Multisect::AllCommits;
-use Test::Multisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::AllCommits;
+use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 30;
 #use Data::Dump qw(pp);
 use Cwd;
@@ -25,9 +25,9 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     verbose => 1,
 );
 $params = process_options(%args);
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $target_args = [
     't/44_func_hashes_mult_unsorted.t',

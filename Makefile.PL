@@ -11,8 +11,8 @@ MESSAGE
 system(qq|git --version|) and croak($lack_git);
 
 my %WriteMakefileArgs = (
-    NAME         => 'Test::Multisect',
-    VERSION_FROM => 'lib/Test/Multisect.pm', # finds \$VERSION
+    NAME         => 'Devel::Git::MultiBisect',
+    VERSION_FROM => 'lib/Devel/Git/MultiBisect.pm', # finds \$VERSION
     AUTHOR       => 'James E Keenan (jkeenan@cpan.org)',
     ABSTRACT     => 'Study test output over a range of git commits',
     CONFIGURE_REQUIRES => {

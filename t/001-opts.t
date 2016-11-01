@@ -2,7 +2,7 @@
 # t/001-opts.t
 use strict;
 use warnings;
-use Test::Multisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 20;
 use Capture::Tiny qw( :all );
 use File::Spec;

@@ -1,9 +1,9 @@
-package Test::Multisect;
+package Devel::Git::MultiBisect;
 use strict;
 use warnings;
 use v5.10.0;
-use Test::Multisect::Opts qw( process_options );
-use Test::Multisect::Auxiliary qw(
+use Devel::Git::MultiBisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::Auxiliary qw(
     clean_outputfile
     hexdigest_one_file
     validate_list_sequence
@@ -20,22 +20,22 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Test::Multisect - Study test output over a range of F<git> commits
+Devel::Git::MultiBisect - Study test output over a range of F<git> commits
 
 =head1 SYNOPSIS
 
 You will typically construct an object of a class which is a child of
-F<Test::Multisect>, such as F<Test::Multisect::AllCommits> or
-F<Test::Multisect::Transitions>.  All methods documented in this package may
+F<Devel::Git::MultiBisect>, such as F<Devel::Git::MultiBisect::AllCommits> or
+F<Devel::Git::MultiBisect::Transitions>.  All methods documented in this package may
 be called from either child class.
 
-    use Test::Multisect::AllCommits;
-    $self = Test::Multisect::AllCommits->new(\%parameters);
+    use Devel::Git::MultiBisect::AllCommits;
+    $self = Devel::Git::MultiBisect::AllCommits->new(\%parameters);
 
 ... or
 
-    use Test::Multisect::Transitions;
-    $self = Test::Multisect::Transitions->new(\%parameters);
+    use Devel::Git::MultiBisect::Transitions;
+    $self = Devel::Git::MultiBisect::Transitions->new(\%parameters);
 
 ... and then:
 
@@ -63,8 +63,8 @@ fail?"> is insufficient.  We may want to capture the test output for each
 commit, or, more usefully, may want to capture the test output only at those
 commits where the output changed.
 
-F<Test::Multisect> provides methods to achieve that objective.  Its child
-classes, F<Test::Multisect::AllCommits> and F<Test::Multisect::Transitions>,
+F<Devel::Git::MultiBisect> provides methods to achieve that objective.  Its child
+classes, F<Devel::Git::MultiBisect::AllCommits> and F<Devel::Git::MultiBisect::Transitions>,
 provide different flavors of that functionality.
 
 =head1 METHODS
@@ -79,14 +79,14 @@ Constructor.
 
 =item * Arguments
 
-    $self = Test::Multisect::AllCommits->new(\%params);
+    $self = Devel::Git::MultiBisect::AllCommits->new(\%params);
 
 or
 
-    $self = Test::Multisect::Transitions->new(\%params);
+    $self = Devel::Git::MultiBisect::Transitions->new(\%params);
 
 Reference to a hash, typically the return value of
-C<Test::Multisect::Opts::process_options()>.
+C<Devel::Git::MultiBisect::Opts::process_options()>.
 
 The hashref passed as argument must contain key-value pairs for C<gitdir>,
 C<workdir> and C<outputdir>.  C<new()> tests for the existence of each of
@@ -94,7 +94,7 @@ these directories.
 
 =item * Return Value
 
-Object of Test::Multisect child class.
+Object of Devel::Git::MultiBisect child class.
 
 =back
 
@@ -354,9 +354,9 @@ the C<file> element:
 =item * C<md5_hex>
 
 String holding the return value of
-C<Test::Multisect::Auxiliary::hexdigest_one_file()> run with the file
+C<Devel::Git::MultiBisect::Auxiliary::hexdigest_one_file()> run with the file
 designated by the C<file> element as an argument.  (More precisely, the file
-as modified by C<Test::Multisect::Auxiliary::clean_outputfile()>.)
+as modified by C<Devel::Git::MultiBisect::Auxiliary::clean_outputfile()>.)
 
 =back
 
@@ -397,8 +397,8 @@ prints C<Created [outputfile]> to STDOUT before returning.
 
 B<Note:>  While this method is publicly documented, in actual use you probably
 will not need to call it directly.  Instead, you will probably use either
-C<Test::Multisect::AllCommits::run_test_files_on_all_commits()> or
-C<Test::Multisect::Transitions::multisect_all_targets()>.
+C<Devel::Git::MultiBisect::AllCommits::run_test_files_on_all_commits()> or
+C<Devel::Git::MultiBisect::Transitions::multisect_all_targets()>.
 
 =back
 
@@ -512,7 +512,7 @@ None; all data needed is already in the object.
 =item * Return Value
 
 Hash reference.  The selection of elements in this hashref will depend on
-which subclass of F<Test::Multisect> you are using and may differ among
+which subclass of F<Devel::Git::MultiBisect> you are using and may differ among
 subclasses.  Example:
 
 

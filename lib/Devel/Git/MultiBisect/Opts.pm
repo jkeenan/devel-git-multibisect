@@ -1,4 +1,4 @@
-package Test::Multisect::Opts;
+package Devel::Git::MultiBisect::Opts;
 use strict;
 use warnings;
 use v5.10.0;
@@ -16,18 +16,18 @@ use Getopt::Long;
 
 =head1 NAME
 
-Test::Multisect::Opts - Prepare parameters for Test::Multisect
+Devel::Git::MultiBisect::Opts - Prepare parameters for Devel::Git::MultiBisect
 
 =head1 SYNOPSIS
 
-    use Test::Multisect::Opts qw( process_options );
+    use Devel::Git::MultiBisect::Opts qw( process_options );
 
     my $params = process_options();
 
 =head1 DESCRIPTION
 
 This package exports on demand only one subroutine, C<process_options()>, used
-to prepare parameters for Test::Multisect.
+to prepare parameters for Devel::Git::MultiBisect.
 
 C<process_options()> takes as arguments an optional list of key-value pairs.
 This approach is useful in testing the subroutine but is not expected to be

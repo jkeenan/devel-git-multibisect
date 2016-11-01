@@ -1,10 +1,10 @@
-package Test::Multisect::Transitions;
+package Devel::Git::MultiBisect::Transitions;
 use strict;
 use warnings;
 use v5.10.0;
-use parent ( qw| Test::Multisect | );
-use Test::Multisect::Opts qw( process_options );
-use Test::Multisect::Auxiliary qw(
+use parent ( qw| Devel::Git::MultiBisect | );
+use Devel::Git::MultiBisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::Auxiliary qw(
     clean_outputfile
     hexdigest_one_file
     validate_list_sequence
@@ -19,13 +19,13 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Test::Multisect::Transitions - Gather test output where it changes over a range of F<git> commits
+Devel::Git::MultiBisect::Transitions - Gather test output where it changes over a range of F<git> commits
 
 =head1 SYNOPSIS
 
-    use Test::Multisect::Transitions;
+    use Devel::Git::MultiBisect::Transitions;
 
-    $self = Test::Multisect::Transitions->new(\%parameters);
+    $self = Devel::Git::MultiBisect::Transitions->new(\%parameters);
 
     $commit_range = $self->get_commits_range();
 
@@ -50,7 +50,7 @@ fail?"> is insufficient.  We may want to capture the test output for each
 commit, or, more usefully, may want to capture the test output only at those
 commits where the output changed.
 
-F<Test::Multisect> provides methods to achieve that objective.  More specifically:
+F<Devel::Git::MultiBisect> provides methods to achieve that objective.  More specifically:
 
 =over 4
 
@@ -58,20 +58,20 @@ F<Test::Multisect> provides methods to achieve that objective.  More specificall
 
 When the number of commits in the specified range is large and you only need
 the test output at those commits where the output materially changed, you can
-use this package, F<Test::Multisect::Transitions>.
+use this package, F<Devel::Git::MultiBisect::Transitions>.
 
 =item *
 
 When you want to capture the test output for each commit in a specified range,
-you can use another package in this library, F<Test::Multisect::AllCommits>.
+you can use another package in this library, F<Devel::Git::MultiBisect::AllCommits>.
 
 =back
 
 =head1 METHODS
 
-This package inherits methods from F<Test::Multisect>.  Only methods unique to
-F<Test::Multisect::AllCommits> are documented here.  See the documentation for
-F<Test::Multisect> for all other methods, including:
+This package inherits methods from F<Devel::Git::MultiBisect>.  Only methods unique to
+F<Devel::Git::MultiBisect::AllCommits> are documented here.  See the documentation for
+F<Devel::Git::MultiBisect> for all other methods, including:
 
     new()
     get_commits_range()
@@ -733,7 +733,7 @@ Example:
 The return value of C<inspect_transitions()> should be useful to the developer
 trying to determine the various points in a long series of commits where a
 target's test output changed in meaningful ways.  Hence, it is really the
-whole point of F<Test::Multisect::Transitions>.
+whole point of F<Devel::Git::MultiBisect::Transitions>.
 
 =back
 

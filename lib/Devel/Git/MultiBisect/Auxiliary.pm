@@ -1,4 +1,4 @@
-package Test::Multisect::Auxiliary;
+package Devel::Git::MultiBisect::Auxiliary;
 use strict;
 use warnings;
 use v5.10.0;
@@ -17,11 +17,11 @@ use List::Util qw(first);
 
 =head1 NAME
 
-Test::Multisect::Auxiliary - Helper functions for Test::Multisect
+Devel::Git::MultiBisect::Auxiliary - Helper functions for Devel::Git::MultiBisect
 
 =head1 SYNOPSIS
 
-    use Test::Multisect::Auxiliary qw(
+    use Devel::Git::MultiBisect::Auxiliary qw(
         clean_outputfile
         hexdigest_one_file
         validate_list_sequence
@@ -30,7 +30,7 @@ Test::Multisect::Auxiliary - Helper functions for Test::Multisect
 =head1 DESCRIPTION
 
 This package exports, on demand only, subroutines used within publicly available
-methods in Test::Multisect.
+methods in Devel::Git::MultiBisect.
 
 =head1 SUBROUTINES
 

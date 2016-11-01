@@ -2,10 +2,10 @@
 # t/009-multisect.t
 use strict;
 use warnings;
-use Test::Multisect::AllCommits;
-use Test::Multisect::Transitions;
-use Test::Multisect::Opts qw( process_options );
-use Test::Multisect::Auxiliary qw(
+use Devel::Git::MultiBisect::AllCommits;
+use Devel::Git::MultiBisect::Transitions;
+use Devel::Git::MultiBisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::Auxiliary qw(
     validate_list_sequence
 );
 use Test::More;
@@ -46,9 +46,9 @@ $target_args = [
 note("First object");
 
 my ($ACself, $ACtransitions);
-$ACself = Test::Multisect::AllCommits->new($params);
+$ACself = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($ACself, "new() returned true value");
-isa_ok($ACself, 'Test::Multisect::AllCommits');
+isa_ok($ACself, 'Devel::Git::MultiBisect::AllCommits');
 
 $full_targets = $ACself->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -116,9 +116,9 @@ note("Second object");
 my ($Tself, $Ttransitions, $commit_range, $idx, $initial_multisected_outputs, $initial_multisected_outputs_undef_count);
 my ($multisected_outputs, $timings);
 
-$Tself = Test::Multisect::Transitions->new({ %{$params}, verbose => 1 });
+$Tself = Devel::Git::MultiBisect::Transitions->new({ %{$params}, verbose => 1 });
 ok($Tself, "new() returned true value");
-isa_ok($Tself, 'Test::Multisect::Transitions');
+isa_ok($Tself, 'Devel::Git::MultiBisect::Transitions');
 
 $commit_range = $Tself->get_commits_range;
 
@@ -260,7 +260,7 @@ for my $target (sort keys %{$Ttransitions}) {
 }
 is_deeply(\%AC, \%T, "Same list of indexes of transitional commits via both classes");
 
-note("Using Test::Multisect::Transitions on a commit range with no transitions");
+note("Using Devel::Git::MultiBisect::Transitions on a commit range with no transitions");
 
 my ($self, $good_last_before, $transitions);
 
@@ -274,9 +274,9 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
 );
 $params = process_options(%args);
 
-$self = Test::Multisect::Transitions->new($params);
+$self = Devel::Git::MultiBisect::Transitions->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::Transitions');
+isa_ok($self, 'Devel::Git::MultiBisect::Transitions');
 
 $target_args = [
     't/44_func_hashes_mult_unsorted.t',

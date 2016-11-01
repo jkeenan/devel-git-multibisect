@@ -2,8 +2,8 @@
 # t/008-prepare-multisect.t
 use strict;
 use warnings;
-use Test::Multisect::AllCommits;
-use Test::Multisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::AllCommits;
+use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 31;
 use Cwd;
 use File::Spec;
@@ -34,9 +34,9 @@ $target_args = [ 't/001_load.t' ];
 
 note("First object");
 
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
@@ -105,9 +105,9 @@ undef $self;
 
 note("Second object");
 
-$self = Test::Multisect::AllCommits->new($params);
+$self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
-isa_ok($self, 'Test::Multisect::AllCommits');
+isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
 
 $full_targets = $self->set_targets($target_args);
 ok($full_targets, "set_targets() returned true value");
