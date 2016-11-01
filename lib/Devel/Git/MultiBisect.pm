@@ -574,29 +574,15 @@ Hash reference.  The selection of elements in this hashref will depend on
 which subclass of F<Devel::Git::MultiBisect> you are using and may differ among
 subclasses.  Example:
 
+    { elapsed => 4297, mean => 186.83, runs => 23 }
 
-Will return undefined value if not yet available in the object.
+In this example (taken from a run of one test file over 220 commits in Perl 5
+blead), 23 runs were needed to achieve a result.   These took 4297 seconds
+(approximately 71 minutes) with a mean run time of approximately 3 minutes
+each.
 
-=over 4
-
-=item * C<path>
-
-Absolute paths to the test files selected for examination.  Test file is
-tested for its existence.
-
-=item * C<stub>
-
-String composed by taking an element in the array ref passed as argument and
-substituting underscores C(<_>) for forward slash (C</>) and dot (C<.>)
-characters.  So,
-
-    t/44_func_hashes_mult_unsorted.t
-
-... becomes:
-
-    t_44_func_hashes_mult_unsorted_t
-
-=back
+Method will return undefined value if timings are not yet available within the
+object.
 
 =back
 
