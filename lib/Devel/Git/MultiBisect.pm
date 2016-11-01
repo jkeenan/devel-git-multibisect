@@ -608,6 +608,27 @@ sub get_timings {
 	return $self->{timings};
 }
 
+=head1 SUPPORT
+
+Please report any bugs by mail to C<bug-Devel-Git-MultiBisect@rt.cpan.org>
+or through the web interface at L<http://rt.cpan.org>.
+
+=head1 AUTHOR
+
+James E. Keenan (jkeenan at cpan dot org).  When sending correspondence, please
+include 'Devel::Git::MultiBisect' or 'Devel-Git-MultiBisect' in your subject line.
+
+Creation date:  November 01 2016. Last modification date:  November 01 2016.
+
+Development repository: L<https://github.com/jkeenan/devel-git-multibisect>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2016 James E. Keenan.  United States.  All rights reserved.
+This is free software and may be distributed under the same terms as Perl
+itself.
+
+=cut
+
 1;
 
-__END__
