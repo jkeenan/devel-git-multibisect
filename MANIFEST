@@ -206,7 +206,6 @@ Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 README
-scripts/multisect
 t/001-opts.t
 t/002-new.t
 t/003-get-commits-range.t
