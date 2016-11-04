@@ -7,3 +7,5 @@ Revision history for Perl module Devel::Git::MultiBisect
 0.02 Tue Nov  1 14:14:37 EDT 2016
     - Correct POD formatting errors in Devel::Git::MultiBisect.
 
+0.03 Fri Nov  4 11:34:10 EDT 2016
+    - In examples/, add annotation for use of Transitions.pm.
