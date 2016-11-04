@@ -194,9 +194,14 @@
 .git/refs/remotes/origin/subtree_experiment_2
 .git/refs/stash
 .git/refs/tags/v0.01
+.git/refs/tags/v0.02
 .gitignore
 .gitmodules
 Changes
+examples/devel-git-multibisect-transitions-example.pod
+examples/README
+examples/tfll.typescript
+examples/transitions_full_lib_locale.pl
 lib/Devel/Git/MultiBisect.pm
 lib/Devel/Git/MultiBisect/AllCommits.pm
 lib/Devel/Git/MultiBisect/Auxiliary.pm

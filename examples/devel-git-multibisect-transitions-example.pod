@@ -1,7 +1,7 @@
 =head1 DESCRIPTION
 
 This file is an annotated version of a program found in the F<examples/>
-subdirectory, F<transitions_full_lib_locale.pl> interspersed with excerpts
+subdirectory, F<transitions_full_lib_locale.pl>, interspersed with excerpts
 from a typescript of its output, F<tfll.typescript>, also found in that
 subdirectory.
 
@@ -10,7 +10,7 @@ subdirectory.
 The program was developed to address a problem faced by the Perl 5 Porters
 (P5P) in
 October 2016 and discussed in
-L<https://rt.perl.org/Ticket/Display.html?id=129953>.  Prior to that time
+L<RT #129953|https://rt.perl.org/Ticket/Display.html?id=129953>.  Prior to that time
 smoke test reports were not being generated on the FreeBSD operating system's
 version 11.0.  It was known that Perl 5.24.0, released in May 2016, built and
 tested successfully on that platform.  But by October Perl's development was
@@ -111,23 +111,23 @@ F<Devel::Git::MultiBisect> requires the user to compose 3 shell commands to
 describe how to configure, build and test the code being studied.  If we were
 multisecting a CPAN distribution these commands would typically be:
 
-i   configure_command:      perl Makefile.PL
+    configure_command:      perl Makefile.PL
     make_command:           make
     test_command:           prove -vb <target>
 
 When we're multisecting the Perl 5 core distribution these commands get more
 complicated:
 
-    $configure_command = 'sh ./Configure -des -Dusedevel -Duseithreads 1>/dev/null';
-    $make_command = 'make test_prep 1>/dev/null 2>&1';
-    $test_command = 'harness';
+    $configure_command  = 'sh ./Configure -des -Dusedevel -Duseithreads 1>/dev/null';
+    $make_command       = 'make test_prep 1>/dev/null 2>&1';
+    $test_command       = 'harness';
 
 During multisection we'll be running F<./Configure> and F<make> many times,
 but we typically don't need to see warnings on each run.  To keep the output
 simpler, we'll discard the output.
 
 In the case of multisection of the Perl 5 core distribution, the value
-C<harness> for $test_command is actually an alias to:
+C<harness> for C<$test_command> is actually an alias to:
 
     cd t; ./perl harness -v <target> > <outputfile> 2>&1; cd -
 
@@ -162,14 +162,14 @@ Output (C<verbose> mode):
               'workdir' => '/usr/home/username/multisect'
             };
 
-C<process_options()> returns hash ref which we pass to the
+C<process_options()> returns a hash ref which we pass to the
 F<Devel::Git::MultiBisect::Transitions> constructor.
 
     $self = Devel::Git::MultiBisect::Transitions->new($params);
 
 Now suppose we want a listing of all the commits in the range under study.
 (This is a diagnostic aid but is not, strictly speaking, needed for
-multisection.)  We call C<get_commits_range(), whose output we can examine
+multisection.)  We call C<get_commits_range()>, whose output we can examine
 with F<Data::Dumper> or, as here, F<Data::Dump::pp()> and which we excerpt here:
 
     my $commits_range = $self->get_commits_range();
@@ -543,7 +543,7 @@ Output (excerpt):
 That's comprehensive output, but what we really want is just a look at the
 transition points, I<i.e.,> the commits where the output of a target's run
 changed from that of the immediately preceding commit.  We get that with
-C<inspect_transitions().
+C<inspect_transitions()>.
 
     $transitions = $self->inspect_transitions($rv);
     say STDERR "EEE: inspect_transitions";
@@ -620,17 +620,26 @@ F<lib/locale.t> changed only 3 times:
 
 =item 1  Between indexes 54 and 55
 
+Inspection of the C<older> and C<newer> output C<file> elements suggested that
+the output here changed only because P5P added one unit test and changed test
+descriptions in F<lib/locale.t>.  The outcome was C<PASS> in both C<older> and
+C<newer>.
+
 =item 2  Between indexes 58 and 59
+
+Inspection of the C<older> and C<newer> output C<file> elements showed that 2
+unit tests were added in commit C<6696cfa>, giving a total of 677 unit tests.
+One showed a C<not ok>, so overall the run now got a C<FAIL>.  Review of the
+source code recommended at this commit point.
 
 =item 3  Between indexes 64 and 65
 
+Inspection of the C<older> and C<newer> output C<file> elements showed that
+F<lib/locale.t> stopped running after test 380.  Re-building and testing at
+commit C<a4a439f> showed that this was the point where the segfault first
+appeared.  Again, review of the source code was recommended.
+
 =back
-
-The output of the target was unchanged from index 0 to index 54, from index 55
-to index 58, from index 59 to index 64, and from index 65 to index 219.
-
-
-
 
 =cut
 
