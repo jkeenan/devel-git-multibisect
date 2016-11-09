@@ -14,7 +14,7 @@ use Cwd;
 use File::Spec;
 use File::Temp;
 use List::Util qw(sum);
-use Data::Dump qw( pp );
+#use Data::Dump qw( pp );
 
 our $VERSION = '0.03';
 
