@@ -9,3 +9,6 @@ Revision history for Perl module Devel::Git::MultiBisect
 
 0.03 Fri Nov  4 11:34:10 EDT 2016
     - In examples/, add annotation for use of Transitions.pm.
+
+0.04 Wed Nov  9 10:09:08 EST 2016
+    - Comment out module import used only for debugging.

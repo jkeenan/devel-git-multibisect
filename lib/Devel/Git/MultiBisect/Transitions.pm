@@ -15,7 +15,7 @@ use File::Temp;
 use List::Util qw(first sum);
 #use Data::Dump qw( pp );
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
