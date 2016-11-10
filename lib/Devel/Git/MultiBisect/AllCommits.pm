@@ -197,9 +197,14 @@ sub run_test_files_on_all_commits {
 	    elapsed	=> $end_time - $start_time,
 	    runs	=> scalar(@{$all_commits}),
     );
-    $timings{mean} = sprintf("%.02f" => $timings{elapsed} / $timings{runs});
+    if ($timings{runs}) {
+        $timings{mean} = sprintf("%.02f" => $timings{elapsed} / $timings{runs});    }
     if ($self->{verbose}) {
-        say "Ran $timings{runs} runs; elapsed: $timings{elapsed} sec; mean: $timings{mean} sec";
+        my $msg = "Ran $timings{runs} runs; elapsed: $timings{elapsed} sec";
+        if ($timings{runs}) {
+            $msg .= "; mean: $timings{mean} sec";
+        }
+        say $msg;
     }
     $self->{all_outputs}  = [ @all_outputs ];
     $self->{timings}	  = \%timings;
