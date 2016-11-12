@@ -1,14 +1,8 @@
 use v5.10.0;
+use Devel::CheckBin;
+check_bin('git');
 
 use ExtUtils::MakeMaker;
-use Carp;
-
-my $lack_git = <<MESSAGE;
-'git --version' failed, suggesting absence of 'git'.
-No point in proceeding.
-MESSAGE
-
-system(qq|git --version|) and croak($lack_git);
 
 my %WriteMakefileArgs = (
     NAME         => 'Devel::Git::MultiBisect',
@@ -17,6 +11,7 @@ my %WriteMakefileArgs = (
     ABSTRACT     => 'Study test output over a range of git commits',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
+        'Devel::CheckBin' => 0,
     },
     PREREQ_PM    => {
         'Carp' => 0,
