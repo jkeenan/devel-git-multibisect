@@ -6,7 +6,6 @@ use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 20;
 use Capture::Tiny qw( :all );
 use File::Spec;
-#use Data::Dump qw( pp );
 
 my $ptg = File::Spec->catfile('', qw| path to gitdir |);
 my $pttf = File::Spec->catfile('', qw| path to test file |);

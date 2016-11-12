@@ -7,7 +7,6 @@ use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 30;
 use Cwd;
 use File::Spec;
-#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 

@@ -13,7 +13,6 @@ use Cwd;
 use File::Copy;
 use File::Spec;
 use File::Temp qw(tempfile tempdir);
-#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 my $datadir = File::Spec->catfile($cwd, qw| t lib | );

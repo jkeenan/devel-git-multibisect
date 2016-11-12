@@ -13,9 +13,8 @@ use Carp;
 use Cwd;
 use File::Temp;
 use List::Util qw(first sum);
-#use Data::Dump qw( pp );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME
 

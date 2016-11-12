@@ -12,7 +12,6 @@ use Test::More;
 use Cwd;
 use File::Spec;
 use List::Util qw( first );
-#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 
