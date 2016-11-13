@@ -14,7 +14,7 @@ use Cwd;
 use File::Temp;
 use List::Util qw(first sum);
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 NAME
 
