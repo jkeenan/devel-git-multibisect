@@ -40,7 +40,7 @@ make install
 ```
 
 If you are on a windows box you should use 'nmake' rather than 'make'.  (This
-library has not yet tested on Windows.)
+library has not yet been tested on Windows.)
 
 Once installed, start reading the documentation by calling:
 
