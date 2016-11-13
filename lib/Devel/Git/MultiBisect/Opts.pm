@@ -8,6 +8,7 @@ our @EXPORT_OK = qw(
     process_options
 );
 use Carp;
+use Config;
 use Cwd;
 use Data::Dumper;
 use File::Path qw( mkpath );
@@ -59,9 +60,12 @@ sub process_options {
         croak "Value of 'targets' must be an array reference"
             unless ref($args{targets}) eq 'ARRAY';
     }
+    my $found_make = $Config{make};
     if ($args{verbose}) {
         print "Arguments provided to process_options():\n";
         print Dumper \%args;
+        print "\n";
+        print q|For 'make', %Config has: |, $found_make, "\n";
     }
 
     my %defaults = (
@@ -71,7 +75,7 @@ sub process_options {
        'branch' => 'master',
        'verbose' => 0,
        'configure_command' => 'perl Makefile.PL 1>/dev/null',
-       'make_command' => 'make 1>/dev/null',
+       'make_command' => "$found_make 1>/dev/null",
        'test_command' => 'prove -vb',
    );
 

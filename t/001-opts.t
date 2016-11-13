@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Devel::Git::MultiBisect::Opts qw( process_options );
-use Test::More tests => 20;
+use Test::More tests => 21;
 use Capture::Tiny qw( :all );
 use File::Spec;
 
@@ -108,6 +108,10 @@ my ($stdout, @result);
 ($stdout, @result) = capture_stdout {process_options(%args);};
 like($stdout, qr/Arguments provided to process_options\(\):/s,
     "Got expected verbose output with 'verbose' in arguments to process_options()");
+my $fmake = '';
+($fmake) = $stdout =~ m/For 'make', %Config has:\s(.*)\Z/s;
+chomp($fmake);
+ok($fmake, "Perl 5 \%Config identified '$fmake' for 'make'");
 $args{verbose} = undef;
 
 my @cl_opts = (
