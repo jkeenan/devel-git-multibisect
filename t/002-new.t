@@ -34,7 +34,7 @@ my ($bad_gitdir, $bad_last_before, $bad_last);
     $args{gitdir} = $bad_gitdir;
     $params = process_options(%args);
     eval { $self = Devel::Git::MultiBisect::AllCommits->new($params); };
-    like($@, qr/Cannot find directory\(ies\): $bad_gitdir/,
+    like($@, qr/\QCannot find directory(ies): $bad_gitdir\E/,
         "Got expected error: missing directory $bad_gitdir"
     );
     $args{gitdir} = $good_gitdir;

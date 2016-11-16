@@ -51,7 +51,7 @@ is_deeply(
         File::Spec->catdir( qw|   45_func_hashes_alt_dual_sorted.t |),
     ];
     eval { $full_targets = $self->set_targets($bad_target_args); };
-    like($@, qr/Cannot find file\(s\) to be tested:.*$bad_target_args->[1]/,
+    like($@, qr/\QCannot find file(s) to be tested:\E.*\Q$bad_target_args->[1]\E/,
         "Got expected error message: bad target file: $bad_target_args->[1]");
 }
 
@@ -84,7 +84,7 @@ note("Error conditions");
             '45_func_hashes_alt_dual_sorted.t',
         ];
         eval { $full_targets = $self->set_targets($bad_target_args); };
-        like($@, qr/Cannot find file\(s\) to be tested:.*$bad_target_args->[1]/,
+        like($@, qr/\QCannot find file(s) to be tested:\E.*\Q$bad_target_args->[1]\E/,
             "Got expected error message: bad target file: $bad_target_args->[1]");
     }
 
@@ -95,7 +95,7 @@ note("Error conditions");
             't/45_func_hashes_alt_dual_sorted.t',
         };
         eval { $full_targets = $self->set_targets($bad_target_args); };
-        like($@, qr/Explicit targets passed to set_targets\(\) must be in array ref/,
+        like($@, qr/\QExplicit targets passed to set_targets() must be in array ref\E/,
             "Got expected error message: non-array-ref argument to set_targets()");
     }
 }

@@ -125,7 +125,7 @@ my $datadir = File::Spec->catfile($cwd, qw| t lib | );
         );
         local $@;
         eval { $rv = validate_list_sequence(\%hash); };
-        like($@, qr/Must provide array ref to validate_list_sequence\(\)/,
+        like($@, qr/\QMust provide array ref to validate_list_sequence()\E/,
             "Got expected error message for non-array-ref argument to validate_list_sequence()");
     }
 
@@ -214,7 +214,7 @@ my $datadir = File::Spec->catfile($cwd, qw| t lib | );
     is($rv->[1], $exp, "Failure to validate at index $exp");
     $exp -= 1;
     like($rv->[2],
-        qr/Immediately preceding element \(index $exp\) not defined/,
+        qr/\QImmediately preceding element (index $exp) not defined\E/,
         "Got expected error message"
     );
 

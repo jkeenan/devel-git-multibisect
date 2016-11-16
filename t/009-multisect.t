@@ -142,7 +142,7 @@ note("_prepare_for_multisection()");
     local $@;
     eval { $rv = $Tself->_multisect_one_target(0); };
     like($@,
-        qr/You must run _prepare_for_multisection\(\) before any stand-alone run of _multisect_one_target\(\)/,
+        qr/\QYou must run _prepare_for_multisection() before any stand-alone run of _multisect_one_target()\E/,
         "Got expected error message for premature _multisect_one_target()"
     );
 }

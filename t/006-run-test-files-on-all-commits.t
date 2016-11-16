@@ -51,7 +51,7 @@ is_deeply(
     local $@;
     eval { $rv = $self->get_digests_by_file_and_commit(); };
     like($@,
-        qr/You must call run_test_files_on_all_commits\(\) before calling get_digests_by_file_and_commit\(\)/,
+        qr/\QYou must call run_test_files_on_all_commits() before calling get_digests_by_file_and_commit()\E/,
         "Got expected error message for premature get_digests_by_file_and_commit()"
     );
 }
