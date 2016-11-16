@@ -18,3 +18,8 @@ Revision history for Perl module Devel::Git::MultiBisect
 
 0.06 Sat Nov 12 20:32:53 EST 2016
     - Opts:  Use Perl 5 %Config's 'make' as starting point for 'make_command'.
+
+0.07 Wed Nov 16 10:03:57 EST 2016
+    - tests: Per discussion in http://perlmonks.org/?node_id=1175983, use \Q
+      and \E to better handle string interpolation within patterns. Eily++;
+      Monk::Thomas++.
