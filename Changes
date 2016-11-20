@@ -23,3 +23,6 @@ Revision history for Perl module Devel::Git::MultiBisect
     - tests: Per discussion in http://perlmonks.org/?node_id=1175983, use \Q
       and \E to better handle string interpolation within patterns. Eily++;
       Monk::Thomas++.
+
+0.08 Sun Nov 20 09:11:55 EST 2016
+    - Exclude from Windows.

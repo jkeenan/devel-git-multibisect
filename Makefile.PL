@@ -1,6 +1,10 @@
 use v5.10.0;
 use Devel::CheckBin;
 check_bin('git');
+if ($^O =~ m/mswin32/i) {
+    print STDERR "NA: Not yet tested on Windows\n";
+    exit 0;
+}
 
 use ExtUtils::MakeMaker;
 
@@ -18,6 +22,7 @@ my %WriteMakefileArgs = (
         'Cwd' => 0,
         'Data::Dumper' => 0,
         'Digest::MD5' => 0,
+        'ExtUtils::MakeMaker' => 0,
         'File::Copy' => 0,
         'File::Spec' => 0,
         'File::Temp' => 0,
