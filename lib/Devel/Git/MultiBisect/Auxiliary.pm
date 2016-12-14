@@ -184,7 +184,8 @@ Reference to an array holding scalars.
 =item * Return Value
 
 Array reference consisting of either 1 or 3 elements.  If the list qualifies,
-the array holds just one element which is a Perl-true value.  If the list qualifies, the array hold 3 elements as follows:
+the array holds just one element which is a Perl-true value.  If the list does
+B<not> qualify, the array hold 3 elements as follows:
 
 =over 4
 
