@@ -8,12 +8,13 @@ use Devel::Git::MultiBisect::Auxiliary qw(
     hexdigest_one_file
     validate_list_sequence
 );
-use Test::More tests => 51;
+use Test::More tests => 55;
 use Cwd;
 use File::Copy;
 use File::Spec;
 use File::Temp qw(tempfile tempdir);
 use List::Util qw( sum );
+#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 my $datadir = File::Spec->catfile($cwd, qw| t lib | );
@@ -278,4 +279,21 @@ my $datadir = File::Spec->catfile($cwd, qw| t lib | );
     is($rv->[0], 0, "list not validated");
     is($rv->[1], $expfail, "Failure to validate at index $expfail");
     is($rv->[2], "$values[0] previously observed", "element $values[0] previously observed");
+
+    #####
+
+    note("List with only one non-undef value seen");
+    @counts = ( 1, 109, 1, 108, 1 );
+    $observed = [
+        (("$values[0]") x $counts[0]),
+        ((undef) x $counts[1]),
+        (("$values[0]") x $counts[2]),
+        ((undef) x $counts[3]),
+        (("$values[0]") x $counts[4]),
+    ];
+    $rv = validate_list_sequence($observed);
+    ok($rv, "validate_list_sequence() returned true value");
+    is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
+    is(scalar(@$rv), 1, "validate_list_sequence() returned array with 1 element");
+    ok($rv->[0], "validate_list_sequence() has true status");
 }
