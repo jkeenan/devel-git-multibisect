@@ -9,11 +9,11 @@ use Test::More;
 
 =head1 NAME
 
-generalized-multisection.t
+examples/generalized-multisection.t
 
 =head1 SYNOPSIS
 
-    prove -v generalized-multisection.t
+    prove -v examples/generalized-multisection.t
 
 =head1 DESCRIPTION
 
@@ -147,6 +147,69 @@ my @values = (
       "60"  => "$values[2]",
       "65"  => "$values[2]",
       "66"  => "$values[3]",
+      "219" => "$values[3]",
+    };
+    
+    test_this_list(\@list, $expected_transitional_values);
+}
+
+{
+    note("Case 4:");
+    my @list = (
+        (("$values[0]") x 217),
+        (("$values[1]") x   1),
+        (("$values[2]") x   1),
+        (("$values[3]") x   1),
+    );
+    
+    my $expected_transitional_values = {
+      "0"   => "$values[0]",
+      "216" => "$values[0]",
+      "217" => "$values[1]",
+      "218" => "$values[2]",
+      "219" => "$values[3]",
+    };
+    
+    test_this_list(\@list, $expected_transitional_values);
+}
+
+{
+    note("Case 5:");
+    my @list = (
+        (("$values[0]") x 216),
+        (("$values[1]") x   1),
+        (("$values[2]") x   1),
+        (("$values[3]") x   2),
+    );
+    
+    my $expected_transitional_values = {
+      "0"   => "$values[0]",
+      "215" => "$values[0]",
+      "216" => "$values[1]",
+      "217" => "$values[2]",
+      "218" => "$values[3]",
+      "219" => "$values[3]",
+    };
+    
+    test_this_list(\@list, $expected_transitional_values);
+}
+
+{
+    note("Case 6:");
+    my @list = (
+        (("$values[0]") x 215),
+        (("$values[1]") x   1),
+        (("$values[2]") x   2),
+        (("$values[3]") x   2),
+    );
+    
+    my $expected_transitional_values = {
+      "0"   => "$values[0]",
+      "214" => "$values[0]",
+      "215" => "$values[1]",
+      "216" => "$values[2]",
+      "217" => "$values[2]",
+      "218" => "$values[3]",
       "219" => "$values[3]",
     };
     
