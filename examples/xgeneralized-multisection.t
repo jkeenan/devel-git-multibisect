@@ -6,6 +6,7 @@ use Carp;
 use Devel::Git::MultiBisect::Auxiliary qw(validate_list_sequence);
 use List::Util qw( min max );
 use Test::More;
+use Data::Dump qw(pp);
 
 =head1 NAME
 
@@ -301,7 +302,12 @@ sub multisect_list {
 
 sub _evaluate_status_one_run {
     my $trans = shift;
+say STDERR "AAA:";
+pp($trans);
     my $vls = validate_list_sequence($trans);
+say STDERR "AAA:";
+pp($vls);
+
     return ( (scalar(@{$vls}) == 1 ) and ($vls->[0])) ? 1 : 0;
 }
 
