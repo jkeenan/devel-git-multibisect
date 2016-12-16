@@ -339,7 +339,6 @@ sub _multisect_one_target {
 
 sub _evaluate_status_one_target_run {
     my ($self, $target_idx) = @_;
-    my $stub = $self->{targets}->[$target_idx]->{stub};
     my @trans = ();
     for my $o (@{$self->{all_outputs}}) {
         push @trans,
