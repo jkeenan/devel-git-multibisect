@@ -15,6 +15,24 @@ excluded.  This would have to be determined within multisect_all_targets().
 This feature will be nice to have, but probably can wait until a later
 release.
 
+** Devel::Git::MultiBisect::Auxiliary::validate_list_sequence().
+
+There is a conceptual flaw in this function with respect to the context in
+which it is used.  A list such as
+
+    ( 'A', undef, ..., undef, 'A', undef, ..., undef, 'A' )
+
+qualifies as a validated list -- but, strictly speaking, only if
+that is the *final* state of that list.  If we're inside the loop in
+Transitions::_multisect_one_target(), we're evaluating the contents of the
+list after each commit visitation.  We are, in effect, *discovering* the
+contents of the list.  The only way we'd know it for sure is if we did
+AllCommits.  Hence, much of the time we can't distinguish a validated list
+such as the above from an invalid list where 'A' starts to re-appear after
+'B', 'C', etc. have appeared following the initial run of 'A's such as.
+
+    ( 'A', undef, ..., 'B', undef, 'A', undef, ..., undef, 'A' )
+
 * Testing and Test Coverage
 
 ** Inspect contents and naming of each t/*.t file for consistency.
