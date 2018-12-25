@@ -69,7 +69,7 @@ you can use another package in this library, F<Devel::Git::MultiBisect::AllCommi
 =head1 METHODS
 
 This package inherits methods from F<Devel::Git::MultiBisect>.  Only methods unique to
-F<Devel::Git::MultiBisect::AllCommits> are documented here.  See the documentation for
+F<Devel::Git::MultiBisect::Transitions> are documented here.  See the documentation for
 F<Devel::Git::MultiBisect> for all other methods, including:
 
     new()
