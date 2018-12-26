@@ -165,8 +165,6 @@ Does not qualify, as the sub-list starting with C<beta> ends with an C<undef>.
 
 Does not qualify, as C<alpha> occurs in both the first and third sub-lists.
 
-Qualifies.
-
 =item * C<['alpha', 'alpha', undef, 'alpha', 'beta', undef, 'beta']>
 
 Qualifies.
