@@ -92,7 +92,7 @@ my @values = (
         (("$values[2]") x   6),
         (("$values[3]") x 155),
     );
-    
+
     my $expected_transitional_values = {
       "0"   => "$values[0]",
       "54"  => "$values[0]",
@@ -103,7 +103,7 @@ my @values = (
       "65"  => "$values[3]",
       "219" => "$values[3]",
     };
-    
+
     test_this_list(\@list, $expected_transitional_values);
 }
 
@@ -115,7 +115,7 @@ my @values = (
         (("$values[2]") x   6),
         (("$values[3]") x 155),
     );
-    
+
     my $expected_transitional_values = {
       "0"   => "$values[0]",
       "53"  => "$values[0]",
@@ -126,7 +126,7 @@ my @values = (
       "65"  => "$values[3]",
       "219" => "$values[3]",
     };
-    
+
     test_this_list(\@list, $expected_transitional_values);
 }
 
@@ -138,7 +138,7 @@ my @values = (
         (("$values[2]") x   6),
         (("$values[3]") x 154),
     );
-    
+
     my $expected_transitional_values = {
       "0"   => "$values[0]",
       "55"  => "$values[0]",
@@ -149,7 +149,7 @@ my @values = (
       "66"  => "$values[3]",
       "219" => "$values[3]",
     };
-    
+
     test_this_list(\@list, $expected_transitional_values);
 }
 
@@ -161,7 +161,7 @@ my @values = (
         (("$values[2]") x   1),
         (("$values[3]") x   1),
     );
-    
+
     my $expected_transitional_values = {
       "0"   => "$values[0]",
       "216" => "$values[0]",
@@ -169,7 +169,7 @@ my @values = (
       "218" => "$values[2]",
       "219" => "$values[3]",
     };
-    
+
     test_this_list(\@list, $expected_transitional_values);
 }
 
@@ -181,7 +181,7 @@ my @values = (
         (("$values[2]") x   1),
         (("$values[3]") x   2),
     );
-    
+
     my $expected_transitional_values = {
       "0"   => "$values[0]",
       "215" => "$values[0]",
@@ -190,7 +190,7 @@ my @values = (
       "218" => "$values[3]",
       "219" => "$values[3]",
     };
-    
+
     test_this_list(\@list, $expected_transitional_values);
 }
 
@@ -202,7 +202,7 @@ my @values = (
         (("$values[2]") x   2),
         (("$values[3]") x   2),
     );
-    
+
     my $expected_transitional_values = {
       "0"   => "$values[0]",
       "214" => "$values[0]",
@@ -212,7 +212,7 @@ my @values = (
       "218" => "$values[3]",
       "219" => "$values[3]",
     };
-    
+
     test_this_list(\@list, $expected_transitional_values);
 }
 
@@ -490,7 +490,7 @@ sub test_this_list {
     my ($list, $expected_transitional_values) = @_;
 
     my $action = generate_action($list);
-    
+
     my ($values, $indices_visited) = multisect_list( {
         action              => $action,
         list_count          => scalar(@{$list}),
@@ -499,7 +499,7 @@ sub test_this_list {
     } );
     is(scalar(@{$values}), scalar(@{$list}), "Got expected number of elements in report");
     pass(scalar(@{$indices_visited}) . " commits visited");
-    
+
     my $rep = prepare_report($values);
     is_deeply($rep, $expected_transitional_values,
         "Got expected look-up table of transitions");
