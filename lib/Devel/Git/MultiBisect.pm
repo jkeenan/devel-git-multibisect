@@ -7,7 +7,6 @@ use Devel::Git::MultiBisect::Auxiliary qw(
     clean_outputfile
     hexdigest_one_file
     validate_list_sequence
-    get_current_branch
 );
 use Carp;
 use Cwd;
@@ -508,7 +507,7 @@ sub _configure_build_one_commit {
     my ($self, $commit) = @_;
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
     system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
-    my $starting_branch = get_current_branch();
+    my $starting_branch = $self->{branch};
 
     system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
     say "Running '$self->{configure_command}'" if $self->{verbose};
