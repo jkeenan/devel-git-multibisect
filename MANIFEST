@@ -252,6 +252,7 @@ t/lib/dummyrepo/README.md
 t/lib/dummyrepo/t/001_load.t
 t/lib/dummyrepo/t/002_add.t
 t/lib/dummyrepo/Todo
+t/lib/Helpers.pm
 t/lib/list-compare/.git
 t/lib/list-compare/.gitignore
 t/lib/list-compare/Changes

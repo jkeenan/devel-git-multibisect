@@ -11,6 +11,8 @@ use Carp;
 use Cwd;
 use File::Spec;
 use List::Util qw(first);
+use lib qw( t/lib );
+use Helpers qw( test_report );
 
 note("Former t/005-run-test-files-on-one-commit.t");
 
@@ -701,13 +703,4 @@ note("Former t/009-multisect.t");
 }
 
 done_testing();
-
-sub test_report {
-    my $r = shift;
-    return 1 if not defined $r;
-    for my $k ( qw| commit commit_short file md5_hex | ) {
-        return 0 unless exists $r->{$k};
-    }
-    return 1;
-}
 
