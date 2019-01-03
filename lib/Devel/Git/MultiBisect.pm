@@ -2,7 +2,7 @@ package Devel::Git::MultiBisect;
 use strict;
 use warnings;
 use v5.10.0;
-use Devel::Git::MultiBisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::Init;
 use Devel::Git::MultiBisect::Auxiliary qw(
     clean_outputfile
     hexdigest_one_file
@@ -159,27 +159,10 @@ Object of Devel::Git::MultiBisect child class.
 
 sub new {
     my ($class, $params) = @_;
-    my %data;
 
-    while (my ($k,$v) = each %{$params}) {
-        $data{$k} = $v;
-    }
+    my $data = Devel::Git::MultiBisect::Init::init($params);
 
-    my @missing_dirs = ();
-    for my $dir ( qw| gitdir workdir outputdir | ) {
-        push @missing_dirs, $data{$dir}
-            unless (-d $data{$dir});
-    }
-    if (@missing_dirs) {
-        croak "Cannot find directory(ies): @missing_dirs";
-    }
-
-    $data{last_short} = substr($data{last}, 0, $data{short});
-    $data{commits} = _get_commits(\%data);
-    $data{targets} //= [];
-    $data{commit_counter} = 0;
-
-    return bless \%data, $class;
+    return bless $data, $class;
 }
 
 sub _get_commits {

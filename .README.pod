@@ -22,6 +22,21 @@ F<Devel::Git::MultiBisect::Transitions>, provide different flavors of that
 functionality for objectives (a) and (b), respectively.  Please refer to their
 documentation for further discussion.
 
+=head2 Multisection of Build-Time Failures
+
+Perl 5 has many different configuration options, some of which are used
+infrequently.  Given a sufficiently large number of F<git> commits and a
+specific set of configuration options, it is possible that Perl might fail to
+build (C<i.e.>, a build-time failure in F<make>) in B<more than one way> over
+that range.
+
+If that is the case, then simply asking, I<"When did Perl start failing to
+build with this set of configuration options?"> is insufficient.  We may want
+to capture the built-time error output at those commits where the output
+changed.  F<Devel::Git::MultiBisect::BuildTransitions> provides methods to
+achieve that objective.  Please refer to their documentation for further
+discussion.
+
 =head1 PREREQUISITES
 
 Perl 5.10 or higher.

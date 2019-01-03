@@ -22,6 +22,21 @@ child classes, `Devel::Git::MultiBisect::AllCommits` and
 functionality for objectives (a) and (b), respectively.  Please refer to their
 documentation for further discussion.
 
+## Multisection of Build-Time Failures
+
+Perl 5 has many different configuration options, some of which are used
+infrequently.  Given a sufficiently large number of `git` commits and a
+specific set of configuration options, it is possible that Perl might fail to
+build (`i.e.`, a build-time failure in `make`) in **more than one way** over
+that range.
+
+If that is the case, then simply asking, _"When did Perl start failing to
+build with this set of configuration options?"_ is insufficient.  We may want
+to capture the built-time error output at those commits where the output
+changed.  `Devel::Git::MultiBisect::BuildTransitions` provides methods to
+achieve that objective.  Please refer to their documentation for further
+discussion.
+
 # PREREQUISITES
 
 Perl 5.10 or higher.
@@ -32,18 +47,14 @@ git.
 
 # INSTALL
 
-```
-perl Makefile.PL
-make
-make test
-make install
-```
+    perl Makefile.PL
+    make
+    make test
+    make install
 
 If you are on a windows box you should use 'nmake' rather than 'make'.  (This
 library has not yet been tested on Windows.)
 
 Once installed, start reading the documentation by calling:
 
-```
-perldoc Devel::Git::MultiBisect
-```
+    perldoc Devel::Git::MultiBisect
