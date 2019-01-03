@@ -469,13 +469,6 @@ sub _configure_one_commit {
 
 sub _configure_build_one_commit {
     my ($self, $commit) = @_;
-#    chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
-#    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
-#    my $starting_branch = $self->{branch};
-#
-#    system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
-#    say "Running '$self->{configure_command}'" if $self->{verbose};
-#    system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
 
     my $starting_branch = $self->_configure_one_commit($commit);
 
@@ -520,6 +513,36 @@ sub _test_one_commit {
         say "Created $outputfile" if $self->{verbose};
     }
     return \@outputs;
+}
+
+sub _bisection_decision {
+    my ($self, $target_h_md5_hex, $current_start_md5_hex, $h, $relevant_self,
+        $overall_end_md5_hex, $current_start_idx, $current_end_idx, $max_idx, $n) = @_;
+    if ($target_h_md5_hex ne $current_start_md5_hex) {
+        my $g = $h - 1;
+        $self->_run_one_commit_and_assign($g);
+        my $target_g_md5_hex  = $relevant_self->[$g]->{md5_hex};
+        if ($target_g_md5_hex eq $current_start_md5_hex) {
+            if ($target_h_md5_hex eq $overall_end_md5_hex) {
+            }
+            else {
+                $current_start_idx  = $h;
+                $current_end_idx    = $max_idx;
+            }
+            $n++;
+        }
+        else {
+            # Bisection should continue downwards
+            $current_end_idx = $h;
+            $n++;
+        }
+    }
+    else {
+        # Bisection should continue upwards
+        $current_start_idx = $h;
+        $n++;
+    }
+    return ($current_start_idx, $current_end_idx, $n);
 }
 
 =head2 C<get_timings()>
