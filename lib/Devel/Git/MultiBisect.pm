@@ -455,7 +455,7 @@ sub run_test_files_on_one_commit {
     return $outputsref;
 }
 
-sub _configure_build_one_commit {
+sub _configure_one_commit {
     my ($self, $commit) = @_;
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
     system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
@@ -464,8 +464,24 @@ sub _configure_build_one_commit {
     system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
     say "Running '$self->{configure_command}'" if $self->{verbose};
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
+    return $starting_branch;
+}
+
+sub _configure_build_one_commit {
+    my ($self, $commit) = @_;
+#    chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
+#    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
+#    my $starting_branch = $self->{branch};
+#
+#    system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
+#    say "Running '$self->{configure_command}'" if $self->{verbose};
+#    system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
+
+    my $starting_branch = $self->_configure_one_commit($commit);
+
     say "Running '$self->{make_command}'" if $self->{verbose};
     system($self->{make_command}) and croak "Unable to run '$self->{make_command})'";
+
     return $starting_branch;
 }
 

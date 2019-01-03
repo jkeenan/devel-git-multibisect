@@ -287,22 +287,21 @@ sub run_build_on_one_commit {
     return $outputsref;
 }
 
-sub _configure_one_commit {
-    my ($self, $commit) = @_;
-    chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
-    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
-    my $starting_branch = $self->{branch};
-
-    system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
-    say "Running '$self->{configure_command}'" if $self->{verbose};
-    system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
-    return $starting_branch;
-}
+#sub _configure_one_commit {
+#    my ($self, $commit) = @_;
+#    chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
+#    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
+#    my $starting_branch = $self->{branch};
+#
+#    system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
+#    say "Running '$self->{configure_command}'" if $self->{verbose};
+#    system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
+#    return $starting_branch;
+#}
 
 sub _build_one_commit {
     my ($self, $commit) = @_; 
     my $short_sha = substr($commit,0,$self->{short});
-    #my @outputs;
     my $build_log = File::Spec->catfile(
         $self->{outputdir},
         join('.' => (
@@ -324,7 +323,6 @@ sub _build_one_commit {
         file => $filtered_errors_file,
         md5_hex => hexdigest_one_file($filtered_errors_file),
     };
-    #return \@outputs;
 }
 
 sub _filter_build_log {
