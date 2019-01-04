@@ -18,7 +18,7 @@ our $VERSION = '0.10';
 
 =head1 NAME
 
-Devel::Git::MultiBisect - Study test output over a range of F<git> commits
+Devel::Git::MultiBisect - Study build and test output over a range of F<git> commits
 
 =head1 SYNOPSIS
 
@@ -53,15 +53,16 @@ parent package may be called from either child class.
 
 Given a Perl library or application kept in F<git> for version control, it is
 often useful to be able to compare the output collected from running one or
-several test files over a range of F<git> commits.  If that range is sufficiently
+more test files over a range of F<git> commits.  If that range is sufficiently
 large, a test may fail in B<more than one way> over that range.
 
 If that is the case, then simply asking, I<"When did this file start to
-fail?"> is insufficient.  We may want to (a) capture the test output for each
-commit; or, (b) capture the test output only at those commits where the output
-changed.  The output of a run of a test file may change for a variety of
-reasons:  test failures, segfaults, changes in the number or content of tests,
-etc.)
+fail?"> -- a question which C<git bisect> is designed to answer -- is
+insufficient.  In order to identify more than one point of failure, we may
+need to (a) capture the test output for each commit; or, (b) capture the test
+output only at those commits where the output changed.  The output of a run of
+a test file may change for a variety of reasons:  test failures, segfaults,
+changes in the number or content of tests, etc.
 
 F<Devel::Git::MultiBisect> provides methods to achieve that objective.  Its
 child classes, F<Devel::Git::MultiBisect::AllCommits> and
