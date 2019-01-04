@@ -50,6 +50,8 @@ discussion.
 
 Perl 5.10 or higher.
 
+CPAN module F<Devel::CheckBin> needed for C<perl Makefile.PL>.
+
 CPAN modules F<Capture::Tiny> and F<IO::CaptureOutput> needed for testing only.
 
 F<git>.

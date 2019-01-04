@@ -50,6 +50,8 @@ discussion.
 
 Perl 5.10 or higher.
 
+CPAN module `Devel::CheckBin` needed for `perl Makefile.PL`.
+
 CPAN modules `Capture::Tiny` and `IO::CaptureOutput` needed for testing only.
 
 `git`.
