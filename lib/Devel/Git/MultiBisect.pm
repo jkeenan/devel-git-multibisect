@@ -76,8 +76,9 @@ documentation for further discussion.
 
 =item * B<commit>
 
-An individual commit to a F<git> repository as denoted by a SHA.  When a commit is
-called for as the argument to a function, you can also use a F<git tag>.
+A source code change set entered ("committed") to a F<git> repository.  Each
+commit is denoted by a SHA.  In this library, whenever a commit is called for
+as the argument to a function, you can also use a F<git tag>.
 
 =item * B<commit range>
 
