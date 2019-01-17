@@ -91,7 +91,9 @@ A test file from the test suite of the application or library under study.
 =item * B<test output>
 
 What is sent to STDOUT or STDERR as a result of calling a test program such as
-F<prove> or F<t/harness> on an individual target file.
+F<prove> or F<t/harness> on an individual target file.  Currently we assume
+that all such test programs are written based on the
+L<Test Anything Protocol (TAP)|https://en.wikipedia.org/wiki/Test_Anything_Protocol>.
 
 =item * B<transitional commit>
 
