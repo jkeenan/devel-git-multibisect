@@ -13,6 +13,7 @@ my %WriteMakefileArgs = (
     VERSION_FROM => 'lib/Devel/Git/MultiBisect.pm', # finds \$VERSION
     AUTHOR       => 'James E Keenan (jkeenan@cpan.org)',
     ABSTRACT     => 'Study test output over a range of git commits',
+    LICENSE      => 'perl_5',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
         'Devel::CheckBin' => 0,
