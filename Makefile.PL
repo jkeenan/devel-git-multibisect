@@ -14,6 +14,7 @@ my %WriteMakefileArgs = (
     AUTHOR       => 'James E Keenan (jkeenan@cpan.org)',
     ABSTRACT     => 'Study test output over a range of git commits',
     MIN_PERL_VERSION => '5.14.0',
+    LICENSE      => 'perl_5',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
         'Devel::CheckBin' => 0,
