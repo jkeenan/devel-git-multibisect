@@ -144,7 +144,7 @@ commit has not yet been visited, the element is C<undef>.
       },
     ]
 
-Unlike F<Devel::Git::MultiBisect::Transitions -- where we could have been
+Unlike F<Devel::Git::MultiBisect::Transitions> -- where we could have been
 testing multiple test files on each commit -- here we're only concerned with
 recording the presence or absence of build-time errors.  Hence, we only need
 an array of hash refs rather than an array of arrays of hash refs.
