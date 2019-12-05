@@ -36,8 +36,6 @@ Devel::Git::MultiBisect::BuildTransitions - Gather build-time output where it ch
 
 =head1 DESCRIPTION
 
-TK
-
 When the number of commits in the specified range is large and you only need
 the build-time output at those commits where the output materially changed, you can
 use this package, F<Devel::Git::MultiBisect::BuildTransitions>.
@@ -402,9 +400,6 @@ elements have the following keys:
     md5_hex
 
 =back
-
-Example:
-
 
 =back
 
