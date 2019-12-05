@@ -75,7 +75,14 @@ human inspection.
 
     $self->multisect_builds();
 
-None; all data needed is already present in the object.
+    $self->multisect_builds({ probe => 'error' });
+
+    $self->multisect_builds({ probe => 'warning' });
+
+Takes one hash reference which, at present, may contain only one element whose
+key is C<probe> and whose possible values are C<error> or C<warning>.
+Defaults to C<error>.  Select between those values depending on whether you
+are probing for changes in errors or changes in warnings. Optional.
 
 =item * Return Value
 
@@ -103,7 +110,22 @@ disk for later human inspection.
 =cut
 
 sub multisect_builds {
-    my ($self) = @_;
+    my ($self, $args) = @_;
+
+    if (defined $args) {
+        croak "Argument passed to multisect_builds() must be hashref"
+            unless ref($args) eq 'HASH';
+        my %good_keys = map {$_ => 1} (qw| probe |);
+        for my $k (keys %{$args}) {
+            croak "Invalid key '$k' in hashref passed to multisect_builds()"
+                unless $good_keys{$k};
+        }
+        my %good_values = map {$_ => 1} (qw| error warning |);
+        for my $v (values %{$args}) {
+            croak "Invalid value '$v' in 'probe' element in hashref passed to multisect_builds()"
+                unless $good_values{$v};
+        }
+    }
 
     # Prepare data structures in the object to hold results of build runs on a
     # per target, per commit basis.
