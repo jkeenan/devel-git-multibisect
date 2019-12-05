@@ -126,6 +126,8 @@ sub multisect_builds {
                 unless $good_values{$v};
         }
     }
+    $args->{probe} = 'error' unless defined $args->{probe};
+    $self->{probe} = $args->{probe};
 
     # Prepare data structures in the object to hold results of build runs on a
     # per target, per commit basis.
@@ -306,15 +308,18 @@ sub _build_one_commit {
     my $cmd = qq|$command_raw > $build_log 2>&1|;
     say "Running '$cmd'" if $self->{verbose};
     my $rv = system($cmd);
-    my $filtered_errors_file = $self->_filter_build_log($build_log, $short_sha);
-    say "Created $filtered_errors_file" if $self->{verbose};
+    my $filtered_probes_file = $self->_filter_build_log($build_log, $short_sha);
+    say "Created $filtered_probes_file" if $self->{verbose};
     return {
         commit => $commit,
         commit_short => $short_sha,
-        file => $filtered_errors_file,
-        md5_hex => hexdigest_one_file($filtered_errors_file),
+        file => $filtered_probes_file,
+        md5_hex => hexdigest_one_file($filtered_probes_file),
     };
 }
+
+# TODO: Adapt this internal method to probe for build-time warnings 
+# when $self->{probe} eq 'warning'.
 
 sub _filter_build_log {
     my ($self, $buildlog, $short_sha) = @_;
