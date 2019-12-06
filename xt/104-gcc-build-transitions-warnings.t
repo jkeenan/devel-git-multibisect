@@ -47,8 +47,11 @@ my ($self);
 my ($good_gitdir);
 $good_gitdir = "/home/jkeenan/gitwork/perl2";
 my $workdir = "$ENV{HOMEDIR}/learn/perl/multisect/testing/$compiler";
-my $first = '45e05241921ae4b742aae3bb04f97028de4b9a92';
-my $last  = '1f6c9461cb3775550f70cd0c579d874dc80c5038';
+#my $first = '45e05241921ae4b742aae3bb04f97028de4b9a92';
+#my $last  = '1f6c9461cb3775550f70cd0c579d874dc80c5038';
+my $first = 'e3f4f321290813be202cfd9ce45f4ef5b3d96a2f';
+my $last  = '43e5ab2e34fe55efd182c925309a4cf5ff2ec540';
+
 my $branch = 'blead';
 my $configure_command =  q|sh ./Configure -des -Dusedevel|;
 $configure_command   .= qq| -Dcc='$compiler -m32' -Dlibs='-lpthread -lnsl -ldl -lm -lcrypt -lutil -lc'|;
@@ -100,7 +103,6 @@ ok($rv, "multisect_builds() returned true value");
 note("get_multisected_outputs()");
 
 my $multisected_outputs = $self->get_multisected_outputs();
-say STDERR "CCC:";
 pp($multisected_outputs);
 
 is(ref($multisected_outputs), 'ARRAY',

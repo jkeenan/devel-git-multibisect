@@ -120,6 +120,5 @@ my $bad_value = 'bar';
         "Detected bad value passed to multisect_builds");
 }
 
-
 done_testing();
 

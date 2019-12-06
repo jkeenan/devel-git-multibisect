@@ -137,8 +137,6 @@ sub multisect_builds {
 
     my $start_time = time();
     my $all_outputs = $self->_prepare_for_multisection();
-    #say STDERR "AAA: In multisect_builds(), after _prepare_for_multisection()";
-    #pp($all_outputs);
 
 =pod
 
@@ -305,9 +303,7 @@ sub _build_one_commit {
         )),
     );
     my $command_raw = $self->{make_command};
-say "RRR: command_raw: $command_raw" if $self->{verbose};
     my $cmd = qq|$command_raw > $build_log 2>&1|;
-say "SSS: Running '$cmd'" if $self->{verbose};
     my $rv = system($cmd);
     my $filtered_probes_file = $self->_filter_build_log($build_log, $short_sha);
     say "Created $filtered_probes_file" if $self->{verbose};
@@ -319,11 +315,7 @@ say "SSS: Running '$cmd'" if $self->{verbose};
     };
 }
 
-# TODO: Adapt this internal method to probe for build-time warnings 
-# when $self->{probe} eq 'warning'.
-
 sub _filter_build_log {
-say STDERR "ZZZ: Entering _filter_build_log";
     my ($self, $buildlog, $short_sha) = @_;
     say "short_sha: $short_sha";
     my $tdir = tempdir( CLEANUP => 1 );
@@ -363,7 +355,6 @@ say STDERR "ZZZ: Entering _filter_build_log";
         return $error_report_file;
     }
     else {
-say STDERR "AAA: Parsing for warnings";
         my $ackpattern = qr/^
             ([^:]+):
             (\d+):
@@ -382,8 +373,6 @@ say STDERR "AAA: Parsing for warnings";
             push @refined_warnings, $rl;
         }
         close $IN or croak "Unable to close $buildlog after reading";
-say STDERR "BBB: refined_warnings";
-pp(\@refined_warnings);
         
         my $warning_report_file =
             File::Spec->catfile($self->{workdir}, "$short_sha.make.warnings.rpt.txt");
