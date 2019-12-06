@@ -79,10 +79,10 @@ human inspection.
 
     $self->multisect_builds({ probe => 'warning' });
 
-Optionally takes one hash reference.  At present that hashref may contain only one element whose
-key is C<probe> and whose possible values are C<error> or C<warning>.
-Defaults to C<error>.  Select between those values depending on whether you
-are probing for changes in errors or changes in warnings.
+Optionally takes one hash reference.  At present that hashref may contain only
+one element whose key is C<probe> and whose possible values are C<error> or
+C<warning>.  Defaults to C<error>.  Select between those values depending on
+whether you are probing for changes in errors or changes in warnings.
 
 =item * Return Value
 

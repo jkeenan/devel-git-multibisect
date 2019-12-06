@@ -45,7 +45,7 @@ my $cwd = cwd();
 
 my ($self);
 my ($good_gitdir);
-$good_gitdir = "/home/jkeenan/gitwork/perl2";
+$good_gitdir = "$ENV{GIT_WORKDIR}/gitwork/perl2";
 my $workdir = "$ENV{HOMEDIR}/learn/perl/multisect/testing/$compiler";
 my $first = 'e3f4f321290813be202cfd9ce45f4ef5b3d96a2f';
 my $last  = '43e5ab2e34fe55efd182c925309a4cf5ff2ec540';
