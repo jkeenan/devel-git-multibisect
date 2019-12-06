@@ -79,10 +79,10 @@ human inspection.
 
     $self->multisect_builds({ probe => 'warning' });
 
-Takes one hash reference which, at present, may contain only one element whose
+Optionally takes one hash reference.  At present that hashref may contain only one element whose
 key is C<probe> and whose possible values are C<error> or C<warning>.
 Defaults to C<error>.  Select between those values depending on whether you
-are probing for changes in errors or changes in warnings. Optional.
+are probing for changes in errors or changes in warnings.
 
 =item * Return Value
 
@@ -291,7 +291,7 @@ sub run_build_on_one_commit {
 }
 
 sub _build_one_commit {
-    my ($self, $commit) = @_; 
+    my ($self, $commit) = @_;
     my $short_sha = substr($commit,0,$self->{short});
     my $build_log = File::Spec->catfile(
         $self->{outputdir},
@@ -362,7 +362,7 @@ sub _filter_build_log {
             (.*?)\s+\[-
             (W.*)]$
         /x;
-        
+
         my @refined_warnings = ();
         open my $IN, '<', $buildlog or croak "Unable to open $buildlog for reading";
         while (my $l = <$IN>) {
@@ -373,7 +373,7 @@ sub _filter_build_log {
             push @refined_warnings, $rl;
         }
         close $IN or croak "Unable to close $buildlog after reading";
-        
+
         my $warning_report_file =
             File::Spec->catfile($self->{workdir}, "$short_sha.make.warnings.rpt.txt");
         say "rpt: $warning_report_file";
