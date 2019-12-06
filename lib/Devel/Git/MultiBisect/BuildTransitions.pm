@@ -305,8 +305,9 @@ sub _build_one_commit {
         )),
     );
     my $command_raw = $self->{make_command};
+say "RRR: command_raw: $command_raw" if $self->{verbose};
     my $cmd = qq|$command_raw > $build_log 2>&1|;
-    say "Running '$cmd'" if $self->{verbose};
+say "SSS: Running '$cmd'" if $self->{verbose};
     my $rv = system($cmd);
     my $filtered_probes_file = $self->_filter_build_log($build_log, $short_sha);
     say "Created $filtered_probes_file" if $self->{verbose};
@@ -322,41 +323,77 @@ sub _build_one_commit {
 # when $self->{probe} eq 'warning'.
 
 sub _filter_build_log {
+say STDERR "ZZZ: Entering _filter_build_log";
     my ($self, $buildlog, $short_sha) = @_;
     say "short_sha: $short_sha";
     my $tdir = tempdir( CLEANUP => 1 );
-    
-    my $ackpattern = q|-A2 '^[^:]+:\d+:\d+:\s+error:'|;
-    my @raw_acklines = grep { ! m/^--\n/ } `ack $ackpattern $buildlog`;
-    chomp(@raw_acklines);
-    #pp(\@raw_acklines);
-    croak "Got incorrect count of lines from ack; should be divisible by 3"
-        unless scalar(@raw_acklines) % 3 == 0;
-    
-    my @refined_errors = ();
-    for (my $i=0; $i <= $#raw_acklines; $i += 3) {
-        my $j = $i + 2;
-        my @this_error = ();
-        my ($normalized) =
-            $raw_acklines[$i] =~ s/^([^:]+):\d+:\d+:(.*)$/$1:_:_:$2/r;
-        push @this_error, ($normalized, @raw_acklines[$i+1 .. $j]);
-        push @refined_errors, \@this_error;
-    }
-    
-    my $error_report_file =
-        File::Spec->catfile($self->{workdir}, "$short_sha.make.errors.rpt.txt");
-    say "rpt: $error_report_file";
-    open my $OUT, '>', $error_report_file
-        or croak "Unable to open $error_report_file for writing";
-    if (@refined_errors) {
-        for (my $i=0; $i<=($#refined_errors -1); $i++) {
-            say $OUT join "\n" => @{$refined_errors[$i]};
-            say $OUT "--";
+
+    if ($self->{probe} eq 'error') {
+        # the default case:  probing for build-time errors
+        my $ackpattern = q|-A2 '^[^:]+:\d+:\d+:\s+error:'|;
+        my @raw_acklines = grep { ! m/^--\n/ } `ack $ackpattern $buildlog`;
+        chomp(@raw_acklines);
+        #pp(\@raw_acklines);
+        croak "Got incorrect count of lines from ack; should be divisible by 3"
+            unless scalar(@raw_acklines) % 3 == 0;
+
+        my @refined_errors = ();
+        for (my $i=0; $i <= $#raw_acklines; $i += 3) {
+            my $j = $i + 2;
+            my @this_error = ();
+            my ($normalized) =
+                $raw_acklines[$i] =~ s/^([^:]+):\d+:\d+:(.*)$/$1:_:_:$2/r;
+            push @this_error, ($normalized, @raw_acklines[$i+1 .. $j]);
+            push @refined_errors, \@this_error;
         }
-        say $OUT join "\n" => @{$refined_errors[-1]};
+
+        my $error_report_file =
+            File::Spec->catfile($self->{workdir}, "$short_sha.make.errors.rpt.txt");
+        say "rpt: $error_report_file";
+        open my $OUT, '>', $error_report_file
+            or croak "Unable to open $error_report_file for writing";
+        if (@refined_errors) {
+            for (my $i=0; $i<=($#refined_errors -1); $i++) {
+                say $OUT join "\n" => @{$refined_errors[$i]};
+                say $OUT "--";
+            }
+            say $OUT join "\n" => @{$refined_errors[-1]};
+        }
+        close $OUT or croak "Unable to close $error_report_file after writing";
+        return $error_report_file;
     }
-    close $OUT or croak "Unable to close $error_report_file after writing";
-    return $error_report_file;
+    else {
+say STDERR "AAA: Parsing for warnings";
+        my $ackpattern = qr/^
+            ([^:]+):
+            (\d+):
+            (\d+):\s+warning:\s+
+            (.*?)\s+\[-
+            (W.*)]$
+        /x;
+        
+        my @refined_warnings = ();
+        open my $IN, '<', $buildlog or croak "Unable to open $buildlog for reading";
+        while (my $l = <$IN>) {
+            chomp $l;
+            next unless $l =~ m/$ackpattern/;
+            my ($source, $line, $character, $text, $class) = ($1, $2, $3, $4, $5);
+            my $rl = "$source:_:_: warning: $text [$class]";
+            push @refined_warnings, $rl;
+        }
+        close $IN or croak "Unable to close $buildlog after reading";
+say STDERR "BBB: refined_warnings";
+pp(\@refined_warnings);
+        
+        my $warning_report_file =
+            File::Spec->catfile($self->{workdir}, "$short_sha.make.warnings.rpt.txt");
+        say "rpt: $warning_report_file";
+        open my $OUT, '>', $warning_report_file
+            or croak "Unable to open $warning_report_file for writing";
+        say $OUT $_ for @refined_warnings;
+        close $OUT or croak "Unable to close $warning_report_file after writing";
+        return $warning_report_file;
+    }
 }
 
 sub _evaluate_status_of_build_runs {
