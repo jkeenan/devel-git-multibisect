@@ -1,5 +1,5 @@
 # -*- perl -*-
-# t/011-buildtransitions.t
+# xt/105-buildtransitions.t
 use strict;
 use warnings;
 use Devel::Git::MultiBisect::Opts qw( process_options );
@@ -40,12 +40,13 @@ for my $k ( qw|
 | ) {
     ok(defined($params->{$k}), "A default value was assigned for $k: $params->{$k}");
 }
+pp($params);
 
 my $cwd = cwd();
 
 my ($self);
 my ($good_gitdir);
-$good_gitdir = "/home/jkeenan/gitwork/perl2";
+$good_gitdir = "$ENV{GIT_WORKDIR}/perl2";
 my $workdir = "$ENV{HOMEDIR}/learn/perl/multisect/testing/$compiler";
 my $first = '7c9c5138c6a704d1caf5908650193f777b81ad23';
 my $last  = '8f6628e3029399ac1e48dfcb59c3cd30e5127c3e';
@@ -66,7 +67,7 @@ my $test_command = '';
     verbose => 1,
 );
 $params = process_options(%args);
-#pp($params);
+
 is($params->{gitdir}, $good_gitdir, "Got expected gitdir");
 is($params->{workdir}, $workdir, "Got expected workdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
