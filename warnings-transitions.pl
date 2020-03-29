@@ -7,13 +7,12 @@ use Devel::Git::MultiBisect::Opts qw( process_options );
 use Devel::Git::MultiBisect::BuildTransitions;
 use Test::More;
 use Carp;
-#use Cwd;
 use File::Spec;
 use Data::Dump qw(dd pp);
 
 # TODO:  Use Getopt::Long to de-hard-code these settings
 
-my ($compiler, %args, $params, $self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command, $test_command);
+my ($compiler, %args, $params, $self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command);
 $compiler = 'gcc';
 $good_gitdir = "$ENV{GIT_WORKDIR}/perl2";
 $workdir = "$ENV{HOMEDIR}/learn/perl/multisect/testing/$compiler";
@@ -24,7 +23,6 @@ $branch = 'blead';
 $configure_command =  q|sh ./Configure -des -Dusedevel|;
 $configure_command   .= qq| -Dcc=$compiler|;
 $configure_command   .=  q| 1>/dev/null 2>&1|;
-$test_command = '';
 
 %args = (
     gitdir  => $good_gitdir,
@@ -33,7 +31,6 @@ $test_command = '';
     last    => $last,
     branch  => $branch,
     configure_command => $configure_command,
-    test_command => $test_command,
     verbose => 1,
 );
 say '\%args';
