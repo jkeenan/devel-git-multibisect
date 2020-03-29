@@ -13,11 +13,8 @@ use Data::Dump qw(dd pp);
 
 # TODO:  Use Getopt::Long to de-hard-code these settings
 
-my $compiler = 'gcc';
-my (%args, $params);
-#my $cwd = cwd();
-
-my ($self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command, $test_command);
+my ($compiler, %args, $params, $self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command, $test_command);
+$compiler = 'gcc';
 $good_gitdir = "$ENV{GIT_WORKDIR}/perl2";
 $workdir = "$ENV{HOMEDIR}/learn/perl/multisect/testing/$compiler";
 $first = 'd7fb2be259ba2ec08e8fa0e88ad0ee860d59dab9';
