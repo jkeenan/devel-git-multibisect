@@ -11,12 +11,23 @@ use File::Spec;
 use Data::Dump qw(dd pp);
 use Tie::File;
 
-# TODO:  Use Getopt::Long to de-hard-code these settings
-# TODO:  process_options() generates 'test_command => 'prove -vb'' by default
-# but for BuildTransitions we want it to be false.  We can simply not test for
-# it.
+=head1 NAME
 
-my $pattern_sought = qr/Opcode\.xs:_:_: warning: overflow in implicit constant conversion \[Woverflow\]/;
+warnings-transitions.pl
+
+=head1 ABSTRACT
+
+Identify Perl 5 commit at which a given build-time warning first appeared
+
+=head1 DESCRIPTION
+
+This program uses methods from L<Devel::Git::MultiBisect::BuildTransitions> to identify the first commit in Perl 5 blead
+
+=cut
+
+# TODO:  Use Getopt::Long to de-hard-code these settings
+
+my $pattern_sought = qr/\QOpcode.xs:_:_: warning: overflow in implicit constant conversion [Woverflow]\E/;
 my ($compiler, %args, $params, $self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command, 
 $make_command);
 $compiler = 'gcc';
