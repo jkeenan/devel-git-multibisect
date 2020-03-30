@@ -10,6 +10,7 @@ use Carp;
 use File::Spec;
 use Data::Dump qw(dd pp);
 use Tie::File;
+use Getopt::Long;
 
 =head1 NAME
 
@@ -21,36 +22,70 @@ Identify Perl 5 commit at which a given build-time warning first appeared
 
 =head1 DESCRIPTION
 
-This program uses methods from L<Devel::Git::MultiBisect::BuildTransitions> to identify the first commit in Perl 5 blead
+This program uses methods from L<Devel::Git::MultiBisect::BuildTransitions> to
+identify the commit in Perl 5 blead where a specified build-time warning first appeared.
 
 =cut
 
-# TODO:  Use Getopt::Long to de-hard-code these settings
-
-my $pattern_sought = qr/\QOpcode.xs:_:_: warning: overflow in implicit constant conversion [Woverflow]\E/;
-my ($compiler, %args, $params, $self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command, 
+my ($compiler, $pattern_sought, $git_checkout_dir, $workdir, $first, $last, $branch, $configure_command,
 $make_command);
-$compiler = 'gcc';
-$good_gitdir = "$ENV{GIT_WORKDIR}/perl2";
-$workdir = "$ENV{HOMEDIR}/learn/perl/multisect/testing/$compiler";
-$first = 'd7fb2be259ba2ec08e8fa0e88ad0ee860d59dab9';
-$last  = '043ae7481cd3d05b453e0830b34573b7eef2aade';
 
-$branch = 'blead';
-$configure_command =  q|sh ./Configure -des -Dusedevel|;
-$configure_command   .= qq| -Dcc=$compiler|;
-$configure_command   .=  q| 1>/dev/null 2>&1|;
-$make_command = qq|make -j$ENV{TEST_JOBS} 1>/dev/null|;
+GetOptions(
+    "compiler=s"            => \$compiler,
+    "git_checkout_dir=s"    => \$git_checkout_dir,
+    "workdir=s"             => \$workdir,
+    "first=s"               => \$first,
+    "last=s"                => \$last,
+    "branch=s"              => \$branch,
+    "configure_command=s"   => \$configure_command,
+    "make_command=s"        => \$make_command,
+    "pattern_sought=s"      => \$pattern_sought,
+) or croak("Error in command-line arguments\n");
 
+my ($quoted_pattern, %args, $params, $self);
+
+# Argument validation
+
+$compiler //= 'gcc';
+unless (defined $git_checkout_dir) {
+    croak "Must provide value for '--git_checkout_dir' on command-line";
+    unless (-d $git_checkout_dir) {
+        croak "git_checkout_dir $git_checkout_dir not found";
+    }
+}
+unless (defined $workdir) {
+    croak "Must provide value for '--workdir' on command-line";
+    unless (-d $workdir) {
+        croak "workdir $workdir not found";
+    }
+}
+unless (defined $workdir and -d $workdir) {
+    croak "work directory $workdir not defined or not found";
+}
+for my $p ($first, $last) {
+    croak "First and last commits (40-character SHA) must be provided on command-line"
+        unless (length($p) == 40);
+}
+$branch //= 'blead';
+$configure_command //=  q|sh ./Configure -des -Dusedevel|
+                     . qq| -Dcc=$compiler|
+                     .  q| 1>/dev/null 2>&1|;
+$make_command //= qq|make -j$ENV{TEST_JOBS} 1>/dev/null|;
+if (defined $pattern_sought) {
+    croak "pattern_sought, if provided, must be of non-zero length"
+        unless length($pattern_sought);
+    $quoted_pattern = qr/\Q$pattern_sought\E/;
+}
+    
 %args = (
-    gitdir  => $good_gitdir,
-    workdir => $workdir,
-    first => $first,
-    last    => $last,
-    branch  => $branch,
-    configure_command => $configure_command,
-    make_command => $make_command,
-    verbose => 1,
+    gitdir              => $git_checkout_dir,
+    workdir             => $workdir,
+    first               => $first,
+    last                => $last,
+    branch              => $branch,
+    configure_command   => $configure_command,
+    make_command        => $make_command,
+    verbose             => 1,
 );
 say '\%args';
 pp(\%args);
@@ -58,7 +93,7 @@ $params = process_options(%args);
 say '$params';
 pp($params);
 
-is($params->{gitdir}, $good_gitdir, "Got expected gitdir");
+is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
 is($params->{workdir}, $workdir, "Got expected workdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
 is($params->{last}, $last, "Got expected last commit to be studied");
@@ -136,25 +171,28 @@ for my $t (@arr) {
         }
     }
 }
-my $first_commit_with_warning = '';
-LOOP: for my $t (@arr) {
-    my $newer = $t->{newer}->{file};
-    say "Examining $newer";
-    my @lines;
-    tie @lines, 'Tie::File', $newer or croak "Unable to Tie::File to $newer";
-    for my $l (@lines) {
-        if ($l =~ m/$pattern_sought/) {
-            $first_commit_with_warning =
-                $multisected_outputs->[$t->{newer}->{idx}]->{commit};
-            untie @lines;
-            last LOOP;
+
+if (defined $pattern_sought) {
+    my $first_commit_with_warning = '';
+    LOOP: for my $t (@arr) {
+        my $newer = $t->{newer}->{file};
+        say "Examining $newer";
+        my @lines;
+        tie @lines, 'Tie::File', $newer or croak "Unable to Tie::File to $newer";
+        for my $l (@lines) {
+            if ($l =~ m/$quoted_pattern/) {
+                $first_commit_with_warning =
+                    $multisected_outputs->[$t->{newer}->{idx}]->{commit};
+                untie @lines;
+                last LOOP;
+            }
         }
+        untie @lines;
     }
-    untie @lines;
+    say "Likely commit with first instance of warning is $first_commit_with_warning";
 }
 
 say "See results in:\n$transitions_report";
-say "Likely commit with first instance of warning is $first_commit_with_warning";
 say "\nFinished";
 
 done_testing();
