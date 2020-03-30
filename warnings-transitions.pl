@@ -133,7 +133,8 @@ LOOP: for my $t (@arr) {
     tie @lines, 'Tie::File', $newer or croak "Unable to Tie::File to $newer";
     for my $l (@lines) {
         if ($l =~ m/$pattern_sought/) {
-            $first_commit_with_warning = $t->{newer}->{md5_hex};
+            $first_commit_with_warning =
+                $multisected_outputs->[$t->{newer}->{idx}]->{commit};
             untie @lines;
             last LOOP;
         }
