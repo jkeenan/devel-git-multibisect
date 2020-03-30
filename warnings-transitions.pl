@@ -11,8 +11,12 @@ use File::Spec;
 use Data::Dump qw(dd pp);
 
 # TODO:  Use Getopt::Long to de-hard-code these settings
+# TODO:  process_options() generates 'test_command => 'prove -vb'' by default
+# but for BuildTransitions we want it to be false.  We can simply not test for
+# it.
 
-my ($compiler, %args, $params, $self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command);
+my ($compiler, %args, $params, $self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command, 
+$make_command);
 $compiler = 'gcc';
 $good_gitdir = "$ENV{GIT_WORKDIR}/perl2";
 $workdir = "$ENV{HOMEDIR}/learn/perl/multisect/testing/$compiler";
@@ -23,6 +27,7 @@ $branch = 'blead';
 $configure_command =  q|sh ./Configure -des -Dusedevel|;
 $configure_command   .= qq| -Dcc=$compiler|;
 $configure_command   .=  q| 1>/dev/null 2>&1|;
+$make_command = qq|make -j$ENV{TEST_JOBS} 1>/dev/null|;
 
 %args = (
     gitdir  => $good_gitdir,
@@ -31,6 +36,7 @@ $configure_command   .=  q| 1>/dev/null 2>&1|;
     last    => $last,
     branch  => $branch,
     configure_command => $configure_command,
+    make_command => $make_command,
     verbose => 1,
 );
 say '\%args';
@@ -45,7 +51,6 @@ is($params->{first}, $first, "Got expected first commit to be studied");
 is($params->{last}, $last, "Got expected last commit to be studied");
 is($params->{branch}, $branch, "Got expected branch");
 is($params->{configure_command}, $configure_command, "Got expected configure_command");
-ok(! $params->{test_command}, "test_command empty as expected");
 ok($params->{verbose}, "verbose requested");
 
 $self = Devel::Git::MultiBisect::BuildTransitions->new($params);
