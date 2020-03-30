@@ -9,12 +9,14 @@ use Test::More;
 use Carp;
 use File::Spec;
 use Data::Dump qw(dd pp);
+use Tie::File;
 
 # TODO:  Use Getopt::Long to de-hard-code these settings
 # TODO:  process_options() generates 'test_command => 'prove -vb'' by default
 # but for BuildTransitions we want it to be false.  We can simply not test for
 # it.
 
+my $pattern_sought = qr/Opcode\.xs:_:_: warning: overflow in implicit constant conversion \[Woverflow\]/;
 my ($compiler, %args, $params, $self, $good_gitdir, $workdir, $first, $last, $branch, $configure_command, 
 $make_command);
 $compiler = 'gcc';
@@ -123,8 +125,25 @@ for my $t (@arr) {
         }
     }
 }
+my $first_commit_with_warning = '';
+LOOP: for my $t (@arr) {
+    my $newer = $t->{newer}->{file};
+    say "Examining $newer";
+    my @lines;
+    tie @lines, 'Tie::File', $newer or croak "Unable to Tie::File to $newer";
+    for my $l (@lines) {
+        if ($l =~ m/$pattern_sought/) {
+            $first_commit_with_warning = $t->{newer}->{md5_hex};
+            untie @lines;
+            last LOOP;
+        }
+    }
+    untie @lines;
+}
 
 say "See results in:\n$transitions_report";
+say "Likely commit with first instance of warning is $first_commit_with_warning";
+say "\nFinished";
 
 done_testing();
 
