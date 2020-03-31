@@ -28,7 +28,7 @@ Identify Perl 5 commit at which a given build-time warning first appeared
         --workdir="$HOMEDIR/learn/perl/multisect/testing/gcc" \
         --first=d7fb2be259ba2ec08e8fa0e88ad0ee860d59dab9 \
         --last=043ae7481cd3d05b453e0830b34573b7eef2aade \
-        --pattern_sought='Opcode.xs:_:_: warning: overflow in implicit constant conversion [Woverflow]'
+        --pattern_sought="Opcode.xs:_:_: warning: overflow in implicit constant conversion [Woverflow]"
 
 =head1 DESCRIPTION
 
@@ -101,10 +101,14 @@ Hence, a warning which appears in captured F<make> output like this:
 
 ... will be called on the command-line like this:
 
-    --pattern_sought='Opcode.xs:_:_: warning: overflow in implicit constant conversion [Woverflow]'
+    --pattern_sought="Opcode.xs:_:_: warning: overflow in implicit constant conversion [Woverflow]"
 
 If this switch is called, a value must be provided.  But if the switch is not
 called, the program will simply avoid running the code which uses the value.
+
+Note:  If the pattern contains any single-quote mark (C<'>) or similar
+characters, you are probably better off double-quoting the pattern on the
+command line (as above).
 
 =head2 Optional Command-Line Switches
 
