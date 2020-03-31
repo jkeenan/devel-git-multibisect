@@ -153,6 +153,70 @@ String holding the invocation of F<make> used in the builds under investigation.
 Once you have installed the Devel-Git-MultiBisect distribution from CPAN, the
 only non-core distribution you need is Data-Dump.
 
+=head1 OUTPUTS
+
+Like all programs using L<Devel::Git::MultiBisect::BuildTransistions>, the
+program prints a log to STDOUT of each commit tested.  In the course of
+testing a given commit, a file is created in the C<workdir> directory which logs the build-time warnings observed.  Example:
+
+    $ 02b85d3.make.warnings.rpt.txt
+    Opcode.xs:_:_: warning: overflow in implicit constant conversion [Woverflow]
+
+When all older-to-newer transitions have been identified, the program creates one additional file in the C<workdir> directory.  This file is named using the compiler used, I<e.g.,> F<transistions.gcc.pl> and looks like this:
+
+    $ cat transitions.gcc.pl
+    {
+      newest => {
+        file => "/home/username/testing/gcc/043ae74.make.warnings.rpt.txt",
+        idx => 7,
+        md5_hex => "157705edf5caf23f889135270fe56ef7",
+      },
+      oldest => {
+        file => "/home/username/testing/gcc/d7fb2be.make.warnings.rpt.txt",
+        idx => 0,
+        md5_hex => "19ae20b703848111b41f08bdbc0b2eb7",
+      },
+      transitions => [
+        {
+          newer => {
+                     file => "/home/username/testing/gcc/aa4119b.make.warnings.rpt.txt",
+                     idx => 1,
+                     md5_hex => "d41d8cd98f00b204e9800998ecf8427e",
+                   },
+          older => {
+                     file => "/home/username/testing/gcc/d7fb2be.make.warnings.rpt.txt",
+                     idx => 0,
+                     md5_hex => "19ae20b703848111b41f08bdbc0b2eb7",
+                   },
+        },
+        {
+          newer => {
+                     file => "/home/username/testing/gcc/02b85d3.make.warnings.rpt.txt",
+                     idx => 2,
+                     md5_hex => "157705edf5caf23f889135270fe56ef7",
+                   },
+          older => {
+                     file => "/home/username/testing/gcc/aa4119b.make.warnings.rpt.txt",
+                     idx => 1,
+                     md5_hex => "d41d8cd98f00b204e9800998ecf8427e",
+                   },
+        },
+      ],
+    }
+
+The elements in the C<transitions> array above are the points where the
+build-time warnings changed.  The user should then manually inspect those
+elements to determine where the warning under investigation first appeared.
+In addition, if a value is provided for C<--pattern_sought>, then the SHA of
+the commit is printed to STDOUT.  However, this functionality should be
+considered experimental and YMMV.  See the discussion of that command-line
+switch above.
+
+=head1 AUTHOR
+
+Copyright 2020 James E Keenan (JKEENAN).  Last revised March 31 2020.
+License:  same terms as Devel::Git::MultiBisect.
+
 =cut
 
 my ($compiler, $pattern_sought, $git_checkout_dir, $workdir, $first, $last, $branch, $configure_command,
