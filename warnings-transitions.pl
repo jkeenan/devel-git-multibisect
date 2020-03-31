@@ -307,6 +307,7 @@ for my $t (@arr) {
 }
 
 if (defined $pattern_sought) {
+    dd($quoted_pattern);
     my $first_commit_with_warning = '';
     LOOP: for my $t (@arr) {
         my $newer = $t->{newer}->{file};
