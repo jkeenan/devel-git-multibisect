@@ -8,7 +8,7 @@ use File::Spec;
 use File::Temp;
 #our @EXPORT_OK = qw( init );
 
-our $VERSION = '0.08';
+our $VERSION = '0.14';
 
 =head1 NAME
 
