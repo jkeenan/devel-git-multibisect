@@ -1,7 +1,7 @@
 package Devel::Git::MultiBisect::AllCommits;
 use strict;
 use warnings;
-use v5.10.0;
+use v5.14.0;
 use parent( qw| Devel::Git::MultiBisect | );
 use Devel::Git::MultiBisect::Opts qw( process_options );
 use Devel::Git::MultiBisect::Auxiliary qw(
