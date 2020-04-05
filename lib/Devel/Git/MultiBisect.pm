@@ -506,7 +506,7 @@ sub _test_one_commit {
             $cmd = qq|cd t; ./perl harness -v $target->{path} >$outputfile 2>&1; cd -|;
         }
         say "Running '$cmd'" if $self->{verbose};
-        system($cmd) and croak "Unable to run test_command";
+        system($cmd) and Carp::confess("Unable to run test_command");
         $outputfile = clean_outputfile($outputfile);
         push @outputs, {
             commit => $commit,
