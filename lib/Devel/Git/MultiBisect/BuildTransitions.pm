@@ -13,7 +13,7 @@ use File::Spec;
 use File::Temp qw( tempdir );
 use Data::Dump qw(dd pp);
 
-our $VERSION = '0.15_001';
+our $VERSION = '0.15_002';
 $VERSION =~ tr/_//d;
 
 =head1 NAME

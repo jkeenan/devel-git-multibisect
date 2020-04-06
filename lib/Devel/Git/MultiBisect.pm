@@ -9,12 +9,13 @@ use Devel::Git::MultiBisect::Auxiliary qw(
     validate_list_sequence
 );
 use Carp;
+use Config;
 use Cwd;
 use File::Spec;
 use File::Temp;
 use List::Util qw(sum);
 
-our $VERSION = '0.15_001';
+our $VERSION = '0.15_002';
 $VERSION =~ tr/_//d;
 
 =head1 NAME
@@ -506,7 +507,7 @@ sub _test_one_commit {
             $cmd = qq|cd t; ./perl harness -v $target->{path} >$outputfile 2>&1; cd -|;
         }
         say "Running '$cmd'" if $self->{verbose};
-        system($cmd) and Carp::confess("Unable to run test_command");
+        system($cmd) and Carp::confess("Unable to run test_command <$cmd> on $Config{myuname}");
         $outputfile = clean_outputfile($outputfile);
         push @outputs, {
             commit => $commit,
