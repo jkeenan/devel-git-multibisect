@@ -320,8 +320,9 @@ sub _build_one_commit {
     );
     my $command_raw = $self->{make_command};
     my $cmd = ($self->{probe} eq 'stderr')
-        ? qq|$command_raw 2> $build_log|
-        : qq|$command_raw > $build_log 2>&1|;
+        ? qq|$command_raw 2>$build_log|
+        : qq|$command_raw >$build_log 2>&1|;
+    say "Actual 'make' command: $cmd" if $self->{verbose};
     my $rv = system($cmd);
     my $filtered_probes_file = $self->_filter_build_log($build_log, $short_sha);
     say "Created $filtered_probes_file" if $self->{verbose};
