@@ -57,13 +57,6 @@ such as the above from an invalid list where 'A' starts to re-appear after
 
 * Architecture
 
-** See how much of this .git stuff can be removed from MANIFEST.  Example.
-
-.git/modules/t/lib/dummyrepo/objects/00/62245858565cf094d92f81211e60517e1e1816
-.git/modules/t/lib/dummyrepo/objects/17/5ac99388aff7399bace6f9112b8fb57607797c
-.git/modules/t/lib/dummyrepo/objects/19/9494ee204dd78ed69490f9e54115b0e83e7d39
-.git/modules/t/lib/dummyrepo/objects/1c/8d83fcff7400da0f68d016e9018a5de134868e
-
 ** Created option such that, during configure_command and make_command,
 errors will be written to a per-commit error file rather than to STDERR.  For
 future release.
