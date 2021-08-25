@@ -48,9 +48,8 @@ large, a test may fail in B<more than one way> over that range.
 If that is the case, then simply asking, I<"When did this file start to
 fail?"> is insufficient.  We may want to capture the test output for each
 commit, or, more usefully, may want to capture the test output only at those
-commits where the output changed.
-
-F<Devel::Git::MultiBisect> provides methods to achieve that objective.  More specifically:
+commits where the output changed.  F<Devel::Git::MultiBisect::AllCommits>
+provides methods for the first of those objectives.  That is:
 
 =over 4
 
