@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Opts qw( process_options );
-#use Test::More tests => 10;
 use Test::More;
 unless (
     $ENV{PERL_LIST_COMPARE_GIT_CHECKOUT_DIR}

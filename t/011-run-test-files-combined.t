@@ -5,7 +5,7 @@ use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Transitions;
 use Devel::Git::MultiBisect::Opts qw( process_options );
-use Test::More qw(no_plan); # tests => 347;
+use Test::More tests => 347;
 use Carp;
 use Cwd;
 use File::Spec;
@@ -411,7 +411,7 @@ SKIP: {
 note("Block 4");
 
 SKIP: {
-    skip "No git checkout of dummyrepo found", 197 
+    skip "No git checkout of dummyrepo found", 197
     unless (
         $ENV{PERL_DUMMYREPO_GIT_CHECKOUT_DIR}
             and
