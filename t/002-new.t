@@ -4,16 +4,29 @@ use strict;
 use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Opts qw( process_options );
-use Test::More tests => 10;
+use Test::More;
+unless (
+    $ENV{PERL_LIST_COMPARE_GIT_CHECKOUT_DIR}
+        and
+    (-d $ENV{PERL_LIST_COMPARE_GIT_CHECKOUT_DIR})
+) {
+    plan skip_all => "No git checkout of List-Compare found";
+}
+else {
+    plan tests => 10;
+}
+use Carp;
 use Cwd;
 use File::Spec;
 
-my $cwd = cwd();
+my $startdir = cwd();
+chdir $ENV{PERL_LIST_COMPARE_GIT_CHECKOUT_DIR}
+    or croak "Unable to change to List-Compare checkout directory";
 
 my (%args, $params, $self);
 
 my ($good_gitdir, $good_last_before, $good_last);
-$good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
+$good_gitdir = cwd();
 $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
 $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
 %args = (
@@ -90,3 +103,7 @@ $params = process_options(%args);
 $self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
 isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
+
+chdir $startdir or croak "Unable to return to $startdir";
+
+__END__
