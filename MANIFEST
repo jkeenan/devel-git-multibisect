@@ -266,6 +266,7 @@ t/003-get-commits-range.t
 t/004-set-targets.t
 t/007-auxiliary.t
 t/010-run-test-files-combined.t
+t/011-run-test-files-combined.t
 t/lib/dummyrepo/.git
 t/lib/dummyrepo/.gitignore
 t/lib/dummyrepo/Changes
