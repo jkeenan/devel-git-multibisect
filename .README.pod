@@ -48,11 +48,11 @@ discussion.
 
 =head1 PREREQUISITES
 
-Perl 5.10 or higher.
+Perl 5.14 or higher.
 
 CPAN module F<Devel::CheckBin> needed for C<perl Makefile.PL>.
 
-CPAN modules F<Capture::Tiny> and F<IO::CaptureOutput> needed for testing only.
+CPAN module F<Capture::Tiny> needed for testing only.
 
 F<git>.
 

@@ -6,9 +6,8 @@ use Carp;
 use Cwd;
 use File::Spec;
 use File::Temp;
-#our @EXPORT_OK = qw( init );
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 =head1 NAME
 
