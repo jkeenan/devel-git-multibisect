@@ -1,5 +1,4 @@
 .gitignore
-.gitmodules
 Changes
 examples/devel-git-multibisect-transitions-example.pod
 examples/generalized-multisection.t
