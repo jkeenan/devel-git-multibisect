@@ -17,11 +17,11 @@ note("Former t/005-run-test-files-on-one-commit.t");
 
 {
     my $cwd = cwd();
-    
+
     my (%args, $params, $self);
     my ($good_gitdir, $good_last_before, $good_last);
     my ($target_args, $full_targets);
-    
+
     $good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
     $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
     $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
@@ -35,7 +35,7 @@ note("Former t/005-run-test-files-on-one-commit.t");
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
     ok($self, "new() returned true value");
     isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
-    
+
     $target_args = [
         File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
         File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
@@ -48,7 +48,7 @@ note("Former t/005-run-test-files-on-one-commit.t");
         [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
         "Got expected full paths to target files for testing",
     );
-    
+
     my ($commits, $outputs, $timings);
     $commits = $self->get_commits_range();
     $outputs = $self->run_test_files_on_one_commit($commits->[0]);
@@ -60,7 +60,7 @@ note("Former t/005-run-test-files-on-one-commit.t");
     }
     ok(! defined($self->get_timings()),
         "get_timings() returned undefined value");
-    
+
     # Try with no arg to run_test_files_on_one_commit
     $target_args = [ File::Spec->catdir( qw| t 46_func_hashes_alt_dual_unsorted.t | ) ];
     $full_targets = $self->set_targets($target_args);
@@ -78,9 +78,9 @@ note("Former t/005-run-test-files-on-one-commit.t");
     for my $f (map { $_->{file} } @{$outputs}) {
         ok(-f $f, "run_test_files_on_one_commit generated $f");
     }
-    
+
     note("Test excluded targets argument");
-    
+
     $target_args = [
         File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
         File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
@@ -88,9 +88,9 @@ note("Former t/005-run-test-files-on-one-commit.t");
     $full_targets = $self->set_targets($target_args);
     ok($full_targets, "set_targets() returned true value");
     is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
-    
+
     my $excluded_targets;
-    
+
     $excluded_targets = [
         File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
     ];
@@ -105,7 +105,7 @@ note("Former t/005-run-test-files-on-one-commit.t");
     for my $f (map { $_->{file} } @{$outputs}) {
         ok(-f $f, "run_test_files_on_one_commit generated $f");
     }
-    
+
     $excluded_targets = [];
     $outputs = $self->run_test_files_on_one_commit($commits->[0], $excluded_targets);
     ok($outputs, "run_test_files_on_one_commit() returned true value");
@@ -118,9 +118,9 @@ note("Former t/005-run-test-files-on-one-commit.t");
     for my $f (map { $_->{file} } @{$outputs}) {
         ok(-f $f, "run_test_files_on_one_commit generated $f");
     }
-    
+
     {
-    
+
         $excluded_targets = { File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |) => 1 };
         local $@;
         eval {
@@ -139,15 +139,15 @@ note("Former t/005-run-test-files-on-all-commits.t");
 
 {
     my $cwd = cwd();
-    
+
     ##### run_test_files_on_all_commits() #####
-    
+
     my (%args, $params, $self);
     my ($good_gitdir, $good_last_before, $good_last);
     my ($target_args, $full_targets);
     my ($rv, $transitions, $all_outputs, $all_outputs_count, $expected_count, $first_element);
     my ($timings);
-    
+
     $good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
     $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
     $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
@@ -161,7 +161,7 @@ note("Former t/005-run-test-files-on-all-commits.t");
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
     ok($self, "new() returned true value");
     isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
-    
+
     $target_args = [
         File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
         File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
@@ -174,7 +174,7 @@ note("Former t/005-run-test-files-on-all-commits.t");
         [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
         "Got expected full paths to target files for testing",
     );
-    
+
     {
         # error case: premature run of get_digests_by_file_and_commit()
         local $@;
@@ -184,7 +184,7 @@ note("Former t/005-run-test-files-on-all-commits.t");
             "Got expected error message for premature get_digests_by_file_and_commit()"
         );
     }
-    
+
     $all_outputs = $self->run_test_files_on_all_commits();
     ok($all_outputs, "run_test_files_on_all_commits() returned true value");
     is(ref($all_outputs), 'ARRAY', "run_test_files_on_all_commits() returned array ref");
@@ -205,9 +205,9 @@ note("Former t/005-run-test-files-on-all-commits.t");
     is($timings->{runs}, scalar(@{$self->get_commits_range}),
         "Got expected number of runs: " . scalar(@{$self->get_commits_range}));
     ok(exists $timings->{mean}, "get_timings(): mean time recorded");
-    
+
     ##### get_digests_by_file_and_commit() #####
-    
+
     $rv = $self->get_digests_by_file_and_commit();
     ok($rv, "get_digests_by_file_and_commit() returned true value");
     is(ref($rv), 'HASH', "get_digests_by_file_and_commit() returned hash ref");
@@ -224,10 +224,10 @@ note("Former t/005-run-test-files-on-all-commits.t");
     for my $k ( qw| commit file md5_hex | ) {
         ok(exists $rv->{$first_element}->[0]->{$k}, "Record has '$k' element");
     }
-    
-    
+
+
     ##### examine_transitions #####
-    
+
     $transitions = $self->examine_transitions($rv);
     ok($transitions, "examine_transitions() returned true value");
     is(ref($transitions), 'HASH', "examine_transitions() returned hash ref");
@@ -264,15 +264,15 @@ note("Former t/008-allcommits.t");
 
 {
     my $cwd = cwd();
-    
+
     my (%args, $params, $self);
     my ($good_gitdir, $good_last_before, $good_last);
     my ($target_args, $full_targets);
     my ($rv, $transitions, $all_outputs, $all_outputs_count, $expected_count, $first_element);
-    
+
     # So that we have a basis for comparison, we'll first run already tested
     # methods over the 'dummyrepo'.
-    
+
     $good_gitdir = File::Spec->catdir($cwd, qw| t lib dummyrepo |);
     $good_last_before = '92a79a3dc5bba45930a52e4affd91551aa6c78fc';
     $good_last = 'efdd091cf3690010913b849dcf4fee290f399009';
@@ -284,13 +284,13 @@ note("Former t/008-allcommits.t");
     );
     $params = process_options(%args);
     $target_args = [ File::Spec->catdir( qw| t 001_load.t | ) ];
-    
+
     note("First object");
-    
+
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
     ok($self, "new() returned true value");
     isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
-    
+
     $full_targets = $self->set_targets($target_args);
     ok($full_targets, "set_targets() returned true value");
     is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
@@ -299,7 +299,7 @@ note("Former t/008-allcommits.t");
         [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
         "Got expected full paths to target files for testing",
     );
-    
+
     $all_outputs = $self->run_test_files_on_all_commits();
     ok($all_outputs, "run_test_files_on_all_commits() returned true value");
     is(ref($all_outputs), 'ARRAY', "run_test_files_on_all_commits() returned array ref");
@@ -314,7 +314,7 @@ note("Former t/008-allcommits.t");
         scalar(@{$self->get_commits_range}) * scalar(@{$target_args}),
         "Got expected number of output files"
     );
-    
+
     $rv = $self->get_digests_by_file_and_commit();
     ok($rv, "get_digests_by_file_and_commit() returned true value");
     is(ref($rv), 'HASH', "get_digests_by_file_and_commit() returned hash ref");
@@ -331,7 +331,7 @@ note("Former t/008-allcommits.t");
     for my $k ( qw| commit file md5_hex | ) {
         ok(exists $rv->{$first_element}->[0]->{$k}, "Record has '$k' element");
     }
-    
+
     $transitions = $self->examine_transitions($rv);
     ok($transitions, "examine_transitions() returned true value");
     is(ref($transitions), 'HASH', "examine_transitions() returned hash ref");
@@ -349,19 +349,19 @@ note("Former t/008-allcommits.t");
     for my $k ( qw| older newer compare | ) {
         ok(exists $transitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
     }
-    
+
     #pp($transitions);
-    
+
     undef $self;
-    
+
     #######################################
-    
+
     note("Second object");
-    
+
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
     ok($self, "new() returned true value");
     isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
-    
+
     $full_targets = $self->set_targets($target_args);
     ok($full_targets, "set_targets() returned true value");
     is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
@@ -380,19 +380,19 @@ note("Former t/009-multisect.t");
 
 {
     my $cwd = cwd();
-    
+
     my (%args, $params);
     my ($good_gitdir, $good_first, $good_last);
     my ($target_args, $full_targets);
     my ($rv, $all_outputs, $all_outputs_count, $expected_count, $first_element);
-    
+
     # In this test file we'll use a different (newer) range of commits in the
     # 'dummyrepo' repository.  In this range there will exist 2 test files for
     # targeting.
-    
+
     # So that we have a basis for comparison, we'll first run already tested
     # methods over the 'dummyrepo'.
-    
+
     $good_gitdir = File::Spec->catdir($cwd, qw| t lib dummyrepo |);
     $good_first = 'd2bd2c75a2fd9afd3ac65a808eea2886d0e41d01';
     $good_last = '199494ee204dd78ed69490f9e54115b0e83e7d39';
@@ -407,14 +407,14 @@ note("Former t/009-multisect.t");
         File::Spec->catdir( qw| t 001_load.t | ),
         File::Spec->catdir( qw| t 002_add.t  | ),
     ];
-    
+
     note("First object");
-    
+
     my ($ACself, $ACtransitions);
     $ACself = Devel::Git::MultiBisect::AllCommits->new($params);
     ok($ACself, "new() returned true value");
     isa_ok($ACself, 'Devel::Git::MultiBisect::AllCommits');
-    
+
     $full_targets = $ACself->set_targets($target_args);
     ok($full_targets, "set_targets() returned true value");
     is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
@@ -423,7 +423,7 @@ note("Former t/009-multisect.t");
         [ map { File::Spec->catfile($ACself->{gitdir}, $_) } @{$target_args} ],
         "Got expected full paths to target files for testing",
     );
-    
+
     $all_outputs = $ACself->run_test_files_on_all_commits();
     ok($all_outputs, "run_test_files_on_all_commits() returned true value");
     is(ref($all_outputs), 'ARRAY', "run_test_files_on_all_commits() returned array ref");
@@ -438,7 +438,7 @@ note("Former t/009-multisect.t");
         scalar(@{$ACself->get_commits_range}) * scalar(@{$target_args}),
         "Got expected number of output files"
     );
-    
+
     $rv = $ACself->get_digests_by_file_and_commit();
     ok($rv, "get_digests_by_file_and_commit() returned true value");
     is(ref($rv), 'HASH', "get_digests_by_file_and_commit() returned hash ref");
@@ -455,7 +455,7 @@ note("Former t/009-multisect.t");
     for my $k ( qw| commit file md5_hex | ) {
         ok(exists $rv->{$first_element}->[0]->{$k}, "Record has '$k' element");
     }
-    
+
     $ACtransitions = $ACself->examine_transitions($rv);
     ok($ACtransitions, "examine_transitions() returned true value");
     is(ref($ACtransitions), 'HASH', "examine_transitions() returned hash ref");
@@ -473,20 +473,20 @@ note("Former t/009-multisect.t");
     for my $k ( qw| older newer compare | ) {
         ok(exists $ACtransitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
     }
-    
+
     #######################################
-    
+
     note("Second object");
-    
+
     my ($Tself, $Ttransitions, $commit_range, $idx, $initial_multisected_outputs, $initial_multisected_outputs_undef_count);
     my ($multisected_outputs, $timings);
-    
+
     $Tself = Devel::Git::MultiBisect::Transitions->new({ %{$params}, verbose => 1 });
     ok($Tself, "new() returned true value");
     isa_ok($Tself, 'Devel::Git::MultiBisect::Transitions');
-    
+
     $commit_range = $Tself->get_commits_range;
-    
+
     $full_targets = $Tself->set_targets($target_args);
     ok($full_targets, "set_targets() returned true value");
     is(ref($full_targets), 'ARRAY', "set_targets() returned array ref");
@@ -495,14 +495,14 @@ note("Former t/009-multisect.t");
         [ map { File::Spec->catfile($Tself->{gitdir}, $_) } @{$target_args} ],
         "Got expected full paths to target files for testing",
     );
-    
+
     note("_prepare_for_multisection()");
-    
+
     # This method, while publicly available and therefore warranting testing, is
     # now called within multisect_all_targets() and only needs to be explicitly
     # called if, for some reason (e.g., testing), you wish to call
     # _multisect_one_target() by itself.
-    
+
     {
         # error case: premature run of _multisect_one_target()
         local $@;
@@ -512,7 +512,7 @@ note("Former t/009-multisect.t");
             "Got expected error message for premature _multisect_one_target()"
         );
     }
-    
+
     $initial_multisected_outputs = $Tself->_prepare_for_multisection();
     ok($initial_multisected_outputs, "_prepare_for_multisection() returned true value");
     is(ref($initial_multisected_outputs), 'HASH', "_prepare_for_multisection() returned hash ref");
@@ -529,7 +529,7 @@ note("Former t/009-multisect.t");
         ok(! $initial_multisected_outputs_undef_count,
             "After _prepare_for_multisection(), internal elements for $target are all as yet undefined");
     }
-    
+
     {
         {
             local $@;
@@ -544,9 +544,9 @@ note("Former t/009-multisect.t");
                 "_multisect_one_target: got expected failure message for lack of argument");
         }
     }
-    
+
     note("multisect_all_targets()");
-    
+
     $rv = $Tself->multisect_all_targets();
     ok($rv, "multisect_all_targets() returned true value");
     $timings = $Tself->get_timings();
@@ -554,9 +554,9 @@ note("Former t/009-multisect.t");
     ok(exists $timings->{runs},
         "get_timings(): number of runs recorded: $timings->{runs}");
     ok(exists $timings->{mean}, "get_timings(): mean time recorded");
-    
+
     note("get_multisected_outputs()");
-    
+
     $multisected_outputs = $Tself->get_multisected_outputs();
     is(ref($multisected_outputs), 'HASH',
         "get_multisected_outputs() returned hash reference");
@@ -571,9 +571,9 @@ note("Former t/009-multisect.t");
                 "Each element is either undefined or a hash ref with expected keys");
         }
     }
-    
+
     note("inspect_transitions()");
-    
+
     $Ttransitions = $Tself->inspect_transitions();
     is(ref($Ttransitions), 'HASH',
         "get_multisected_outputs() returned hash reference");
@@ -608,9 +608,9 @@ note("Former t/009-multisect.t");
             }
         }
     }
-    
+
     note("Comparison of AllCommits vs. Transitions on same repository and commit range");
-    
+
     my (%AC, %T);
     for my $target (sort keys %{$ACtransitions}) {
         for my $commit (@{$ACtransitions->{$target}}) {
@@ -624,11 +624,11 @@ note("Former t/009-multisect.t");
         }
     }
     is_deeply(\%AC, \%T, "Same list of indexes of transitional commits via both classes");
-    
+
     note("Using Devel::Git::MultiBisect::Transitions on a commit range with no transitions");
-    
+
     my ($self, $good_last_before, $transitions);
-    
+
     $good_gitdir = File::Spec->catdir($cwd, qw| t lib list-compare |);
     $good_last_before = '2614b2c2f1e4c10fe297acbbea60cf30e457e7af';
     $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
@@ -638,11 +638,11 @@ note("Former t/009-multisect.t");
         last => $good_last,
     );
     $params = process_options(%args);
-    
+
     $self = Devel::Git::MultiBisect::Transitions->new($params);
     ok($self, "new() returned true value");
     isa_ok($self, 'Devel::Git::MultiBisect::Transitions');
-    
+
     $target_args = [
         File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
         File::Spec->catdir( qw| t 45_func_hashes_alt_dual_sorted.t |),
@@ -655,12 +655,12 @@ note("Former t/009-multisect.t");
         [ map { File::Spec->catfile($self->{gitdir}, $_) } @{$target_args} ],
         "Got expected full paths to target files for testing",
     );
-    
+
     $rv = $self->multisect_all_targets();
     ok($rv, "multisect_all_targets() returned true value");
-    
+
     note("get_multisected_outputs()");
-    
+
     $multisected_outputs = $self->get_multisected_outputs();
     is(ref($multisected_outputs), 'HASH',
         "get_multisected_outputs() returned hash reference");
@@ -673,7 +673,7 @@ note("Former t/009-multisect.t");
                 "Each element is either undefined or a hash ref with expected keys");
         }
     }
-    
+
     $transitions = $self->inspect_transitions();
     is(ref($transitions), 'HASH',
         "get_multisected_outputs() returned hash reference");
