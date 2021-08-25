@@ -36,7 +36,6 @@ my %WriteMakefileArgs = (
     TEST_REQUIRES => {
         'Test::Simple' => 0.44,
         'Capture::Tiny' => 0,
-        'IO::CaptureOutput' => 0,
     },
     (eval { ExtUtils::MakeMaker->VERSION(6.46) } ? ( META_MERGE => {
       'meta-spec' => { version => 2 },
