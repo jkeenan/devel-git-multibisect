@@ -1,5 +1,6 @@
 .gitignore
 Changes
+CONTRIBUTING.md
 examples/devel-git-multibisect-transitions-example.pod
 examples/generalized-multisection.t
 examples/README

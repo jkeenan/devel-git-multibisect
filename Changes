@@ -59,3 +59,11 @@ Revision history for Perl module Devel::Git::MultiBisect
 
 0.15 Sat Aug 21 16:02:02 UTC 2021
     - Enforce requirement of Perl 5.14
+
+0.16 Wed Aug 25 23:33:44 UTC 2021
+    - No change in functionality.
+    - Testing no longer relies on git submodules shipped to repository or
+      within CPAN distribution.  Instead, testers must do separate checkouts
+      of certain GitHub locations, place paths to those checkouts in 
+      environmental variables and invoke those envvars before running tests.
+      (See CONTRIBUTING.md for details.)
