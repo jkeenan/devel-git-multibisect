@@ -1,5 +1,5 @@
 # -*- perl -*-
-# t/012-build-transitions.t
+# t/012-build-transitions-probe-error.t
 use strict;
 use warnings;
 use Devel::Git::MultiBisect::BuildTransitions;
