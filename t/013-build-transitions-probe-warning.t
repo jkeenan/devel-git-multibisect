@@ -1,5 +1,5 @@
 # -*- perl -*-
-# t/012-build-transitions-probe-error.t
+# t/013-build-transitions-probe-warning.t
 use 5.14.0;
 use warnings;
 use Devel::Git::MultiBisect::BuildTransitions;
@@ -13,7 +13,7 @@ unless (
     plan skip_all => "No git checkout of perl found";
 }
 else {
-    plan tests => 57;
+    plan tests => 42;
 }
 use Carp;
 use Cwd;
@@ -21,7 +21,7 @@ use File::Spec;
 use File::Temp qw( tempdir );
 use lib qw( t/lib );
 use Helpers qw( test_report );
-use Data::Dump;
+use Data::Dump qw(dd pp);
 
 my $startdir = cwd();
 
@@ -38,17 +38,13 @@ $git_checkout_dir = cwd();
 #$workdir = tempdir( CLEANUP => 1 );
 $workdir = tempdir(); # Permit CLEANUP only when we're set
 
-#$first = 'ab340fffd3aab332a1b31d7cf502274d67d1d4a5';
-#$last =  'b54ed1c793fbfd1e9a6bdf117dea77bfac8ba4a4';
-#$branch = 'blead';
+$branch = 'blead';
+$first = 'e3f4f321290813be202cfd9ce45f4ef5b3d96a2f';
+$last  = '43e5ab2e34fe55efd182c925309a4cf5ff2ec540';
 
-$branch = 'squash-multibisect-probe-errors-retain-20210827';
-$first = '2623ca3c173506cabaa0bad66c0e8ed775985f19';
-$last =  '17053877bc526a49bfb8d3974b2ca7528c151b3e';
-
-$configure_command = 'sh ./Configure -des -Dusedevel';
-$configure_command   .= " -Dcc=$compiler -Accflags=-DPERL_GLOBAL_STRUCT";
-$configure_command   .= ' 1>/dev/null 2>&1';
+$configure_command =  q|sh ./Configure -des -Dusedevel|;
+$configure_command   .= qq| -Dcc='$compiler -m32' -Dlibs='-lpthread -lnsl -ldl -lm -lcrypt -lutil -lc'|;
+$configure_command   .=  q| 1>/dev/null 2>&1|;
 $test_command = '';
 
 %args = (
@@ -59,7 +55,7 @@ $test_command = '';
     branch  => $branch,
     configure_command => $configure_command,
     test_command => $test_command,
-    verbose => 1,
+    verbose => 0,
 );
 $params = process_options(%args);
 #Data::Dump::pp($params);
@@ -70,7 +66,7 @@ is($params->{last}, $last, "Got expected last commit to be studied");
 is($params->{branch}, $branch, "Got expected branch");
 is($params->{configure_command}, $configure_command, "Got expected configure_command");
 ok(! $params->{test_command}, "test_command empty as expected");
-ok($params->{verbose}, "verbose requested");
+ok(! $params->{verbose}, "verbose not requested");
 
 $self = Devel::Git::MultiBisect::BuildTransitions->new($params);
 ok($self, "new() returned true value");
@@ -89,60 +85,20 @@ is($this_commit_range->[0], $first, "Got expected first commit in range");
 is($this_commit_range->[-1], $last, "Got expected last commit in range");
 note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
 
-note("Test for bad arguments to multisect_builds()");
+note("get_multisected_outputs()");
 
-{
-    local $@;
-    eval { $rv = $self->multisect_builds( [ qw( probe error ) ] ); };
-    like($@, qr/Argument passed to multisect_builds\(\) must be hashref/,
-        "Got expected error for bad argument to multisect_builds()");
-}
-
-{
-    local $@;
-    my $bad_key = 'foo';
-    eval { $rv = $self->multisect_builds( { $bad_key => 'bar' } ); };
-
-    like($@, qr/\QInvalid key '$bad_key' in hashref passed to multisect_builds()\E/,
-        "Got expected error for bad argument to multisect_builds()");
-}
-
-{
-    local $@;
-    my $bad_value = 'foo';
-    eval { $rv = $self->multisect_builds( { probe => $bad_value } ); };
-
-    like($@, qr/\QInvalid value '$bad_value' in 'probe' element in hashref passed to multisect_builds()\E/,
-        "Got expected error for bad argument to multisect_builds()");
-}
-
-$rv = $self->multisect_builds( { probe => 'error' } );
+$rv = $self->multisect_builds( { probe => 'warning' } );
 ok($rv, "multisect_builds() returned true value");
 
 note("get_multisected_outputs()");
 
 $multisected_outputs = $self->get_multisected_outputs();
-#print STDERR "AAA: self\n";
-#Data::Dump::pp $self;
-#print STDERR "BBB: multisected_outputs\n";
-#Data::Dump::pp $multisected_outputs;
+Data::Dump::pp($multisected_outputs);
+
 is(ref($multisected_outputs), 'ARRAY',
     "get_multisected_outputs() returned array reference");
 is(scalar(@{$multisected_outputs}), scalar(@{$self->{commits}}),
     "get_multisected_outputs() has one element for each commit");
-@invalids = ();
-for my $r (@{$multisected_outputs}) {
-    if (! test_report($r)) {
-        push @invalids, $r;
-    }
-}
-if (@invalids) {
-    fail("Expectation as to elements not met");
-    Data::Dump::pp(\@invalids);
-}
-else {
-    pass("Each element is either undefined or a hash ref with expected keys");
-}
 
 note("inspect_transitions()");
 
@@ -183,8 +139,6 @@ for my $t (@arr) {
         }
     }
 }
-
-# clean up
 
 chdir $startdir or croak "Unable to return to $startdir";
 
