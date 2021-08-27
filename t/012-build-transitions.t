@@ -13,7 +13,7 @@ unless (
     plan skip_all => "No git checkout of perl found";
 }
 else {
-    plan tests => 54;
+    plan tests => 57;
 }
 use Carp;
 use Cwd;
@@ -21,7 +21,7 @@ use File::Spec;
 use File::Temp qw( tempdir );
 use lib qw( t/lib );
 use Helpers qw( test_report );
-use Data::Dump qw( dd pp );
+use Data::Dump;
 
 # TODO This is taking ~ 17 min to run; can I shorten it?
 
@@ -59,7 +59,7 @@ $test_command = '';
     verbose => 1,
 );
 $params = process_options(%args);
-#pp($params);
+#Data::Dump::pp($params);
 is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
 is($params->{workdir}, $workdir, "Got expected workdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
@@ -85,16 +85,43 @@ is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
 is($this_commit_range->[0], $first, "Got expected first commit in range");
 is($this_commit_range->[-1], $last, "Got expected last commit in range");
 
+note("Test for bad arguments to multisect_builds()");
+
+{
+    local $@;
+    eval { $rv = $self->multisect_builds( [ qw( probe error ) ] ); };
+    like($@, qr/Argument passed to multisect_builds\(\) must be hashref/,
+        "Got expected error for bad argument to multisect_builds()");
+}
+
+{
+    local $@;
+    my $bad_key = 'foo';
+    eval { $rv = $self->multisect_builds( { $bad_key => 'bar' } ); };
+
+    like($@, qr/\QInvalid key '$bad_key' in hashref passed to multisect_builds()\E/,
+        "Got expected error for bad argument to multisect_builds()");
+}
+
+{
+    local $@;
+    my $bad_value = 'foo';
+    eval { $rv = $self->multisect_builds( { probe => $bad_value } ); };
+
+    like($@, qr/\QInvalid value '$bad_value' in 'probe' element in hashref passed to multisect_builds()\E/,
+        "Got expected error for bad argument to multisect_builds()");
+}
+
 $rv = $self->multisect_builds( { probe => 'error' } );
 ok($rv, "multisect_builds() returned true value");
 
 note("get_multisected_outputs()");
 
 $multisected_outputs = $self->get_multisected_outputs();
-print STDERR "AAA: self\n";
-pp $self;
-print STDERR "BBB: multisected_outputs\n";
-pp $multisected_outputs;
+#print STDERR "AAA: self\n";
+#Data::Dump::pp $self;
+#print STDERR "BBB: multisected_outputs\n";
+#Data::Dump::pp $multisected_outputs;
 is(ref($multisected_outputs), 'ARRAY',
     "get_multisected_outputs() returned array reference");
 is(scalar(@{$multisected_outputs}), scalar(@{$self->{commits}}),
@@ -107,7 +134,7 @@ for my $r (@{$multisected_outputs}) {
 }
 if (@invalids) {
     fail("Expectation as to elements not met");
-    pp(\@invalids);
+    Data::Dump::pp(\@invalids);
 }
 else {
     pass("Each element is either undefined or a hash ref with expected keys");
@@ -121,7 +148,7 @@ my $transitions_report = File::Spec->catfile($workdir, "transitions.$compiler.pl
 open my $TR, '>', $transitions_report
     or croak "Unable to open $transitions_report for writing";
 my $old_fh = select($TR);
-dd($transitions);
+Data::Dump::dd($transitions);
 select($old_fh);
 close $TR or croak "Unable to close $transitions_report after writing";
 
