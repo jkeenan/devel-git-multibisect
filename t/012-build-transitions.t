@@ -40,9 +40,14 @@ $git_checkout_dir = cwd();
 #$workdir = tempdir( CLEANUP => 1 );
 $workdir = tempdir(); # Permit CLEANUP only when we're set
 
-$first = 'ab340fffd3aab332a1b31d7cf502274d67d1d4a5';
-$last =  'b54ed1c793fbfd1e9a6bdf117dea77bfac8ba4a4';
-$branch = 'blead';
+#$first = 'ab340fffd3aab332a1b31d7cf502274d67d1d4a5';
+#$last =  'b54ed1c793fbfd1e9a6bdf117dea77bfac8ba4a4';
+#$branch = 'blead';
+
+$branch = 'squash-multibisect-probe-errors-retain-20210827';
+$first = '2623ca3c173506cabaa0bad66c0e8ed775985f19';
+$last =  '17053877bc526a49bfb8d3974b2ca7528c151b3e';
+
 $configure_command = 'sh ./Configure -des -Dusedevel';
 $configure_command   .= " -Dcc=$compiler -Accflags=-DPERL_GLOBAL_STRUCT";
 $configure_command   .= ' 1>/dev/null 2>&1';
