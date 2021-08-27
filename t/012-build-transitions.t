@@ -19,7 +19,6 @@ use Carp;
 use Cwd;
 use File::Spec;
 use File::Temp qw( tempdir );
-#use List::Util qw(first);
 use lib qw( t/lib );
 use Helpers qw( test_report );
 use Data::Dump qw( dd pp );
@@ -35,6 +34,7 @@ my (%args, $params, $self);
 my ($first, $last, $branch, $configure_command, $test_command);
 my ($git_checkout_dir, $workdir, $rv, $this_commit_range);
 my ($multisected_outputs, @invalids);
+my $compiler = 'clang';
 
 $git_checkout_dir = cwd();
 #$workdir = tempdir( CLEANUP => 1 );
@@ -44,8 +44,7 @@ $first = 'ab340fffd3aab332a1b31d7cf502274d67d1d4a5';
 $last =  'b54ed1c793fbfd1e9a6bdf117dea77bfac8ba4a4';
 $branch = 'blead';
 $configure_command = 'sh ./Configure -des -Dusedevel';
-#$configure_command   .= " -Dcc=$compiler -Accflags=-DPERL_GLOBAL_STRUCT";
-$configure_command   .= " -Accflags=-DPERL_GLOBAL_STRUCT";
+$configure_command   .= " -Dcc=$compiler -Accflags=-DPERL_GLOBAL_STRUCT";
 $configure_command   .= ' 1>/dev/null 2>&1';
 $test_command = '';
 
@@ -86,7 +85,7 @@ is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
 is($this_commit_range->[0], $first, "Got expected first commit in range");
 is($this_commit_range->[-1], $last, "Got expected last commit in range");
 
-$rv = $self->multisect_builds();
+$rv = $self->multisect_builds( { probe => 'error' } );
 ok($rv, "multisect_builds() returned true value");
 
 note("get_multisected_outputs()");
@@ -118,7 +117,7 @@ note("inspect_transitions()");
 
 my $transitions = $self->inspect_transitions();
 
-my $transitions_report = File::Spec->catfile($workdir, "transitions.pl");
+my $transitions_report = File::Spec->catfile($workdir, "transitions.$compiler.pl");
 open my $TR, '>', $transitions_report
     or croak "Unable to open $transitions_report for writing";
 my $old_fh = select($TR);
