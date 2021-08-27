@@ -24,6 +24,7 @@ t/003-get-commits-range.t
 t/004-set-targets.t
 t/007-auxiliary.t
 t/011-run-test-files-combined.t
+t/012-build-transitions.t
 t/lib/Helpers.pm
 t/lib/output1.txt
 t/lib/output2.txt
