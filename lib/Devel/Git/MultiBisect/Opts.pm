@@ -61,10 +61,10 @@ sub process_options {
     }
     my $found_make = $Config{make};
     if ($args{verbose}) {
-        print "Arguments provided to process_options():\n";
-        print Dumper \%args;
-        print "\n";
-        print q|For 'make', %Config has: |, $found_make, "\n";
+        say "Arguments provided to process_options():";
+        say Dumper \%args;
+        say "";
+        say q|For 'make', %Config has: |, $found_make;
     }
 
     my %defaults = (
@@ -98,12 +98,12 @@ sub process_options {
     ) or croak("Error in command line arguments\n");
 
     if ($opts{verbose}) {
-        print "Command-line arguments:\n";
+        say "Command-line arguments:";
         my %defined_opts;
         for my $k (keys %opts) {
             $defined_opts{$k} = $opts{$k} if defined $opts{$k};
         }
-        print Dumper \%defined_opts;
+        say Dumper \%defined_opts;
     }
 
     # Final selection of params starts with defaults.
