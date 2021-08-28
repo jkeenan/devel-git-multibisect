@@ -31,13 +31,10 @@ to prepare parameters for Devel::Git::MultiBisect.
 
 C<process_options()> takes as arguments an optional list of key-value pairs.
 This approach is useful in testing the subroutine but is not expected to be
-used otherwise.  C<process_options()> is a wrapper around
-Getopt::Long::GetOptions(), so is devoted to processing command-line arguments
-provided, for example, to the command-line utility F<multisect> (not yet
-created, but to be included in a future version of this CPAN distribution).
+used otherwise.
 
-The subroutine returns a reference to a hash populated with values in the
-following order:
+C<process_options()> is a wrapper around C<Getopt::Long::GetOptions()>.  It
+returns a reference to a hash populated with values in the following order:
 
 =over 4
 
