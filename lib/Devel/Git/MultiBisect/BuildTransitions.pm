@@ -1,7 +1,6 @@
 package Devel::Git::MultiBisect::BuildTransitions;
-use strict;
-use warnings;
 use v5.14.0;
+use warnings;
 use parent ( qw| Devel::Git::MultiBisect | );
 use Devel::Git::MultiBisect::Auxiliary qw(
     hexdigest_one_file
@@ -317,7 +316,6 @@ sub _build_one_commit {
 
 sub _filter_build_log {
     my ($self, $buildlog, $short_sha) = @_;
-    say "short_sha: $short_sha";
     my $tdir = tempdir( CLEANUP => 1 );
 
     if ($self->{probe} eq 'error') {
@@ -376,7 +374,6 @@ sub _filter_build_log {
 
         my $warning_report_file =
             File::Spec->catfile($self->{workdir}, "$short_sha.make.warnings.rpt.txt");
-        say "rpt: $warning_report_file";
         open my $OUT, '>', $warning_report_file
             or croak "Unable to open $warning_report_file for writing";
         say $OUT $_ for @refined_warnings;
