@@ -1,7 +1,6 @@
 package Devel::Git::MultiBisect::Transitions;
-use strict;
-use warnings;
 use v5.14.0;
+use warnings;
 use parent ( qw| Devel::Git::MultiBisect | );
 use Devel::Git::MultiBisect::Opts qw( process_options );
 use Devel::Git::MultiBisect::Auxiliary qw(

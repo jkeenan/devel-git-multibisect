@@ -1,6 +1,6 @@
 # -*- perl -*-
 # t/004-set-targets-t
-use strict;
+use 5.14.0;
 use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Opts qw( process_options );

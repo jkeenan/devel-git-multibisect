@@ -1,6 +1,6 @@
 # -*- perl -*-
 # t/001-opts.t
-use strict;
+use 5.14.0;
 use warnings;
 use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More tests => 21;

@@ -1,6 +1,6 @@
 # -*- perl -*-
 # t/011-run-test_files-combined.t
-use strict;
+use 5.14.0;
 use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Transitions;
