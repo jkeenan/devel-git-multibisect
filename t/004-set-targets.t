@@ -13,11 +13,12 @@ unless (
     plan skip_all => "No git checkout of List-Compare found";
 }
 else {
-    plan tests => 20;
+    plan tests => 26;
 }
 use Carp;
 use Cwd;
 use File::Spec;
+use File::Temp qw( tempdir );
 
 my $startdir = cwd();
 chdir $ENV{PERL_LIST_COMPARE_GIT_CHECKOUT_DIR}
@@ -38,11 +39,16 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     #    targets => [ @good_targets ],
     last_before => $good_last_before,
     last => $good_last,
+    outputdir => tempdir( CLEANUP => 1 ),
 );
 $params = process_options(%args);
 $self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
 isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
+for my $d (qw| gitdir workdir outputdir |) {
+    ok(defined $self->{$d}, "'$d' has been defined");
+    ok(-d $self->{$d}, "'$d' exists: $self->{$d}");
+}
 
 $target_args = [
     File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
@@ -119,6 +125,7 @@ note("targets provided via new()");
     #    targets => [ @good_targets ],
     last_before => $good_last_before,
     last => $good_last,
+    outputdir => tempdir( CLEANUP => 1 ),
 );
 $params = process_options(%args);
 $self = Devel::Git::MultiBisect::AllCommits->new($params);
@@ -133,6 +140,7 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     #    targets => [ @good_targets ],
     last_before => $good_last_before,
     last => $good_last,
+    outputdir => tempdir( CLEANUP => 1 ),
 );
 $params = process_options(%args);
 $target_args = [

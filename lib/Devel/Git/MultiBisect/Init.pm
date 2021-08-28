@@ -73,7 +73,7 @@ sub _get_commits {
     chdir $dataref->{gitdir} or croak "Unable to chdir";
     my @commits = ();
     my ($older, $cmd);
-    my ($fh, $err) = File::Temp::tempfile();
+    my $err = File::Temp->new( UNLINK => 1, SUFFIX => '.err' );
     if ($dataref->{last_before}) {
         $older = '^' . $dataref->{last_before};
         $cmd = "git rev-list --reverse $older $dataref->{last} 2>$err";

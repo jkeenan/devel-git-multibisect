@@ -13,11 +13,12 @@ unless (
     plan skip_all => "No git checkout of List-Compare found";
 }
 else {
-    plan tests => 10;
+    plan tests => 16;
 }
 use Carp;
 use Cwd;
 use File::Spec;
+use File::Temp qw( tempdir );
 
 my $startdir = cwd();
 chdir $ENV{PERL_LIST_COMPARE_GIT_CHECKOUT_DIR}
@@ -39,11 +40,17 @@ $good_last = 'd304a207329e6bd7e62354df4f561d9a7ce1c8c2';
     targets => [ @good_targets ],
     last_before => $good_last_before,
     last => $good_last,
+    outputdir => tempdir( CLEANUP => 1 ),
 );
 $params = process_options(%args);
 $self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
 isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
+for my $d (qw| gitdir workdir outputdir |) {
+    ok(defined $self->{$d}, "'$d' has been defined");
+    ok(-d $self->{$d}, "'$d' exists: $self->{$d}");
+}
+
 $this_commit_range = $self->get_commits_range();
 ok($this_commit_range, "get_commits_range() returned true value");
 is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
