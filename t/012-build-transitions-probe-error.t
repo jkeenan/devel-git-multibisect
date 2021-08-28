@@ -181,6 +181,7 @@ for my $t (@arr) {
         }
     }
 }
+is(scalar(@arr), 2, "Observed 2 older/newer transitions, as expected");
 
 # clean up
 

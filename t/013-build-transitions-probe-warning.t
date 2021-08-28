@@ -41,7 +41,7 @@ $workdir = tempdir(); # Permit CLEANUP only when we're set
 
 $branch = 'blead';
 $first = 'b38ce61ef5b98631f9924bea9364ec344b9a8d10';
-$last  = '6e4fa8514431313d08a1632b111e0bac7b3d4695';
+$last  = 'bec292a9fa46f45c0e524b673451cf5292e5d35b';
 
 $configure_command =  q|sh ./Configure -des -Dusedevel|;
 $configure_command   .= qq| -Dcc=$compiler |;
@@ -140,6 +140,7 @@ for my $t (@arr) {
         }
     }
 }
+is(scalar(@arr), 1, "Observed 1 older/newer transition, as expected");
 
 chdir $startdir or croak "Unable to return to $startdir";
 
