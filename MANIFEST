@@ -29,4 +29,5 @@ t/013-build-transitions-probe-warning.t
 t/lib/Helpers.pm
 t/lib/output1.txt
 t/lib/output2.txt
+xt/104-gcc-build-transitions-warnings.t
 xt/warnings-transitions.pl
