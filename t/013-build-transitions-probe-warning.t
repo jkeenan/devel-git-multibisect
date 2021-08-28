@@ -1,81 +1,72 @@
 # -*- perl -*-
-# xt/104-gcc-build-transitions-warnings.t
-use strict;
+# t/013-build-transitions-probe-warning.t
+use 5.14.0;
 use warnings;
-use Devel::Git::MultiBisect::Opts qw( process_options );
 use Devel::Git::MultiBisect::BuildTransitions;
+use Devel::Git::MultiBisect::Opts qw( process_options );
 use Test::More;
+unless (
+    $ENV{PERL_GIT_CHECKOUT_DIR}
+        and
+    (-d $ENV{PERL_GIT_CHECKOUT_DIR})
+) {
+    plan skip_all => "No git checkout of perl found";
+}
+else {
+    plan tests => 42;
+}
 use Carp;
 use Cwd;
 use File::Spec;
-use Data::Dump qw(dd pp);
+use File::Temp qw( tempdir );
 use lib qw( t/lib );
 use Helpers qw( test_report );
+use Data::Dump qw(dd pp);
 
-my $compiler = 'gcc-8';
+my $startdir = cwd();
 
-my $ptg = File::Spec->catfile('', qw| path to gitdir |);
-my $pttf = File::Spec->catfile('', qw| path to test file |);
+chdir $ENV{PERL_GIT_CHECKOUT_DIR}
+    or croak "Unable to change to perl checkout directory";
 
-my (%args, $params);
+my (%args, $params, $self);
+my ($first, $last, $branch, $configure_command, $test_command);
+my ($git_checkout_dir, $workdir, $rv, $this_commit_range);
+my ($multisected_outputs, @invalids);
+my $compiler = 'clang';
 
-%args = (
-    last_before => '12345ab',
-    gitdir => $ptg,
-    targets => [ $pttf ],
-    last => '67890ab',
-);
-$params = process_options(%args);
-ok($params, "process_options() returned true value");
-ok(ref($params) eq 'HASH', "process_options() returned hash reference");
-for my $k ( qw|
-    last_before
-    make_command
-    outputdir
-    repository
-    branch
-    short
-    verbose
-    workdir
-| ) {
-    ok(defined($params->{$k}), "A default value was assigned for $k: $params->{$k}");
-}
+$git_checkout_dir = cwd();
+#$workdir = tempdir( CLEANUP => 1 );
+$workdir = tempdir(); # Permit CLEANUP only when we're set
 
-my $cwd = cwd();
+$branch = 'blead';
+$first = 'e3f4f321290813be202cfd9ce45f4ef5b3d96a2f';
+$last  = '43e5ab2e34fe55efd182c925309a4cf5ff2ec540';
 
-my ($self);
-my ($good_gitdir);
-$good_gitdir = "$ENV{GIT_WORKDIR}/perl2";
-my $workdir = "$ENV{HOMEDIR}/learn/perl/multisect/testing/$compiler";
-my $first = 'e3f4f321290813be202cfd9ce45f4ef5b3d96a2f';
-my $last  = '43e5ab2e34fe55efd182c925309a4cf5ff2ec540';
-
-my $branch = 'blead';
-my $configure_command =  q|sh ./Configure -des -Dusedevel|;
+$configure_command =  q|sh ./Configure -des -Dusedevel|;
 $configure_command   .= qq| -Dcc='$compiler -m32' -Dlibs='-lpthread -lnsl -ldl -lm -lcrypt -lutil -lc'|;
 $configure_command   .=  q| 1>/dev/null 2>&1|;
-my $test_command = '';
+$test_command = '';
 
 %args = (
-    gitdir  => $good_gitdir,
+    gitdir  => $git_checkout_dir,
     workdir => $workdir,
-    first => $first,
+    first   => $first,
     last    => $last,
     branch  => $branch,
     configure_command => $configure_command,
     test_command => $test_command,
-    verbose => 1,
+    verbose => 0,
 );
 $params = process_options(%args);
-
-is($params->{gitdir}, $good_gitdir, "Got expected gitdir");
+#Data::Dump::pp($params);
+is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
 is($params->{workdir}, $workdir, "Got expected workdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
 is($params->{last}, $last, "Got expected last commit to be studied");
 is($params->{branch}, $branch, "Got expected branch");
 is($params->{configure_command}, $configure_command, "Got expected configure_command");
 ok(! $params->{test_command}, "test_command empty as expected");
-ok($params->{verbose}, "verbose requested");
+ok(! $params->{verbose}, "verbose not requested");
 
 $self = Devel::Git::MultiBisect::BuildTransitions->new($params);
 ok($self, "new() returned true value");
@@ -87,21 +78,22 @@ ok(! exists $self->{targets},
 ok(! exists $self->{test_command},
     "BuildTransitions has no need of 'test_command' attribute");
 
-my $this_commit_range = $self->get_commits_range();
+$this_commit_range = $self->get_commits_range();
 ok($this_commit_range, "get_commits_range() returned true value");
 is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
 is($this_commit_range->[0], $first, "Got expected first commit in range");
 is($this_commit_range->[-1], $last, "Got expected last commit in range");
+note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
 
-# See t/011-buildtransitions.t for tests of bad values to multisect_builds()
+note("get_multisected_outputs()");
 
-my $rv = $self->multisect_builds( { probe => 'warning' } );
+$rv = $self->multisect_builds( { probe => 'warning' } );
 ok($rv, "multisect_builds() returned true value");
 
 note("get_multisected_outputs()");
 
-my $multisected_outputs = $self->get_multisected_outputs();
-pp($multisected_outputs);
+$multisected_outputs = $self->get_multisected_outputs();
+Data::Dump::pp($multisected_outputs);
 
 is(ref($multisected_outputs), 'ARRAY',
     "get_multisected_outputs() returned array reference");
@@ -116,7 +108,7 @@ my $transitions_report = File::Spec->catfile($workdir, "transitions.$compiler.pl
 open my $TR, '>', $transitions_report
     or croak "Unable to open $transitions_report for writing";
 my $old_fh = select($TR);
-dd($transitions);
+Data::Dump::dd($transitions);
 select($old_fh);
 close $TR or croak "Unable to close $transitions_report after writing";
 
@@ -148,5 +140,6 @@ for my $t (@arr) {
     }
 }
 
-done_testing();
+chdir $startdir or croak "Unable to return to $startdir";
 
+__END__
