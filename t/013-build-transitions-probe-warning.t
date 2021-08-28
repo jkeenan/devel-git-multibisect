@@ -43,7 +43,7 @@ $first = 'e3f4f321290813be202cfd9ce45f4ef5b3d96a2f';
 $last  = '43e5ab2e34fe55efd182c925309a4cf5ff2ec540';
 
 $configure_command =  q|sh ./Configure -des -Dusedevel|;
-$configure_command   .= qq| -Dcc='$compiler -m32' -Dlibs='-lpthread -lnsl -ldl -lm -lcrypt -lutil -lc'|;
+$configure_command   .= qq| -Dcc=$compiler -Duseithreads |;
 $configure_command   .=  q| 1>/dev/null 2>&1|;
 $test_command = '';
 
