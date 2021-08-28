@@ -116,16 +116,14 @@ note("Test for bad arguments to multisect_builds()");
         "Got expected error for bad argument to multisect_builds()");
 }
 
+note("multisect_builds, probing for C-level errors");
+
 $rv = $self->multisect_builds( { probe => 'error' } );
 ok($rv, "multisect_builds() returned true value");
 
 note("get_multisected_outputs()");
 
 $multisected_outputs = $self->get_multisected_outputs();
-#print STDERR "AAA: self\n";
-#Data::Dump::pp $self;
-#print STDERR "BBB: multisected_outputs\n";
-#Data::Dump::pp $multisected_outputs;
 is(ref($multisected_outputs), 'ARRAY',
     "get_multisected_outputs() returned array reference");
 is(scalar(@{$multisected_outputs}), scalar(@{$self->{commits}}),
