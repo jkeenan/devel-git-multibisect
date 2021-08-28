@@ -13,7 +13,7 @@ unless (
     plan skip_all => "No git checkout of perl found";
 }
 else {
-    plan tests => 42;
+    plan tests => 43;
 }
 use Carp;
 use Cwd;
