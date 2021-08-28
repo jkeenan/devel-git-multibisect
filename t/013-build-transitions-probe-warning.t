@@ -32,6 +32,7 @@ my (%args, $params, $self);
 my ($first, $last, $branch, $configure_command, $test_command);
 my ($git_checkout_dir, $workdir, $rv, $this_commit_range);
 my ($multisected_outputs, @invalids);
+
 my $compiler = 'clang';
 
 $git_checkout_dir = cwd();
@@ -39,11 +40,11 @@ $git_checkout_dir = cwd();
 $workdir = tempdir(); # Permit CLEANUP only when we're set
 
 $branch = 'blead';
-$first = 'e3f4f321290813be202cfd9ce45f4ef5b3d96a2f';
-$last  = '43e5ab2e34fe55efd182c925309a4cf5ff2ec540';
+$first = 'b38ce61ef5b98631f9924bea9364ec344b9a8d10';
+$last  = '6e4fa8514431313d08a1632b111e0bac7b3d4695';
 
 $configure_command =  q|sh ./Configure -des -Dusedevel|;
-$configure_command   .= qq| -Dcc=$compiler -Duseithreads |;
+$configure_command   .= qq| -Dcc=$compiler |;
 $configure_command   .=  q| 1>/dev/null 2>&1|;
 $test_command = '';
 
