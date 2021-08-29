@@ -5,7 +5,7 @@ use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Transitions;
 use Devel::Git::MultiBisect::Opts qw( process_options );
-use Test::More tests => 353;
+use Test::More tests => 351;
 use Carp;
 use Cwd;
 use File::Spec;
@@ -55,7 +55,7 @@ SKIP: {
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
     ok($self, "new() returned true value");
     isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
-    for my $d (qw| gitdir workdir outputdir |) {
+    for my $d (qw| gitdir outputdir |) {
         ok(defined $self->{$d}, "'$d' has been defined");
         ok(-d $self->{$d}, "'$d' exists: $self->{$d}");
     }
