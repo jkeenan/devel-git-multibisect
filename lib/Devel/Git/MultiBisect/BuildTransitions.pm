@@ -27,7 +27,7 @@ Devel::Git::MultiBisect::BuildTransitions - Gather build-time output where it ch
 
     $commit_range = $self->get_commits_range();
 
-    $self->multisect_builds();
+    $self->multisect_builds( { probe => 'error' } );
 
     $multisected_outputs = $self->get_multisected_outputs();
 
@@ -36,13 +36,60 @@ Devel::Git::MultiBisect::BuildTransitions - Gather build-time output where it ch
 
 =head1 DESCRIPTION
 
-When the number of commits in the specified range is large and you only need
-the build-time output at those commits where the output materially changed, you can
-use this package, F<Devel::Git::MultiBisect::BuildTransitions>.
+Whereas F<Devel::Git::MultiBisect::Transitions> is concerned with B<test-time>
+failures, F<Devel::Git::MultiBisect::BuildTransitions> is concerned with
+B<build-time> phenomena:  exceptions and warnings.  We can identify three such
+cases:
+
+=over 4
+
+=item * Build-time failures
+
+While running your C-compiler over C source code via F<make>, an exception may
+be thrown which causes the build to fail.  Over a large number of commits,
+different exceptions may be thrown at various commits.  Identify those
+commits.
+
+=item * Build-time C-level warnings
+
+Your C-compiler may identify sub-optimal C source code and emit warnings.
+Over a large number of commits, different warnings may be thrown at various
+commits.  Identify the commits where the warnings changed.
+
+=item * Build-time non-C-level warnings
+
+At build time F<make> is not limited to running a C compiler; it may also
+execute statements in Perl, shell or other languages.  Those statements may
+themselves generate warnings.  Identify the commits where the F<STDERR> output
+from F<make> changes.
+
+=back
+
+These three cases are distinguished by the arguments passed to the
+C<multisect_builds()> method described below.
 
 =head1 METHODS
 
 =head2 C<new()>
+
+=over 4
+
+=item * Purpose
+
+Constructor.
+
+=item * Arguments
+
+    $self = Devel::Git::MultiBisect::BuildTransitions->new(\%params);
+
+Reference to a hash, typically the return value of
+C<Devel::Git::MultiBisect::Opts::process_options()>.
+
+=item * Return Value
+
+Object of Devel::Git::MultiBisect child class.
+
+=back
 
 =cut
 
@@ -64,16 +111,19 @@ sub new {
 =item * Purpose
 
 With a given set of configuration options and a specified range of F<git>
-commits, identify the point where the "build command" -- typically, F<make>
--- first threw exceptions and then all subsequent commits where the build-time
-exceptions materially changed.  A "material change" would be either a
-correction of all exceptions or a set of different build-time exceptions from
-those first observed.  Store the test output at those transition points for
-human inspection.
+commits, identify the points where the output of the "build command" --
+typically, F<make> -- materially changed.
+
+A B<material change> would be either (a) the emergence or correction of
+C-level exceptions; (b) the emergence or correction of C-level warnings; (c)
+the emergence or correction of F<STDERR> output emitted during F<make> by
+Perl, shell or other non-C code.
+
+These three cases are distinguished by the arguments passed to this method.
 
 =item * Arguments
 
-    $self->multisect_builds();
+    $self->multisect_builds();      # defaults to { probe => 'error' }
 
     $self->multisect_builds({ probe => 'error' });
 
@@ -100,13 +150,14 @@ As C<multisect_builds()> runs it does two kinds of things:
 
 =item *
 
-It stores results data within the object which you can subsequently access through method calls.
+It stores results data within the object which you can subsequently access
+through method calls.
 
 =item *
 
 It captures error messages from each commit run and writes them to a file on
-disk for later human inspection.  (If you have selected C<probe => 'stderr'>,
-all content printed to C<STDERR> is written to that file.)
+disk for later human inspection.  (If you have selected C<probe =E<gt> 'stderr'>,
+all content directed to F<STDERR> is written to that file.)
 
 =back
 
@@ -154,59 +205,55 @@ sub multisect_builds {
     my $start_time = time();
     my $all_outputs = $self->_prepare_for_multisection();
 
-=pod
-
-At this point, C<$all_outputs> is an array ref with one
-element per commit in the commit range.  If a commit has been visited, the
-element is a hash ref with 4 key-value pairs like the ones below.  If the
-commit has not yet been visited, the element is C<undef>.
-
-    [
-      {
-        commit => "7c9c5138c6a704d1caf5908650193f777b81ad23",
-        commit_short => "7c9c513",
-        file => "/home/jkeenan/learn/perl/multisect/7c9c513.make.errors.rpt.txt",
-        md5_hex => "d41d8cd98f00b204e9800998ecf8427e",
-      },
-      undef,
-      undef,
-    ...
-      undef,
-      {
-        commit => "8f6628e3029399ac1e48dfcb59c3cd30e5127c3e",
-        commit_short => "8f6628e",
-        file => "/home/jkeenan/learn/perl/multisect/8f6628e.make.errors.rpt.txt",
-        md5_hex => "fdce7ff2f07a0a8cd64005857f4060d4",
-      },
-    ]
-
-Unlike F<Devel::Git::MultiBisect::Transitions> -- where we could have been
-testing multiple test files on each commit -- here we're only concerned with
-recording the presence or absence of build-time errors.  Hence, we only need
-an array of hash refs rather than an array of arrays of hash refs.
-
-The multisection process will entail running C<run_build_on_one_commit()> over
-each commit selected by the multisection algorithm.  Each run will insert a hash
-ref with the 4 KVPs into C<@{$self-E<gt>{all_outputs}}>.  At the end of the
-multisection process those elements which we did not need to visit will still be
-C<undef>.  We will then analyze the defined elements to identify the
-transitional commits.
-
-B<The objective of multisection is to identify the git commits at which the
-build output> -- as reflected in a file on disk holding a list of normalized
-errors, normalized warnings or C<STDERR> -- B<materially changed.>  We are using
-an md5_hex value for that error file as a presumably valid unique identifier
-for that file's content.  A transition point is a commit at which the output
-file's md5_hex differs from that of the immediately preceding commit.  So, to
-identify the first transition point, we need to locate the commit at which the
-md5_hex changed from that found in the very first commit in the designated
-commit range.  Once we've identified the first transition point, we'll look
-for the second transition point, i.e., that where the md5_hex changed from
-that observed at the first transition point.  We'll continue that process
-until we get to a transition point where the md5_hex is identical to that of
-the very last commit in the commit range.
-
-=cut
+# At this point, C<$all_outputs> is an array ref with one
+# element per commit in the commit range.  If a commit has been visited, the
+# element is a hash ref with 4 key-value pairs like the ones below.  If the
+# commit has not yet been visited, the element is C<undef>.
+#
+#     [
+#       {
+#         commit => "7c9c5138c6a704d1caf5908650193f777b81ad23",
+#         commit_short => "7c9c513",
+#         file => "/home/jkeenan/learn/perl/multisect/7c9c513.make.errors.rpt.txt",
+#         md5_hex => "d41d8cd98f00b204e9800998ecf8427e",
+#       },
+#       undef,
+#       undef,
+#     ...
+#       undef,
+#       {
+#         commit => "8f6628e3029399ac1e48dfcb59c3cd30e5127c3e",
+#         commit_short => "8f6628e",
+#         file => "/home/jkeenan/learn/perl/multisect/8f6628e.make.errors.rpt.txt",
+#         md5_hex => "fdce7ff2f07a0a8cd64005857f4060d4",
+#       },
+#     ]
+#
+# Unlike F<Devel::Git::MultiBisect::Transitions> -- where we could have been
+# testing multiple test files on each commit -- here we're only concerned with
+# recording the presence or absence of build-time errors.  Hence, we only need
+# an array of hash refs rather than an array of arrays of hash refs.
+#
+# The multisection process will entail running C<run_build_on_one_commit()> over
+# each commit selected by the multisection algorithm.  Each run will insert a hash
+# ref with the 4 KVPs into C<@{$self-E<gt>{all_outputs}}>.  At the end of the
+# multisection process those elements which we did not need to visit will still be
+# C<undef>.  We will then analyze the defined elements to identify the
+# transitional commits.
+#
+# B<The objective of multisection is to identify the git commits at which the
+# build output> -- as reflected in a file on disk holding a list of normalized
+# errors, normalized warnings or C<STDERR> -- B<materially changed.>  We are using
+# an md5_hex value for that error file as a presumably valid unique identifier
+# for that file's content.  A transition point is a commit at which the output
+# file's md5_hex differs from that of the immediately preceding commit.  So, to
+# identify the first transition point, we need to locate the commit at which the
+# md5_hex changed from that found in the very first commit in the designated
+# commit range.  Once we've identified the first transition point, we'll look
+# for the second transition point, i.e., that where the md5_hex changed from
+# that observed at the first transition point.  We'll continue that process
+# until we get to a transition point where the md5_hex is identical to that of
+# the very last commit in the commit range.
 
     my ($min_idx, $max_idx)     = (0, $#{$self->{commits}});
     my $this_target_status      = 0;
@@ -254,14 +301,14 @@ the very last commit in the commit range.
 
     my $end_time = time();
     my %timings = (
-	    elapsed	=> $end_time - $start_time,
-        runs => scalar( grep {defined $_} @{$self->{all_outputs}} ),
+        elapsed => $end_time - $start_time,
+        runs    => scalar( grep {defined $_} @{$self->{all_outputs}} ),
     );
     $timings{mean} = sprintf("%.02f" => $timings{elapsed} / $timings{runs});
     if ($self->{verbose}) {
         say "Ran $timings{runs} runs; elapsed: $timings{elapsed} sec; mean: $timings{mean} sec";
     }
-    $self->{timings}	  = \%timings;
+    $self->{timings} = \%timings;
 
     return 1;
 }
@@ -309,19 +356,6 @@ sub run_build_on_one_commit {
 sub _build_one_commit {
     my ($self, $commit) = @_;
     my $short_sha = substr($commit,0,$self->{short});
-#    my $build_log = File::Spec->catfile(
-#        $self->{outputdir},
-#        join('.' => (
-#            $short_sha,
-#            'make',
-#            'output',
-#            'txt'
-#        )),
-#    );
-#    my $command_raw = $self->{make_command};
-#    my $cmd = ($self->{probe} eq 'stderr')
-#        ? qq|$command_raw 2>$build_log|
-#        : qq|$command_raw >$build_log 2>&1|;
     my $command_raw = $self->{make_command};
 
     # If probe => error or probe => warning, we are capturing the entire
@@ -380,7 +414,6 @@ sub _filter_build_log {
         my $ackpattern = q|-A2 '^[^:]+:\d+:\d+:\s+error:'|;
         my @raw_acklines = grep { ! m/^--\n/ } `ack $ackpattern $buildlog`;
         chomp(@raw_acklines);
-        #pp(\@raw_acklines);
         croak "Got incorrect count of lines from ack; should be divisible by 3"
             unless scalar(@raw_acklines) % 3 == 0;
 
