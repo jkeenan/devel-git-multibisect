@@ -12,9 +12,8 @@ use Test::More tests => 55;
 use Cwd;
 use File::Copy;
 use File::Spec;
-use File::Temp qw(tempfile tempdir);
+use File::Temp qw(tempdir);
 use List::Util qw( sum );
-#use Data::Dump qw(pp);
 
 my $cwd = cwd();
 my $datadir = File::Spec->catfile($cwd, qw| t lib | );
@@ -65,38 +64,44 @@ my $datadir = File::Spec->catfile($cwd, qw| t lib | );
 
     my @digests;
 
-    my ($fh1, $t1) = tempfile();
-    for (1..100) { say $fh1 $basic }
-    close $fh1 or croak "Unable to close $t1 after writing";
+    my $t1 = File::Temp->new( UNLINK => 1, SUFFIX => '' );
+    binmode $t1, ':raw';
+    for (1..100) { say $t1 $basic }
+    close $t1 or croak "Unable to close $t1 after writing";
     push @digests, hexdigest_one_file($t1);
 
-    my ($fh2, $t2) = tempfile();
-    for (1..100) { say $fh2 $basic }
-    close $fh2 or croak "Unable to close $t2 after writing";
+    my $t2 = File::Temp->new( UNLINK => 1, SUFFIX => '' );
+    binmode $t2, ':raw';
+    for (1..100) { say $t2 $basic }
+    close $t2 or croak "Unable to close $t2 after writing";
     push @digests, hexdigest_one_file($t2);
 
-    my ($fh3, $t3) = tempfile();
-    for (1.. 99) { say $fh3 $basic }
-    say $fh3 $minus;
-    close $fh3 or croak "Unable to close $t3 after writing";
+    my $t3 = File::Temp->new( UNLINK => 1, SUFFIX => '' );
+    binmode $t3, ':raw';
+    for (1..99) { say $t3 $basic }
+    say $t3 $minus;
+    close $t3 or croak "Unable to close $t3 after writing";
     push @digests, hexdigest_one_file($t3);
 
-    my ($fh4, $t4) = tempfile();
-    for (1.. 99) { say $fh4 $basic }
-    say $fh4 $end_a;
-    close $fh4 or croak "Unable to close $t4 after writing";
+    my $t4 = File::Temp->new( UNLINK => 1, SUFFIX => '' );
+    binmode $t4, ':raw';
+    for (1.. 99) { say $t4 $basic }
+    say $t4 $end_a;
+    close $t4 or croak "Unable to close $t4 after writing";
     push @digests, hexdigest_one_file($t4);
 
-    my ($fh5, $t5) = tempfile();
-    for (1.. 99) { say $fh5 $basic }
-    say $fh5 $end_b;
-    close $fh5 or croak "Unable to close $t5 after writing";
+    my $t5 = File::Temp->new( UNLINK => 1, SUFFIX => '' );
+    binmode $t5, ':raw';
+    for (1.. 99) { say $t5 $basic }
+    say $t5 $end_b;
+    close $t5 or croak "Unable to close $t5 after writing";
     push @digests, hexdigest_one_file($t5);
 
-    my ($fh6, $t6) = tempfile();
-    for (1.. 99) { say $fh6 $basic }
-    say $fh6 $plus;
-    close $fh6 or croak "Unable to close $t6 after writing";
+    my $t6 = File::Temp->new( UNLINK => 1, SUFFIX => '' );
+    binmode $t6, ':raw';
+    for (1.. 99) { say $t6 $basic }
+    say $t6 $plus;
+    close $t6 or croak "Unable to close $t6 after writing";
     push @digests, hexdigest_one_file($t6);
 
     cmp_ok($digests[0], 'eq', $digests[1],
@@ -229,7 +234,6 @@ my $datadir = File::Spec->catfile($cwd, qw| t lib | );
     is(ref($rv), 'ARRAY', "validate_list_sequence() returned array ref");
     is(scalar(@$rv), 1, "validate_list_sequence() returned array with 1 element");
     ok($rv->[0], "validate_list_sequence() has true status");
-    #pp(\@list_basic);
 
     note("Problematic list");
     my $observed = [
