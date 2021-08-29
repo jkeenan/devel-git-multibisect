@@ -338,7 +338,7 @@ sub _filter_build_log {
         }
 
         my $error_report_file =
-            File::Spec->catfile($self->{workdir}, "$short_sha.make.errors.rpt.txt");
+            File::Spec->catfile($self->{outputdir}, "$short_sha.make.errors.rpt.txt");
         say "rpt: $error_report_file";
         open my $OUT, '>', $error_report_file
             or croak "Unable to open $error_report_file for writing";
@@ -373,7 +373,7 @@ sub _filter_build_log {
         close $IN or croak "Unable to close $buildlog after reading";
 
         my $warning_report_file =
-            File::Spec->catfile($self->{workdir}, "$short_sha.make.warnings.rpt.txt");
+            File::Spec->catfile($self->{outputdir}, "$short_sha.make.warnings.rpt.txt");
         open my $OUT, '>', $warning_report_file
             or croak "Unable to open $warning_report_file for writing";
         say $OUT $_ for @refined_warnings;

@@ -65,7 +65,6 @@ sub process_options {
     }
 
     my %defaults = (
-       'workdir' => cwd(),
        'short' => 7,
        'repository' => 'origin',
        'branch' => 'master',
@@ -86,7 +85,6 @@ sub process_options {
         "configure_command=s" => \$opts{configure_command},
         "make_command=s" => \$opts{make_command},
         "test_command=s" => \$opts{test_command},
-        "workdir=s" => \$opts{workdir},
         "outputdir=s" => \$opts{outputdir},
         "short=i" => \$opts{short},
         "repository=s" => \$opts{repository},
@@ -133,7 +131,6 @@ sub process_options {
         unless (defined $params{last_before} or defined $params{first});
 
     for my $p ( qw|
-        workdir
         short
         repository
         branch

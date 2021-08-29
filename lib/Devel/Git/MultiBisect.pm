@@ -174,7 +174,7 @@ Reference to a hash, typically the return value of
 C<Devel::Git::MultiBisect::Opts::process_options()>.
 
 The hashref passed as argument must contain key-value pairs for C<gitdir>,
-C<workdir> and C<outputdir>.  C<new()> tests for the existence of each of
+C<outputdir>.  C<new()> tests for the existence of each of
 these directories.
 
 =item * Return Value

@@ -51,7 +51,7 @@ sub init {
     }
 
     my @missing_dirs = ();
-    for my $dir ( qw| gitdir workdir outputdir | ) {
+    for my $dir ( qw| gitdir outputdir | ) {
         push @missing_dirs, $data{$dir}
             unless (-d $data{$dir});
     }

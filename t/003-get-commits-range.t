@@ -13,7 +13,7 @@ unless (
     plan skip_all => "No git checkout of List-Compare found";
 }
 else {
-    plan tests => 16;
+    plan tests => 14;
 }
 use Carp;
 use Cwd;
@@ -46,7 +46,7 @@ $params = process_options(%args);
 $self = Devel::Git::MultiBisect::AllCommits->new($params);
 ok($self, "new() returned true value");
 isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
-for my $d (qw| gitdir workdir outputdir |) {
+for my $d (qw| gitdir outputdir |) {
     ok(defined $self->{$d}, "'$d' has been defined");
     ok(-d $self->{$d}, "'$d' exists: $self->{$d}");
 }
