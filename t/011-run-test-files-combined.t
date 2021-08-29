@@ -5,15 +5,16 @@ use warnings;
 use Devel::Git::MultiBisect::AllCommits;
 use Devel::Git::MultiBisect::Transitions;
 use Devel::Git::MultiBisect::Opts qw( process_options );
-use Test::More tests => 347;
+use Test::More tests => 353;
 use Carp;
 use Cwd;
 use File::Spec;
+use File::Temp qw( tempdir );
 use List::Util qw(first);
 use lib qw( t/lib );
 use Helpers qw( test_report );
 
-# Objective of this test program is to replace t/011-run-test_files-combined.t
+# Objective of this test program is to replace t/010-run-test_files-combined.t
 # running the same unit tests but from git checkouts on the tester's local
 # disk rather than from submodules bundled with the CPAN distribution.
 #
@@ -24,7 +25,7 @@ use Helpers qw( test_report );
 note("Block 1");
 
 SKIP: {
-    skip "No git checkout of List-Compare found", 30
+    skip "No git checkout of List-Compare found", 36
     unless (
         $ENV{PERL_LIST_COMPARE_GIT_CHECKOUT_DIR}
             and
@@ -46,11 +47,18 @@ SKIP: {
         last_before => $good_last_before,
         last => $good_last,
         verbose => 1,
+        # Until development is complete, we will want to be able to inspect
+        # files created in the outputdir.
+        outputdir => tempdir( CLEANUP => 0 ),
     );
     $params = process_options(%args);
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
     ok($self, "new() returned true value");
     isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
+    for my $d (qw| gitdir workdir outputdir |) {
+        ok(defined $self->{$d}, "'$d' has been defined");
+        ok(-d $self->{$d}, "'$d' exists: $self->{$d}");
+    }
 
     $target_args = [
         File::Spec->catdir( qw| t 44_func_hashes_mult_unsorted.t |),
@@ -180,6 +188,9 @@ SKIP: {
         last_before => $good_last_before,
         last => $good_last,
         verbose => 1,
+        # Until development is complete, we will want to be able to inspect
+        # files created in the outputdir.
+        outputdir => tempdir( CLEANUP => 0 ),
     );
     $params = process_options(%args);
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
@@ -313,6 +324,9 @@ SKIP: {
         last_before => $good_last_before,
         last => $good_last,
         verbose => 0,
+        # Until development is complete, we will want to be able to inspect
+        # files created in the outputdir.
+        outputdir => tempdir( CLEANUP => 0 ),
     );
     $params = process_options(%args);
     $target_args = [ File::Spec->catdir( qw| t 001_load.t | ) ];
@@ -441,6 +455,9 @@ SKIP: {
         first => $good_first,
         last => $good_last,
         verbose => 0,
+        # Until development is complete, we will want to be able to inspect
+        # files created in the outputdir.
+        outputdir => tempdir( CLEANUP => 0 ),
     );
     $params = process_options(%args);
     $target_args = [
@@ -698,6 +715,9 @@ SKIP: {
         gitdir => $good_gitdir,
         last_before => $good_last_before,
         last => $good_last,
+        # Until development is complete, we will want to be able to inspect
+        # files created in the outputdir.
+        outputdir => tempdir( CLEANUP => 0 ),
     );
     $params = process_options(%args);
 
@@ -763,5 +783,4 @@ SKIP: {
     chdir $startdir or croak "Unable to return to $startdir";
 }
 
-done_testing();
-
+__END__
