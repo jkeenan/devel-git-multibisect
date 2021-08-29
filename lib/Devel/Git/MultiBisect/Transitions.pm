@@ -4,8 +4,6 @@ use warnings;
 use parent ( qw| Devel::Git::MultiBisect | );
 use Devel::Git::MultiBisect::Opts qw( process_options );
 use Devel::Git::MultiBisect::Auxiliary qw(
-    clean_outputfile
-    hexdigest_one_file
     validate_list_sequence
 );
 use Carp;
