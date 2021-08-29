@@ -32,14 +32,14 @@ chdir $ENV{PERL_GIT_CHECKOUT_DIR}
 
 my (%args, $params, $self);
 my ($first, $last, $branch, $configure_command, $test_command);
-my ($git_checkout_dir, $workdir, $rv, $this_commit_range);
+my ($git_checkout_dir, $outputdir, $rv, $this_commit_range);
 my ($multisected_outputs, @invalids);
 
 my $compiler = 'clang';
 
 $git_checkout_dir = cwd();
-#$workdir = tempdir( CLEANUP => 1 );
-$workdir = tempdir(); # Permit CLEANUP only when we're set
+#$outputdir = tempdir( CLEANUP => 1 );
+$outputdir = tempdir(); # Permit CLEANUP only when we're set
 
 $branch = 'blead';
 $first = 'd4bf6b07402c770d61a5f8692f24fe944655d99f';
@@ -52,7 +52,7 @@ $test_command = '';
 
 %args = (
     gitdir  => $git_checkout_dir,
-    workdir => $workdir,
+    outputdir => $outputdir,
     first   => $first,
     last    => $last,
     branch  => $branch,
@@ -63,7 +63,7 @@ $test_command = '';
 $params = process_options(%args);
 #Data::Dump::pp($params);
 is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
-is($params->{workdir}, $workdir, "Got expected workdir");
+is($params->{outputdir}, $outputdir, "Got expected outputdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
 is($params->{last}, $last, "Got expected last commit to be studied");
 is($params->{branch}, $branch, "Got expected branch");
@@ -106,7 +106,7 @@ note("inspect_transitions()");
 my $transitions = $self->inspect_transitions();
 pp($transitions);
 
-my $transitions_report = File::Spec->catfile($workdir, "transitions.$compiler.pl");
+my $transitions_report = File::Spec->catfile($outputdir, "transitions.$compiler.pl");
 open my $TR, '>', $transitions_report
     or croak "Unable to open $transitions_report for writing";
 my $old_fh = select($TR);
