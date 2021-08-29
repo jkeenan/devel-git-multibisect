@@ -309,19 +309,56 @@ sub run_build_on_one_commit {
 sub _build_one_commit {
     my ($self, $commit) = @_;
     my $short_sha = substr($commit,0,$self->{short});
-    my $build_log = File::Spec->catfile(
-        $self->{outputdir},
-        join('.' => (
-            $short_sha,
-            'make',
-            'output',
-            'txt'
-        )),
-    );
+#    my $build_log = File::Spec->catfile(
+#        $self->{outputdir},
+#        join('.' => (
+#            $short_sha,
+#            'make',
+#            'output',
+#            'txt'
+#        )),
+#    );
+#    my $command_raw = $self->{make_command};
+#    my $cmd = ($self->{probe} eq 'stderr')
+#        ? qq|$command_raw 2>$build_log|
+#        : qq|$command_raw >$build_log 2>&1|;
     my $command_raw = $self->{make_command};
-    my $cmd = ($self->{probe} eq 'stderr')
-        ? qq|$command_raw 2>$build_log|
-        : qq|$command_raw >$build_log 2>&1|;
+
+    # If probe => error or probe => warning, we are capturing the entire
+    # (2>&1) output of 'make' in a file and then filtering that file (in
+    # _filter_build_log() for either C-level exceptions or C-level warnings.
+    # Hence, that file's name should end in 'make.output.txt'.
+    #
+    # If, however, probe => stderr, we are directly filtering the output of
+    # 'make' for STDERR and saving that in a file for subsequent
+    # commit-by-commit comparison of the STDERR output.  Hence, the file for
+    # each commit should end in 'make.stderr.txt'.
+
+    my ($build_log, $cmd);
+    if ($self->{probe} eq 'stderr') {
+        $build_log = File::Spec->catfile(
+            $self->{outputdir},
+            join('.' => (
+                $short_sha,
+                'make',
+                'stderr',
+                'txt'
+            )),
+        );
+        $cmd = qq|$command_raw 2>$build_log|;
+    }
+    else {
+        $build_log = File::Spec->catfile(
+            $self->{outputdir},
+            join('.' => (
+                $short_sha,
+                'make',
+                'output',
+                'txt'
+            )),
+        );
+        $cmd = qq|$command_raw >$build_log 2>&1|;
+    }
     say "Actual 'make' command: $cmd" if $self->{verbose};
     my $rv = system($cmd);
     my $filtered_probes_file = $self->_filter_build_log($build_log, $short_sha);
