@@ -80,3 +80,6 @@ Revision history for Perl module Devel::Git::MultiBisect
     - 'workdir' is no longer used either as a command-line switch processed by
       Devel::Git::MultiBisect::Opts or as an attribute inside any
       Devel::Git::MultiBisect::* object.  It was found to be superfluous.
+
+0.18 Mon 30 Aug 2021 03:38:23 PM EDT
+    - No change in functionality; only correction to plan in one test file.
