@@ -224,6 +224,28 @@ sub get_commits_range {
     return [  map { $_->{sha} } @{$self->{commits}} ];
 }
 
+sub did_file_change_over_commits_range {
+    my ($self, $file) = @_;
+    # {commits} is populated during Init::init() and
+    # {gitdir} is verified there as well.  So we should not need to do error
+    # checking here.
+    my $ffile = File::Spec->catfile($self->{gitdir}, $file);
+    unless (-f $ffile) {
+        croak "Could not locate $ffile";
+    }
+    my $this_commit_range = $self->get_commits_range();
+    my $last_before = $this_commit_range->[0] . '^';
+    my $cmd = qq|git diff -w ${last_before}..$this_commit_range->[-1] -- $ffile|;
+    say "Calling: ", $cmd if $self->{verbose};
+    my @lines = `$cmd`;
+    my $rv = @lines ? 1 : 0;
+    my $msg = "From $this_commit_range->[0] to $this_commit_range->[-1] (inclusive), $file ";
+    $msg .= ($rv ? 'did change' : 'did not change');
+    say $msg if $self->{verbose};
+    $self->{file_change_range}{$file}++;
+    return $rv;
+}
+
 =head2 C<set_targets()>
 
 =over 4
