@@ -7,6 +7,7 @@ use File::Spec;
 use File::Temp;
 
 our $VERSION = '0.16';
+$VERSION = eval $VERSION;
 
 =head1 NAME
 

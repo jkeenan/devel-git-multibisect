@@ -7,13 +7,11 @@ use Devel::Git::MultiBisect::Auxiliary qw(
     validate_list_sequence
 );
 use Carp;
-use Cwd;
 use File::Spec;
 use File::Temp qw( tempdir );
-use Data::Dump qw(dd pp);
 
 our $VERSION = '0.16';
-eval $VERSION;
+$VERSION = eval $VERSION;
 
 =head1 NAME
 
