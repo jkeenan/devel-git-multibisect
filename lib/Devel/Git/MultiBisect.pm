@@ -13,7 +13,7 @@ use File::Spec;
 use File::Temp;
 use List::Util qw(sum);
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 $VERSION = eval $VERSION;
 
 =head1 NAME
@@ -625,7 +625,7 @@ or through the web interface at L<http://rt.cpan.org>.
 James E. Keenan (jkeenan at cpan dot org).  When sending correspondence, please
 include 'Devel::Git::MultiBisect' or 'Devel-Git-MultiBisect' in your subject line.
 
-Creation date:  October 12 2016. Last modification date:  August 25 2021.
+Creation date:  October 12 2016. Last modification date:  August 30 2021.
 
 Development repository: L<https://github.com/jkeenan/devel-git-multibisect>
 
@@ -655,7 +655,7 @@ For diagnosis of File::Temp problems in L<https://perlmonks.org/?node_id=1113618
 
 =head1 COPYRIGHT
 
-Copyright (c) 2016-2019 James E. Keenan.  United States.  All rights reserved.
+Copyright (c) 2016-2021 James E. Keenan.  United States.  All rights reserved.
 This is free software and may be distributed under the same terms as Perl
 itself.
 
