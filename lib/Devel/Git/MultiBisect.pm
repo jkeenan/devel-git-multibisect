@@ -76,7 +76,10 @@ F<Devel::Git::MultiBisect::Transitions>, provide different flavors of that
 functionality for objectives (a) and (b), respectively.  Please refer to their
 documentation for further discussion.
 
-Child class F<Devel::Git::MultiBisect::BuildTransitions> focuses on failures during the B<build> process rather than during testing.  It can handle three different types of problems which arise when you run F<make> to build a Perl library or to build Perl itself:
+Child class F<Devel::Git::MultiBisect::BuildTransitions> focuses on failures
+during the B<build> process rather than during testing.  It can handle three
+different types of problems which arise when you run F<make> to build a Perl
+library or to build Perl itself:
 
 =over 4
 
@@ -642,7 +645,11 @@ For feedback during initial development.
 
 =item * Eily and Monk::Thomas
 
-For diagnosis of regex problems in http://perlmonks.org/?node_id=1175983.
+For diagnosis of regex problems in L<http://perlmonks.org/?node_id=1175983>.
+
+=item * Max Maischein
+
+For diagnosis of File::Temp problems in L<https://perlmonks.org/?node_id=11136181>.
 
 =back
 
