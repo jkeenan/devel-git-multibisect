@@ -25,7 +25,7 @@ use Helpers qw( test_report );
 note("Block 1");
 
 SKIP: {
-    skip "No git checkout of List-Compare found", 36
+    skip "No git checkout of List-Compare found", 34
     unless (
         $ENV{PERL_LIST_COMPARE_GIT_CHECKOUT_DIR}
             and
