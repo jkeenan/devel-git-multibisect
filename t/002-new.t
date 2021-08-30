@@ -13,9 +13,10 @@ unless (
     plan skip_all => "No git checkout of List-Compare found";
 }
 else {
-    plan tests => 14;
+    plan tests => 15;
 }
 use Carp;
+use Capture::Tiny qw( :all );
 use Cwd;
 use File::Spec;
 use File::Temp qw( tempdir );
@@ -104,11 +105,22 @@ isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
     $args{first} = $good_first;
 }
 
-$args{verbose} = 1;
-$params = process_options(%args);
-$self = Devel::Git::MultiBisect::AllCommits->new($params);
-ok($self, "new() returned true value");
-isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
+{
+    my %args = (
+        gitdir => $good_gitdir,
+        last_before => $good_last_before,
+        last => $good_last,
+        outputdir => tempdir( CLEANUP => 1 ),
+        verbose => 1,
+    );
+    my ($stdout, @result) = capture_stdout { process_options(%args); };
+    like($stdout, qr/Arguments provided to process_options\(\):/s,
+        "Got expected verbose output with 'verbose' in arguments to process_options()");
+    $self = Devel::Git::MultiBisect::AllCommits->new($result[0]);
+    ok($self, "new() returned true value");
+    isa_ok($self, 'Devel::Git::MultiBisect::AllCommits');
+    $args{verbose} = undef;
+}
 
 chdir $startdir or croak "Unable to return to $startdir";
 
