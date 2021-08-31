@@ -512,12 +512,18 @@ sub run_test_files_on_one_commit {
 sub _configure_one_commit {
     my ($self, $commit) = @_;
     chdir $self->{gitdir} or croak "Unable to change to $self->{gitdir}";
-    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
     my $starting_branch = $self->{branch};
 
+    # If $self->{permit_short_configure} is; and
+    # did_file_change_over_commits_range() returns false; and
+    # if we are NOT on the first commit to be tested;
+    # then we can risk skipping re-configuration.
+
+    system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
     system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
     say "Running '$self->{configure_command}'" if $self->{verbose};
     system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
+
     return $starting_branch;
 }
 
@@ -533,7 +539,7 @@ sub _configure_build_one_commit {
 }
 
 sub _test_one_commit {
-    my ($self, $commit, $current_targets) = @_; 
+    my ($self, $commit, $current_targets) = @_;
     my $short = substr($commit,0,$self->{short});
     my @outputs;
     for my $target (@{$current_targets}) {
