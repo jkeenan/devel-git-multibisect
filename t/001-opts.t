@@ -3,7 +3,7 @@
 use 5.14.0;
 use warnings;
 use Devel::Git::MultiBisect::Opts qw( process_options );
-use Test::More tests => 20;
+use Test::More tests => 21;
 use Capture::Tiny qw( :all );
 use File::Spec;
 
@@ -98,6 +98,7 @@ for my $k ( qw|
     short
     test_command
     verbose
+    permit_short_configure
 | ) {
     ok(defined($params->{$k}), "A default value was assigned for $k: $params->{$k}");
 }

@@ -73,6 +73,7 @@ sub process_options {
        'configure_command' => 'perl Makefile.PL 1>/dev/null',
        'make_command' => "$found_make 1>/dev/null",
        'test_command' => 'prove -vb',
+       'permit_short_configure' => 0,
    );
 
     my %opts;
@@ -91,6 +92,7 @@ sub process_options {
         "repository=s" => \$opts{repository},
         "branch=s" => \$opts{branch},
         "verbose"  => \$opts{verbose}, # flag
+        "permit_short_configure"  => \$opts{permit_short_configure}, # flag
     ) or croak("Error in command line arguments\n");
 
     if ($opts{verbose}) {
