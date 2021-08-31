@@ -88,7 +88,9 @@ is($this_commit_range->[0], $first, "Got expected first commit in range");
 is($this_commit_range->[-1], $last, "Got expected last commit in range");
 note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
 
+say STDERR "START multisect_builds(): ", `date`;
 $rv = $self->multisect_builds( { probe => 'stderr' } );
+say STDERR "END   multisect_builds(): ", `date`;
 ok($rv, "multisect_builds() returned true value");
 
 note("get_multisected_outputs()");

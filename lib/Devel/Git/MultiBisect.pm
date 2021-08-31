@@ -236,12 +236,12 @@ sub did_file_change_over_commits_range {
     my $this_commit_range = $self->get_commits_range();
     my $last_before = $this_commit_range->[0] . '^';
     my $cmd = qq|git diff -w ${last_before}..$this_commit_range->[-1] -- $ffile|;
-    say "Calling: ", $cmd if $self->{verbose};
+    say "Calling: ", $cmd if $self->{verbose} == 2;
     my @lines = `$cmd`;
     my $rv = @lines ? 1 : 0;
     my $msg = "From $this_commit_range->[0] to $this_commit_range->[-1] (inclusive), $file ";
     $msg .= ($rv ? 'did change' : 'did not change');
-    say $msg if $self->{verbose};
+    say $msg if $self->{verbose} == 2;
     $self->{file_change_range}{$file}++;
     return $rv;
 }
@@ -527,24 +527,16 @@ sub _configure_one_commit {
     if ($okay_to_short_configure) {
         if (! $self->{commit_counter}) {
             # commit_counter 0
-#            system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
-#            system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
-#            say "Running '$self->{configure_command}'" if $self->{verbose};
-#            system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
-        $self->_customary_configuration($commit);;
+            $self->_customary_configuration($commit);;
         }
         else {
             # commit_counter > 0; no git clean, no configure_command
             system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
-            say "Skipping additional configuring" if $self->{verbose};
+            say "Skipping additional configuring (per request_short_configure)" if $self->{verbose};
         }
     }
     else {
         # customary configuration: once each commit
-#        system(qq|git clean --quiet -dfx|) and croak "Unable to 'git clean --quiet -dfx'";
-#        system(qq|git checkout --quiet $commit|) and croak "Unable to 'git checkout --quiet $commit'";
-#        say "Running '$self->{configure_command}'" if $self->{verbose};
-#        system($self->{configure_command}) and croak "Unable to run '$self->{configure_command})'";
         $self->_customary_configuration($commit);;
     }
 
