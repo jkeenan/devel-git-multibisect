@@ -13,7 +13,7 @@ unless (
     plan skip_all => "No git checkout of perl found";
 }
 else {
-    plan tests => 40;
+    plan tests => 78;
 }
 use Carp;
 use Capture::Tiny qw( :all );
@@ -64,10 +64,10 @@ $test_command = '';
     branch  => $branch,
     configure_command => $configure_command,
     test_command => $test_command,
-    verbose => 0,
+    verbose => 1,
+    request_short_configure => 1,
 );
 $params = process_options(%args);
-#Data::Dump::pp($params);
 is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
 is($params->{outputdir}, $outputdir, "Got expected outputdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
@@ -75,7 +75,9 @@ is($params->{last}, $last, "Got expected last commit to be studied");
 is($params->{branch}, $branch, "Got expected branch");
 is($params->{configure_command}, $configure_command, "Got expected configure_command");
 ok(! $params->{test_command}, "test_command empty as expected");
-ok(! $params->{verbose}, "verbose not requested");
+ok($params->{verbose}, "verbose requested");
+ok($params->{request_short_configure}, "Short configuration requested");
+Data::Dump::pp($params);
 
 $self = Devel::Git::MultiBisect::BuildTransitions->new($params);
 ok($self, "new() returned true value");
@@ -86,6 +88,7 @@ ok(! exists $self->{targets},
     "BuildTransitions has no need of 'targets' attribute");
 ok(! exists $self->{test_command},
     "BuildTransitions has no need of 'test_command' attribute");
+Data::Dump::pp($self);
 
 {
     local $@;
@@ -109,6 +112,62 @@ $change_file = "Configure";
 $expect = 0;
 $rv = $self->did_file_change_over_commits_range($change_file);
 is($rv, $expect, "$change_file DID NOT CHANGE over commit range");
+pp($self);
+say STDERR "START multisect_builds(): ", `date`;
+$rv = $self->multisect_builds( { probe => 'stderr' } );
+say STDERR "END   multisect_builds(): ", `date`;
+ok($rv, "multisect_builds() returned true value");
+
+note("get_multisected_outputs()");
+
+$multisected_outputs = $self->get_multisected_outputs();
+pp($multisected_outputs);
+
+is(ref($multisected_outputs), 'ARRAY',
+    "get_multisected_outputs() returned array reference");
+is(scalar(@{$multisected_outputs}), scalar(@{$self->{commits}}),
+    "get_multisected_outputs() has one element for each commit");
+
+note("inspect_transitions()");
+
+my $transitions = $self->inspect_transitions();
+pp($transitions);
+
+my $transitions_report = File::Spec->catfile($outputdir, "transitions.$compiler.pl");
+open my $TR, '>', $transitions_report
+    or croak "Unable to open $transitions_report for writing";
+my $old_fh = select($TR);
+dd($transitions);
+select($old_fh);
+close $TR or croak "Unable to close $transitions_report after writing";
+
+is(ref($transitions), 'HASH',
+    "inspect_transitions() returned hash reference");
+is(scalar(keys %{$transitions}), 3,
+    "inspect_transitions() has 3 elements");
+for my $k ( qw| newest oldest | ) {
+    is(ref($transitions->{$k}), 'HASH',
+        "Got hashref as value for '$k'");
+    for my $l ( qw| idx md5_hex file | ) {
+        ok(exists $transitions->{$k}->{$l},
+            "Got key '$l' for '$k'");
+    }
+}
+is(ref($transitions->{transitions}), 'ARRAY',
+    "Got arrayref as value for 'transitions'");
+my @arr = @{$transitions->{transitions}};
+for my $t (@arr) {
+    is(ref($t), 'HASH',
+        "Got hashref as value for element in 'transitions' array");
+    for my $m ( qw| newer older | ) {
+        ok(exists $t->{$m}, "Got key '$m'");
+        is(ref($t->{$m}), 'HASH', "Got hashref");
+        for my $n ( qw| idx md5_hex file | ) {
+            ok(exists $t->{$m}->{$n},
+                "Got key '$n'");
+        }
+    }
+}
 
 note("Case 2:");
 
@@ -193,60 +252,8 @@ $expect = 1;
 $rv = $self->did_file_change_over_commits_range($change_file);
 is($rv, $expect, "$change_file CHANGED over commit range");
 
+done_testing();
 __END__
-$rv = $self->multisect_builds( { probe => 'stderr' } );
-ok($rv, "multisect_builds() returned true value");
-
-note("get_multisected_outputs()");
-
-$multisected_outputs = $self->get_multisected_outputs();
-pp($multisected_outputs);
-
-is(ref($multisected_outputs), 'ARRAY',
-    "get_multisected_outputs() returned array reference");
-is(scalar(@{$multisected_outputs}), scalar(@{$self->{commits}}),
-    "get_multisected_outputs() has one element for each commit");
-
-note("inspect_transitions()");
-
-my $transitions = $self->inspect_transitions();
-pp($transitions);
-
-my $transitions_report = File::Spec->catfile($outputdir, "transitions.$compiler.pl");
-open my $TR, '>', $transitions_report
-    or croak "Unable to open $transitions_report for writing";
-my $old_fh = select($TR);
-dd($transitions);
-select($old_fh);
-close $TR or croak "Unable to close $transitions_report after writing";
-
-is(ref($transitions), 'HASH',
-    "inspect_transitions() returned hash reference");
-is(scalar(keys %{$transitions}), 3,
-    "inspect_transitions() has 3 elements");
-for my $k ( qw| newest oldest | ) {
-    is(ref($transitions->{$k}), 'HASH',
-        "Got hashref as value for '$k'");
-    for my $l ( qw| idx md5_hex file | ) {
-        ok(exists $transitions->{$k}->{$l},
-            "Got key '$l' for '$k'");
-    }
-}
-is(ref($transitions->{transitions}), 'ARRAY',
-    "Got arrayref as value for 'transitions'");
-my @arr = @{$transitions->{transitions}};
-for my $t (@arr) {
-    is(ref($t), 'HASH',
-        "Got hashref as value for element in 'transitions' array");
-    for my $m ( qw| newer older | ) {
-        ok(exists $t->{$m}, "Got key '$m'");
-        is(ref($t->{$m}), 'HASH', "Got hashref");
-        for my $n ( qw| idx md5_hex file | ) {
-            ok(exists $t->{$m}->{$n},
-                "Got key '$n'");
-        }
-    }
-}
 
 #if (defined $pattern_sought) {
 #    dd($quoted_pattern);

@@ -98,7 +98,7 @@ for my $k ( qw|
     short
     test_command
     verbose
-    permit_short_configure
+    request_short_configure
 | ) {
     ok(defined($params->{$k}), "A default value was assigned for $k: $params->{$k}");
 }
