@@ -45,6 +45,8 @@ $git_checkout_dir = cwd();
 #$outputdir = tempdir( CLEANUP => 1 );
 $outputdir = tempdir(); # Permit CLEANUP only when we're set
 
+note("Case 1:");
+
 $branch = 'blead';
 $first = 'd4bf6b07402c770d61a5f8692f24fe944655d99f';
 $last  = '9be343bf32d0921e5c792cbaa2b0038f43c6e463';
@@ -106,11 +108,9 @@ note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
 $change_file = "Configure";
 $expect = 0;
 $rv = $self->did_file_change_over_commits_range($change_file);
-is($rv, $expect, "$change_file did not change over commit range");
+is($rv, $expect, "$change_file DID NOT CHANGE over commit range");
 
-#pp($this_commit_range);
-#pass(changes($this_commit_range, $git_checkout_dir));
-
+note("Case 2:");
 
 # f1258252af9029c93a503f5e45bf6ae88977c4dd
 
@@ -148,16 +148,15 @@ note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
 
 $change_file = "Configure";
 $expect = 1;
-#$rv = $self->did_file_change_over_commits_range($change_file);
-#is($rv, $expect, "$change_file changed over commit range");
 ($stdout, @result) = capture_stdout { $self->did_file_change_over_commits_range($change_file); };
 like($stdout, qr/Calling/s,
     "did_file_change_over_commits_range(): Got expected verbose output");
 like($stdout, qr/$change_file did change/s,
     "did_file_change_over_commits_range(): Got expected verbose output");
 $rv = $result[0];
-is($rv, $expect, "$change_file changed over commit range");
+is($rv, $expect, "$change_file CHANGED over commit range");
 
+note("Case 3:");
 
 # 78f044cf3c081ec5840ad6e07cf2e3d33f2c227e
 
@@ -189,27 +188,10 @@ is($this_commit_range->[0], $first, "Got expected first commit in range");
 is($this_commit_range->[-1], $last, "Got expected last commit in range");
 note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
 
-#pp($this_commit_range);
-#pass(changes($this_commit_range, $git_checkout_dir));
-
 $change_file = "Configure";
 $expect = 1;
 $rv = $self->did_file_change_over_commits_range($change_file);
-is($rv, $expect, "$change_file changed over commit range");
-
-#sub changes {
-#    my ($this_commit_range, $git_checkout_dir) = @_;
-#    my $last_before = $this_commit_range->[0] . '^';
-#    my $file = File::Spec->catfile($git_checkout_dir, "Configure");
-#    my $cmd = qq|git diff -w ${last_before}..$this_commit_range->[-1] -- $file|;
-#    say STDERR "Calling: ", $cmd;
-#    my @lines = `$cmd`;
-#    #pp(\@lines);
-#    my $msg = "From $this_commit_range->[0] to $this_commit_range->[-1] (inclusive), there were ";
-#    $msg .= (@lines ? '' : 0) . " change(s) in $file";
-#    return $msg;
-#}
-
+is($rv, $expect, "$change_file CHANGED over commit range");
 
 __END__
 $rv = $self->multisect_builds( { probe => 'stderr' } );
