@@ -12,9 +12,9 @@ unless (
 ) {
     plan skip_all => "No git checkout of perl found";
 }
-else {
-    plan tests => 78;
-}
+#else {
+#    plan tests => 77;
+#}
 use Carp;
 use Capture::Tiny qw( :all );
 use Cwd;
@@ -34,7 +34,6 @@ chdir $ENV{PERL_GIT_CHECKOUT_DIR}
 my (%args, $params, $self);
 my ($first, $last, $branch, $configure_command, $test_command);
 my ($git_checkout_dir, $outputdir, $this_commit_range);
-my ($multisected_outputs, @invalids);
 my ($change_file, $rv, $expect);
 my ($stdout, @result);
 
@@ -45,7 +44,7 @@ $git_checkout_dir = cwd();
 #$outputdir = tempdir( CLEANUP => 1 );
 $outputdir = tempdir(); # Permit CLEANUP only when we're set
 
-note("Case 1:");
+note("Case 1: 7 commits | Configure did not change | 2 transitions | verbose | request_short_configure");
 
 $branch = 'blead';
 $first = 'd4bf6b07402c770d61a5f8692f24fe944655d99f';
@@ -68,114 +67,37 @@ $test_command = '';
     request_short_configure => 1,
 );
 $params = process_options(%args);
-is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
-is($params->{outputdir}, $outputdir, "Got expected outputdir");
-is($params->{first}, $first, "Got expected first commit to be studied");
-is($params->{last}, $last, "Got expected last commit to be studied");
-is($params->{branch}, $branch, "Got expected branch");
-is($params->{configure_command}, $configure_command, "Got expected configure_command");
-ok(! $params->{test_command}, "test_command empty as expected");
+test_params($params, $git_checkout_dir, $outputdir, $first, $last, $branch, $configure_command);
 ok($params->{verbose}, "verbose requested");
 ok($params->{request_short_configure}, "Short configuration requested");
-Data::Dump::pp($params);
 
 $self = Devel::Git::MultiBisect::BuildTransitions->new($params);
-ok($self, "new() returned true value");
-isa_ok($self, 'Devel::Git::MultiBisect::BuildTransitions');
-isa_ok($self, 'Devel::Git::MultiBisect');
-
-ok(! exists $self->{targets},
-    "BuildTransitions has no need of 'targets' attribute");
-ok(! exists $self->{test_command},
-    "BuildTransitions has no need of 'test_command' attribute");
-Data::Dump::pp($self);
-
-{
-    local $@;
-    my ($change_file, $ffile, $rv);
-    $change_file = "foobar";
-    $ffile = File::Spec->catfile($self->{gitdir}, $change_file);
-    eval { $rv = $self->did_file_change_over_commits_range($change_file); };
-    like($@, qr/Could not locate $ffile/,
-        "did_file_change_over_commits_range: Got expected exception for missing file");
-}
-
-$this_commit_range = $self->get_commits_range();
-
-ok($this_commit_range, "get_commits_range() returned true value");
-is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
-is($this_commit_range->[0], $first, "Got expected first commit in range");
-is($this_commit_range->[-1], $last, "Got expected last commit in range");
-note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
+test_object($self);
 
 $change_file = "Configure";
 $expect = 0;
 $rv = $self->did_file_change_over_commits_range($change_file);
 is($rv, $expect, "$change_file DID NOT CHANGE over commit range");
-pp($self);
+
 say STDERR "START multisect_builds(): ", `date`;
 $rv = $self->multisect_builds( { probe => 'stderr' } );
 say STDERR "END   multisect_builds(): ", `date`;
 ok($rv, "multisect_builds() returned true value");
 
-note("get_multisected_outputs()");
+balance($self, $outputdir, $compiler);
 
-$multisected_outputs = $self->get_multisected_outputs();
-pp($multisected_outputs);
+#######################################
 
-is(ref($multisected_outputs), 'ARRAY',
-    "get_multisected_outputs() returned array reference");
-is(scalar(@{$multisected_outputs}), scalar(@{$self->{commits}}),
-    "get_multisected_outputs() has one element for each commit");
-
-note("inspect_transitions()");
-
-my $transitions = $self->inspect_transitions();
-pp($transitions);
-
-my $transitions_report = File::Spec->catfile($outputdir, "transitions.$compiler.pl");
-open my $TR, '>', $transitions_report
-    or croak "Unable to open $transitions_report for writing";
-my $old_fh = select($TR);
-dd($transitions);
-select($old_fh);
-close $TR or croak "Unable to close $transitions_report after writing";
-
-is(ref($transitions), 'HASH',
-    "inspect_transitions() returned hash reference");
-is(scalar(keys %{$transitions}), 3,
-    "inspect_transitions() has 3 elements");
-for my $k ( qw| newest oldest | ) {
-    is(ref($transitions->{$k}), 'HASH',
-        "Got hashref as value for '$k'");
-    for my $l ( qw| idx md5_hex file | ) {
-        ok(exists $transitions->{$k}->{$l},
-            "Got key '$l' for '$k'");
-    }
-}
-is(ref($transitions->{transitions}), 'ARRAY',
-    "Got arrayref as value for 'transitions'");
-my @arr = @{$transitions->{transitions}};
-for my $t (@arr) {
-    is(ref($t), 'HASH',
-        "Got hashref as value for element in 'transitions' array");
-    for my $m ( qw| newer older | ) {
-        ok(exists $t->{$m}, "Got key '$m'");
-        is(ref($t->{$m}), 'HASH', "Got hashref");
-        for my $n ( qw| idx md5_hex file | ) {
-            ok(exists $t->{$m}->{$n},
-                "Got key '$n'");
-        }
-    }
-}
-
-note("Case 2:");
-
-# f1258252af9029c93a503f5e45bf6ae88977c4dd
+note("Case 2: 7 commits | Configure did not change | 2 transitions | verbose | NO request_short_configure");
 
 $branch = 'blead';
-$first = 'f1258252af9029c93a503f5e45bf6ae88977c4dd';
+$first = 'd4bf6b07402c770d61a5f8692f24fe944655d99f';
 $last  = '9be343bf32d0921e5c792cbaa2b0038f43c6e463';
+
+$configure_command =  q|sh ./Configure -des -Dusedevel|;
+$configure_command   .= qq| -Dcc=$compiler |;
+$configure_command   .=  q| 1>/dev/null 2>&1|;
+$test_command = '';
 
 %args = (
     gitdir  => $git_checkout_dir,
@@ -186,98 +108,127 @@ $last  = '9be343bf32d0921e5c792cbaa2b0038f43c6e463';
     configure_command => $configure_command,
     test_command => $test_command,
     verbose => 1,
-);
-($stdout, @result) = capture_stdout { process_options(%args); };
-$params = $result[0];
-ok($params->{verbose}, "verbose requested");
-like($stdout, qr/Arguments provided to process_options\(\):/s,
-    "Got expected verbose output with 'verbose' in arguments to process_options()");
-
-$self = Devel::Git::MultiBisect::BuildTransitions->new($params);
-ok($self, "new() returned true value");
-isa_ok($self, 'Devel::Git::MultiBisect::BuildTransitions');
-isa_ok($self, 'Devel::Git::MultiBisect');
-
-$this_commit_range = $self->get_commits_range();
-ok($this_commit_range, "get_commits_range() returned true value");
-is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
-is($this_commit_range->[0], $first, "Got expected first commit in range");
-is($this_commit_range->[-1], $last, "Got expected last commit in range");
-note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
-
-$change_file = "Configure";
-$expect = 1;
-($stdout, @result) = capture_stdout { $self->did_file_change_over_commits_range($change_file); };
-like($stdout, qr/Calling/s,
-    "did_file_change_over_commits_range(): Got expected verbose output");
-like($stdout, qr/$change_file did change/s,
-    "did_file_change_over_commits_range(): Got expected verbose output");
-$rv = $result[0];
-is($rv, $expect, "$change_file CHANGED over commit range");
-
-note("Case 3:");
-
-# 78f044cf3c081ec5840ad6e07cf2e3d33f2c227e
-
-$branch = 'blead';
-$first = '78f044cf3c081ec5840ad6e07cf2e3d33f2c227e';
-$last  = '9be343bf32d0921e5c792cbaa2b0038f43c6e463';
-
-%args = (
-    gitdir  => $git_checkout_dir,
-    outputdir => $outputdir,
-    first   => $first,
-    last    => $last,
-    branch  => $branch,
-    configure_command => $configure_command,
-    test_command => $test_command,
-    verbose => 0,
+    request_short_configure => 0,
 );
 $params = process_options(%args);
-ok(! $params->{verbose}, "verbose not requested");
-$self = Devel::Git::MultiBisect::BuildTransitions->new($params);
-ok($self, "new() returned true value");
-isa_ok($self, 'Devel::Git::MultiBisect::BuildTransitions');
-isa_ok($self, 'Devel::Git::MultiBisect');
+test_params($params, $git_checkout_dir, $outputdir, $first, $last, $branch, $configure_command);
+ok($params->{verbose}, "verbose requested");
+ok(! $params->{request_short_configure}, "Short configuration NOT requested");
 
-$this_commit_range = $self->get_commits_range();
-ok($this_commit_range, "get_commits_range() returned true value");
-is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
-is($this_commit_range->[0], $first, "Got expected first commit in range");
-is($this_commit_range->[-1], $last, "Got expected last commit in range");
-note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
+$self = Devel::Git::MultiBisect::BuildTransitions->new($params);
+test_object($self);
 
 $change_file = "Configure";
-$expect = 1;
+$expect = 0;
 $rv = $self->did_file_change_over_commits_range($change_file);
-is($rv, $expect, "$change_file CHANGED over commit range");
+is($rv, $expect, "$change_file DID NOT CHANGE over commit range");
+
+say STDERR "START multisect_builds(): ", `date`;
+$rv = $self->multisect_builds( { probe => 'stderr' } );
+say STDERR "END   multisect_builds(): ", `date`;
+ok($rv, "multisect_builds() returned true value");
+
+balance($self, $outputdir, $compiler);
+
+#######################################
+
+sub test_params {
+    my ($params, $git_checkout_dir, $outputdir, $first, $last, $branch, $configure_command) = @_;
+    is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
+    is($params->{outputdir}, $outputdir, "Got expected outputdir");
+    is($params->{first}, $first, "Got expected first commit to be studied");
+    is($params->{last}, $last, "Got expected last commit to be studied");
+    is($params->{branch}, $branch, "Got expected branch");
+    is($params->{configure_command}, $configure_command, "Got expected configure_command");
+    ok(! $params->{test_command}, "test_command empty as expected");
+}
+
+sub test_object {
+    my ($self) = @_;
+    ok($self, "new() returned true value");
+    isa_ok($self, 'Devel::Git::MultiBisect::BuildTransitions');
+    isa_ok($self, 'Devel::Git::MultiBisect');
+
+    ok(! exists $self->{targets},
+        "BuildTransitions has no need of 'targets' attribute");
+    ok(! exists $self->{test_command},
+        "BuildTransitions has no need of 'test_command' attribute");
+
+    {
+        local $@;
+        my ($change_file, $ffile, $rv);
+        $change_file = "foobar";
+        $ffile = File::Spec->catfile($self->{gitdir}, $change_file);
+        eval { $rv = $self->did_file_change_over_commits_range($change_file); };
+        like($@, qr/Could not locate $ffile/,
+            "did_file_change_over_commits_range: Got expected exception for missing file");
+    }
+
+    my $this_commit_range = $self->get_commits_range();
+
+    ok($this_commit_range, "get_commits_range() returned true value");
+    is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
+    is($this_commit_range->[0], $first, "Got expected first commit in range");
+    is($this_commit_range->[-1], $last, "Got expected last commit in range");
+    note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
+}
+
+sub balance {
+    my ($self, $outputdir, $compiler) = @_;
+
+    note("get_multisected_outputs()");
+
+    my $multisected_outputs = $self->get_multisected_outputs();
+    pp($multisected_outputs);
+
+    is(ref($multisected_outputs), 'ARRAY',
+        "get_multisected_outputs() returned array reference");
+    is(scalar(@{$multisected_outputs}), scalar(@{$self->{commits}}),
+        "get_multisected_outputs() has one element for each commit");
+
+    note("inspect_transitions()");
+
+    my $transitions = $self->inspect_transitions();
+    pp($transitions);
+
+    my $transitions_report = File::Spec->catfile($outputdir, "transitions.$compiler.pl");
+    open my $TR, '>', $transitions_report
+        or croak "Unable to open $transitions_report for writing";
+    my $old_fh = select($TR);
+    dd($transitions);
+    select($old_fh);
+    close $TR or croak "Unable to close $transitions_report after writing";
+
+    is(ref($transitions), 'HASH',
+        "inspect_transitions() returned hash reference");
+    is(scalar(keys %{$transitions}), 3,
+        "inspect_transitions() has 3 elements");
+    for my $k ( qw| newest oldest | ) {
+        is(ref($transitions->{$k}), 'HASH',
+            "Got hashref as value for '$k'");
+        for my $l ( qw| idx md5_hex file | ) {
+            ok(exists $transitions->{$k}->{$l},
+                "Got key '$l' for '$k'");
+        }
+    }
+    is(ref($transitions->{transitions}), 'ARRAY',
+        "Got arrayref as value for 'transitions'");
+    my @arr = @{$transitions->{transitions}};
+    for my $t (@arr) {
+        is(ref($t), 'HASH',
+            "Got hashref as value for element in 'transitions' array");
+        for my $m ( qw| newer older | ) {
+            ok(exists $t->{$m}, "Got key '$m'");
+            is(ref($t->{$m}), 'HASH', "Got hashref");
+            for my $n ( qw| idx md5_hex file | ) {
+                ok(exists $t->{$m}->{$n},
+                    "Got key '$n'");
+            }
+        }
+    }
+}
 
 done_testing();
+
 __END__
 
-#if (defined $pattern_sought) {
-#    dd($quoted_pattern);
-#    my $first_commit_with_warning = '';
-#    LOOP: for my $t (@arr) {
-#        my $newer = $t->{newer}->{file};
-#        say "Examining $newer";
-#        my @lines;
-#        tie @lines, 'Tie::File', $newer or croak "Unable to Tie::File to $newer";
-#        for my $l (@lines) {
-#            if ($l =~ m/$quoted_pattern/) {
-#                $first_commit_with_warning =
-#                    $multisected_outputs->[$t->{newer}->{idx}]->{commit};
-#                untie @lines;
-#                last LOOP;
-#            }
-#        }
-#        untie @lines;
-#    }
-#    say "Likely commit with first instance of warning is $first_commit_with_warning";
-#}
-#
-#say STDERR "See results in:\n$transitions_report";
-#say "\nFinished";
-
-#done_testing();
-__END__
