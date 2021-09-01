@@ -41,10 +41,11 @@ my ($stdout, @result);
 my $compiler = 'clang';
 
 $git_checkout_dir = cwd();
-#$outputdir = tempdir( CLEANUP => 1 );
-$outputdir = tempdir(); # Permit CLEANUP only when we're set
 
 note("Case 1: 7 commits | Configure did not change | 2 transitions | verbose | request_short_configure");
+
+#$outputdir = tempdir( CLEANUP => 1 );
+$outputdir = tempdir(); # Permit CLEANUP only when we're set
 
 $branch = 'blead';
 $first = 'd4bf6b07402c770d61a5f8692f24fe944655d99f';
@@ -86,9 +87,18 @@ ok($rv, "multisect_builds() returned true value");
 
 balance($self, $outputdir, $compiler);
 
+# Precautionary:
+system(qq| git clean --quiet -dfx |) and croak "Unable to git clean between cases";
+system(qq| git checkout blead |) and croak "Unable to git checkout blead";
+
 #######################################
 
 note("Case 2: 7 commits | Configure did not change | 2 transitions | verbose | NO request_short_configure");
+
+# Use a different tempdir.
+
+#$outputdir = tempdir( CLEANUP => 1 );
+$outputdir = tempdir(); # Permit CLEANUP only when we're set
 
 $branch = 'blead';
 $first = 'd4bf6b07402c770d61a5f8692f24fe944655d99f';
