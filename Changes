@@ -83,3 +83,6 @@ Revision history for Perl module Devel::Git::MultiBisect
 
 0.18 Mon 30 Aug 2021 03:38:23 PM EDT
     - No change in functionality; only correction to plan in one test file.
+
+0.19 Wed 01 Sep 2021 08:20:55 AM EDT
+    - No change in functionality; requiring Data::Dump for testing.
