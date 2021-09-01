@@ -40,3 +40,5 @@ nytprof.out
 .git/
 ^t/lib/list-compare/
 ^t/lib/dummyrepo/
+^travis\.yml$
+^.travis\.yml$
