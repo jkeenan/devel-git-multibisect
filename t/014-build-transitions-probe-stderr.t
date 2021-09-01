@@ -20,7 +20,7 @@ use Cwd;
 use File::Spec;
 use File::Temp qw( tempdir );
 use Tie::File;
-use Data::Dump qw(dd pp);
+use Data::Dump;
 use lib qw( t/lib );
 use Helpers qw( test_report );
 use Getopt::Long;
@@ -61,7 +61,6 @@ $test_command = '';
     verbose => 1,
 );
 $params = process_options(%args);
-#Data::Dump::pp($params);
 is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
 is($params->{outputdir}, $outputdir, "Got expected outputdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
@@ -94,7 +93,6 @@ ok($rv, "multisect_builds() returned true value");
 note("get_multisected_outputs()");
 
 $multisected_outputs = $self->get_multisected_outputs();
-pp($multisected_outputs);
 
 is(ref($multisected_outputs), 'ARRAY',
     "get_multisected_outputs() returned array reference");
@@ -104,13 +102,12 @@ is(scalar(@{$multisected_outputs}), scalar(@{$self->{commits}}),
 note("inspect_transitions()");
 
 my $transitions = $self->inspect_transitions();
-pp($transitions);
 
 my $transitions_report = File::Spec->catfile($outputdir, "transitions.$compiler.pl");
 open my $TR, '>', $transitions_report
     or croak "Unable to open $transitions_report for writing";
 my $old_fh = select($TR);
-dd($transitions);
+Data::Dump::dd($transitions);
 select($old_fh);
 close $TR or croak "Unable to close $transitions_report after writing";
 
@@ -143,7 +140,6 @@ for my $t (@arr) {
 }
 
 #if (defined $pattern_sought) {
-#    dd($quoted_pattern);
 #    my $first_commit_with_warning = '';
 #    LOOP: for my $t (@arr) {
 #        my $newer = $t->{newer}->{file};

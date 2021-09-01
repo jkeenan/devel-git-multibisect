@@ -19,7 +19,7 @@ use Carp;
 use Cwd;
 use File::Spec;
 use File::Temp qw( tempdir );
-use Data::Dump qw(dd pp);
+use Data::Dump;
 use lib qw( t/lib );
 use Helpers qw( test_report );
 
@@ -59,7 +59,6 @@ $test_command = '';
     verbose => 0,
 );
 $params = process_options(%args);
-#Data::Dump::pp($params);
 is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
 is($params->{outputdir}, $outputdir, "Got expected outputdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
@@ -94,7 +93,6 @@ ok($rv, "multisect_builds() returned true value");
 note("get_multisected_outputs()");
 
 $multisected_outputs = $self->get_multisected_outputs();
-Data::Dump::pp($multisected_outputs);
 
 is(ref($multisected_outputs), 'ARRAY',
     "get_multisected_outputs() returned array reference");

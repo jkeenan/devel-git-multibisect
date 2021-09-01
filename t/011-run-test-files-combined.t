@@ -396,8 +396,6 @@ SKIP: {
         ok(exists $transitions->{$first_element}->[0]->{$k}, "Record has '$k' element");
     }
 
-    #pp($transitions);
-
     undef $self;
 
     #######################################

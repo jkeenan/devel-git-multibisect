@@ -62,7 +62,6 @@ $test_command = '';
     verbose => 1,
 );
 $params = process_options(%args);
-#Data::Dump::pp($params);
 is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
 is($params->{outputdir}, $outputdir, "Got expected outputdir");
 is($params->{first}, $first, "Got expected first commit to be studied");
