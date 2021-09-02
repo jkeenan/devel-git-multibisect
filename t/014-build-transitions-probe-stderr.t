@@ -4,6 +4,7 @@ use 5.14.0;
 use warnings;
 use Devel::Git::MultiBisect::BuildTransitions;
 use Devel::Git::MultiBisect::Opts qw( process_options );
+use Devel::Git::MultiBisect::Auxiliary qw( write_transitions_report );
 use Test::More;
 unless (
     $ENV{PERL_GIT_CHECKOUT_DIR}
@@ -20,7 +21,6 @@ use Cwd;
 use File::Spec;
 use File::Temp qw( tempdir );
 use Tie::File;
-use Data::Dump;
 use lib qw( t/lib );
 use Helpers qw( test_report );
 use Getopt::Long;
@@ -103,13 +103,12 @@ note("inspect_transitions()");
 
 my $transitions = $self->inspect_transitions();
 
-my $transitions_report = File::Spec->catfile($outputdir, "transitions.$compiler.pl");
-open my $TR, '>', $transitions_report
-    or croak "Unable to open $transitions_report for writing";
-my $old_fh = select($TR);
-Data::Dump::dd($transitions);
-select($old_fh);
-close $TR or croak "Unable to close $transitions_report after writing";
+my $transitions_report = write_transitions_report(
+    $outputdir,
+    "transitions.$compiler.pl",
+    $transitions
+);
+note("Report: $transitions_report");
 
 is(ref($transitions), 'HASH',
     "inspect_transitions() returned hash reference");
