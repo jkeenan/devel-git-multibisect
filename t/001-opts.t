@@ -3,8 +3,8 @@
 use 5.14.0;
 use warnings;
 use Devel::Git::MultiBisect::Opts qw( process_options );
-use Test::More tests => 20;
-use Capture::Tiny qw( :all );
+use Test::More;
+use Capture::Tiny qw( capture_stdout );
 use File::Spec;
 
 my $ptg = File::Spec->catfile('', qw| path to gitdir |);
@@ -89,15 +89,17 @@ $params = process_options(%args);
 ok($params, "process_options() returned true value");
 ok(ref($params) eq 'HASH', "process_options() returned hash reference");
 for my $k ( qw|
-    configure_command
-    last_before
-    make_command
     outputdir
     repository
     branch
     short
+    configure_command
+    make_command
     test_command
+    last_before
+    probe
     verbose
+    transitions_report
 | ) {
     ok(defined($params->{$k}), "A default value was assigned for $k: $params->{$k}");
 }
@@ -125,3 +127,6 @@ my @cl_opts = (
     like($stdout, qr/Command-line arguments:/s,
         "Got expected verbose output with 'verbose' on command-line");
 }
+
+done_testing();
+
