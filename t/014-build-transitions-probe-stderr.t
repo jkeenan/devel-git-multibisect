@@ -22,8 +22,11 @@ use File::Spec;
 use File::Temp qw( tempdir );
 use Tie::File;
 use lib qw( t/lib );
-use Helpers qw( test_report );
-use Getopt::Long;
+use Helpers qw(
+    test_report
+    test_commit_range
+    test_transitions_data
+);
 
 my $startdir = cwd();
 
@@ -80,12 +83,7 @@ ok(! exists $self->{targets},
 ok(! exists $self->{test_command},
     "BuildTransitions has no need of 'test_command' attribute");
 
-$this_commit_range = $self->get_commits_range();
-ok($this_commit_range, "get_commits_range() returned true value");
-is(ref($this_commit_range), 'ARRAY', "get_commits_range() returned array ref");
-is($this_commit_range->[0], $first, "Got expected first commit in range");
-is($this_commit_range->[-1], $last, "Got expected last commit in range");
-note("Observed " . scalar(@{$this_commit_range}) . " commits in range");
+test_commit_range($self->get_commits_range(), $first, $last);
 
 $rv = $self->multisect_builds( { probe => 'stderr' } );
 ok($rv, "multisect_builds() returned true value");
@@ -110,33 +108,7 @@ my $transitions_report = write_transitions_report(
 );
 note("Report: $transitions_report");
 
-is(ref($transitions), 'HASH',
-    "inspect_transitions() returned hash reference");
-is(scalar(keys %{$transitions}), 3,
-    "inspect_transitions() has 3 elements");
-for my $k ( qw| newest oldest | ) {
-    is(ref($transitions->{$k}), 'HASH',
-        "Got hashref as value for '$k'");
-    for my $l ( qw| idx md5_hex file | ) {
-        ok(exists $transitions->{$k}->{$l},
-            "Got key '$l' for '$k'");
-    }
-}
-is(ref($transitions->{transitions}), 'ARRAY',
-    "Got arrayref as value for 'transitions'");
-my @arr = @{$transitions->{transitions}};
-for my $t (@arr) {
-    is(ref($t), 'HASH',
-        "Got hashref as value for element in 'transitions' array");
-    for my $m ( qw| newer older | ) {
-        ok(exists $t->{$m}, "Got key '$m'");
-        is(ref($t->{$m}), 'HASH', "Got hashref");
-        for my $n ( qw| idx md5_hex file | ) {
-            ok(exists $t->{$m}->{$n},
-                "Got key '$n'");
-        }
-    }
-}
+my @arr = test_transitions_data($transitions);
 
 #if (defined $pattern_sought) {
 #    my $first_commit_with_warning = '';
