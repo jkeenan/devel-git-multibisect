@@ -43,7 +43,7 @@ for my $d (qw| gitdir outputdir |) {
     ok(defined $self->{$d}, "'$d' has been defined");
     ok(-d $self->{$d}, "'$d' exists: $self->{$d}");
 }
-for my $attr (qw| probe transitions_report |) {
+for my $attr (qw| probe |) {
     ok(! exists $self->{$attr},
         "AllCommits has no need of '$attr' attribute");
 }

@@ -100,7 +100,6 @@ my (%args, $params);
   repository
   short
   test_command
-  transitions_report
   verbose
 |);
 

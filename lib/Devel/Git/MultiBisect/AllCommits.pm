@@ -100,7 +100,6 @@ sub new {
     my $data = $class->SUPER::new($params);
 
     delete $data->{probe};
-    delete $data->{transitions_report};
 
     return bless $data, $class;
 }

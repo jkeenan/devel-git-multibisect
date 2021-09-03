@@ -74,7 +74,6 @@ sub process_options {
        'make_command' => "$found_make 1>/dev/null",
        'test_command' => 'prove -vb',
        'probe' => 'error',
-       'transitions_report' => 'transitions.pl',
    );
 
     my %opts;
