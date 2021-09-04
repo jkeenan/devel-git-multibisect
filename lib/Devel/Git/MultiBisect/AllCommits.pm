@@ -67,7 +67,6 @@ This package inherits methods from F<Devel::Git::MultiBisect>.  Only methods uni
 F<Devel::Git::MultiBisect::AllCommits> are documented here.  See the documentation for
 F<Devel::Git::MultiBisect> for all other methods, including:
 
-    new()
     get_commits_range()
     set_targets()
     run_test_files_on_one_commit()
