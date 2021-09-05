@@ -14,7 +14,7 @@ unless (
     plan skip_all => "No git checkout of perl found";
 }
 else {
-    plan tests => 58;
+    plan tests => 63;
 }
 use Carp;
 use Cwd;
@@ -37,6 +37,7 @@ my (%args, $params, $self);
 my ($first, $last, $branch, $configure_command, $test_command);
 my ($git_checkout_dir, $outputdir, $rv, $this_commit_range);
 my ($multisected_outputs, @invalids);
+my ($default_probe, $probe_validated, $set_probe);
 my $compiler = 'clang';
 
 $git_checkout_dir = cwd();
@@ -85,6 +86,8 @@ ok(! exists $self->{targets},
     "BuildTransitions has no need of 'targets' attribute");
 ok(! exists $self->{test_command},
     "BuildTransitions has no need of 'test_command' attribute");
+is($self->{probe}, 'error',
+    "BuildTransitions has default 'probe' attribute: error");
 
 test_commit_range($self->get_commits_range(), $first, $last);
 
@@ -114,6 +117,23 @@ note("Test for bad arguments to multisect_builds()");
     like($@, qr/\QInvalid value '$bad_value' in 'probe' element in hashref passed to multisect_builds()\E/,
         "Got expected error for bad argument to multisect_builds()");
 }
+
+note("_validate_multisect_builds_args(): tested explicitly because multisect_builds() takes a long time");
+
+$default_probe = 'error';
+
+$probe_validated = $self->_validate_multisect_builds_args();
+is($probe_validated, $default_probe,
+    "_validate_multisect_builds_args() returned default value of $default_probe");
+is($self->{probe}, $probe_validated,
+    "'probe' set to default value of $default_probe");
+
+$set_probe = 'error';
+$probe_validated = $self->_validate_multisect_builds_args( { probe => $set_probe } );
+is($probe_validated, $set_probe,
+    "_validate_multisect_builds_args() returned set value of $set_probe");
+is($self->{probe}, $probe_validated,
+    "'probe' set to value of $default_probe");
 
 note("multisect_builds, probing for C-level errors");
 

@@ -14,7 +14,7 @@ unless (
     plan skip_all => "No git checkout of perl found";
 }
 else {
-    plan tests => 43;
+    plan tests => 45;
 }
 use Carp;
 use Cwd;
@@ -36,6 +36,7 @@ my (%args, $params, $self);
 my ($first, $last, $branch, $configure_command, $test_command);
 my ($git_checkout_dir, $outputdir, $rv, $this_commit_range);
 my ($multisected_outputs, @invalids);
+my ($probe, $probe_validated);
 
 my $compiler = 'clang';
 
@@ -51,6 +52,7 @@ $configure_command =  q|sh ./Configure -des -Dusedevel|;
 $configure_command   .= qq| -Dcc=$compiler |;
 $configure_command   .=  q| 1>/dev/null 2>&1|;
 $test_command = '';
+$probe = 'warning';
 
 %args = (
     gitdir  => $git_checkout_dir,
@@ -61,6 +63,7 @@ $test_command = '';
     configure_command => $configure_command,
     test_command => $test_command,
     verbose => 0,
+    probe => $probe,
 );
 $params = process_options(%args);
 is($params->{gitdir}, $git_checkout_dir, "Got expected gitdir");
@@ -81,12 +84,20 @@ ok(! exists $self->{targets},
     "BuildTransitions has no need of 'targets' attribute");
 ok(! exists $self->{test_command},
     "BuildTransitions has no need of 'test_command' attribute");
+is($self->{probe}, $probe,
+    "BuildTransitions has user-provided value '$probe' for 'probe' attribute");
 
 test_commit_range($self->get_commits_range(), $first, $last);
 
+note("_validate_multisect_builds_args(): tested explicitly because multisect_builds() takes a long time");
+
+$probe_validated = $self->_validate_multisect_builds_args();
+is($probe_validated, $probe,
+    "_validate_multisect_builds_args() returned user-provided value of $probe provided to new()");
+
 note("get_multisected_outputs()");
 
-$rv = $self->multisect_builds( { probe => 'warning' } );
+$rv = $self->multisect_builds();
 ok($rv, "multisect_builds() returned true value");
 
 note("get_multisected_outputs()");

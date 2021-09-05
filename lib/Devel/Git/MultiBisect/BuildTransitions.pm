@@ -167,6 +167,7 @@ sub multisect_builds {
     my ($self, $args) = @_;
 
     # Methods called within multisect_builds:
+    # _validate_multisect_builds_args
     # _prepare_for_multisection
     #       get_commits_range
     #       run_build_on_one_commit
@@ -177,22 +178,7 @@ sub multisect_builds {
     # _bisection_decision
     # _evaluate_status_of_build_runs
 
-    if (defined $args) {
-        croak "Argument passed to multisect_builds() must be hashref"
-            unless ref($args) eq 'HASH';
-        my %good_keys = map {$_ => 1} (qw| probe |);
-        for my $k (keys %{$args}) {
-            croak "Invalid key '$k' in hashref passed to multisect_builds()"
-                unless $good_keys{$k};
-        }
-        my %good_values = map {$_ => 1} (qw| error warning stderr |);
-        for my $v (values %{$args}) {
-            croak "Invalid value '$v' in 'probe' element in hashref passed to multisect_builds()"
-                unless $good_values{$v};
-        }
-    }
-    $args->{probe} = 'error' unless defined $args->{probe};
-    $self->{probe} = $args->{probe};
+    my $probe_validated = $self->_validate_multisect_builds_args($args);
 
     # Prepare data structures in the object to hold results of build runs on a
     # per target, per commit basis.
@@ -309,6 +295,31 @@ sub multisect_builds {
     $self->{timings} = \%timings;
 
     return 1;
+}
+
+sub _validate_multisect_builds_args {
+    my ($self, $args) = @_;
+    if (defined $args) {
+        croak "Argument passed to multisect_builds() must be hashref"
+            unless ref($args) eq 'HASH';
+        my %good_keys = map {$_ => 1} (qw| probe |);
+        for my $k (keys %{$args}) {
+            croak "Invalid key '$k' in hashref passed to multisect_builds()"
+                unless $good_keys{$k};
+        }
+        my %good_values = map {$_ => 1} (qw| error warning stderr |);
+        for my $v (values %{$args}) {
+            croak "Invalid value '$v' in 'probe' element in hashref passed to multisect_builds()"
+                unless $good_values{$v};
+        }
+        $self->{probe} = $args->{probe};
+    }
+    else {
+        # If no $args passed to multisect_build(), then we rely on either
+        # the value for 'probe' provided by user to new() or the default value
+        # -- 'error' -- now provided in Devel::Git::MultiBisect::Opts.
+    }
+    return $self->{probe};
 }
 
 sub _prepare_for_multisection {
