@@ -69,9 +69,40 @@ This package inherits methods from F<Devel::Git::MultiBisect>.  Only methods uni
 F<Devel::Git::MultiBisect::Transitions> are documented here.  See the documentation for
 F<Devel::Git::MultiBisect> for all other methods, including:
 
-    new()
     get_commits_range()
     set_targets()
+
+=head2 C<new()>
+
+=over 4
+
+=item * Purpose
+
+Constructor.
+
+=item * Arguments
+
+    $self = Devel::Git::MultiBisect::Transitions->new(\%params);
+
+Reference to a hash, typically the return value of
+C<Devel::Git::MultiBisect::Opts::process_options()>.
+
+=item * Return Value
+
+Object of Devel::Git::MultiBisect child class.
+
+=back
+
+=cut
+
+sub new {
+    my ($class, $params) = @_;
+    my $data = $class->SUPER::new($params);
+
+    delete $data->{probe};
+
+    return bless $data, $class;
+}
 
 =head2 C<multisect_all_targets()>
 

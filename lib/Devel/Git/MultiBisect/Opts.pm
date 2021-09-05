@@ -73,6 +73,7 @@ sub process_options {
        'configure_command' => 'perl Makefile.PL 1>/dev/null',
        'make_command' => "$found_make 1>/dev/null",
        'test_command' => 'prove -vb',
+       'probe' => 'error',
    );
 
     my %opts;
