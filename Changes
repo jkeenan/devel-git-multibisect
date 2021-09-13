@@ -86,3 +86,11 @@ Revision history for Perl module Devel::Git::MultiBisect
 
 0.19 Wed 01 Sep 2021 08:20:55 AM EDT
     - No change in functionality; requiring Data::Dump for testing.
+
+0.20 Mon Sep 13 01:07:51 UTC 2021
+    - Devel::Git::MultiBisect::Opts: introduce attributes 'compiler' and
+      'probe'.  These will enable us to write programs in which all parameters
+      needed for any of the three variants of 'probe' in BuildTransitions.pm
+      can be supplied via command-line switches; see
+      xt/identify-build-transitions.
+
