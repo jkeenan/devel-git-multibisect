@@ -10,7 +10,7 @@ use Carp;
 use File::Spec;
 use File::Temp qw( tempdir );
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 $VERSION = eval $VERSION;
 
 =head1 NAME
