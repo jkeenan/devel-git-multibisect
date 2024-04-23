@@ -51,6 +51,10 @@ such as the above from an invalid list where 'A' starts to re-appear after
 
 ** Test CPAN distros that only use Module::Build.
 
+** Devel::Git::MultiBisect::set_outside_targets().  See if this can actually
+handle more than one target file.  Can we mix and match inside and outside
+targets?
+
 * Documentation
 
 ** Update README(.md).
