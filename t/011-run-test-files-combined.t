@@ -637,9 +637,9 @@ SKIP: {
 
     $Ttransitions = $Tself->inspect_transitions();
     is(ref($Ttransitions), 'HASH',
-        "get_multisected_outputs() returned hash reference");
+        "inspect_transitions() returned hash reference");
     is(scalar(keys %{$Ttransitions}), scalar(@{$target_args}),
-        "get_multisected_outputs() has one element for each target");
+        "inspect_transitions() has one element for each target");
     for my $target (keys %{$Ttransitions}) {
         for my $k ( qw| newest oldest transitions | ) {
             ok(exists $Ttransitions->{$target}->{$k},
@@ -762,9 +762,9 @@ SKIP: {
 
     $transitions = $self->inspect_transitions();
     is(ref($transitions), 'HASH',
-        "get_multisected_outputs() returned hash reference");
+        "inspect_transitions() returned hash reference");
     is(scalar(keys %{$transitions}), scalar(@{$target_args}),
-        "get_multisected_outputs() has one element for each target");
+        "inspect_transitions() has one element for each target");
     for my $target (keys %{$transitions}) {
         for my $k ( qw| newest oldest transitions | ) {
             ok(exists $transitions->{$target}->{$k},
