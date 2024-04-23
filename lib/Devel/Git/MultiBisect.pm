@@ -13,7 +13,7 @@ use File::Spec;
 use File::Temp;
 use List::Util qw(sum);
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 $VERSION = eval $VERSION;
 
 =head1 NAME
@@ -722,7 +722,7 @@ or through the web interface at L<http://rt.cpan.org>.
 James E. Keenan (jkeenan at cpan dot org).  When sending correspondence, please
 include 'Devel::Git::MultiBisect' or 'Devel-Git-MultiBisect' in your subject line.
 
-Creation date:  October 12 2016. Last modification date:  September 12 2021.
+Creation date:  October 12 2016. Last modification date:  April 23 2024.
 
 Development repository: L<https://github.com/jkeenan/devel-git-multibisect>
 
