@@ -49,7 +49,7 @@ SKIP: {
         verbose => 1,
         # Until development is complete, we will want to be able to inspect
         # files created in the outputdir.
-        outputdir => tempdir( CLEANUP => 0 ),
+        outputdir => tempdir( CLEANUP => 1 ),
     );
     $params = process_options(%args);
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
@@ -190,7 +190,7 @@ SKIP: {
         verbose => 1,
         # Until development is complete, we will want to be able to inspect
         # files created in the outputdir.
-        outputdir => tempdir( CLEANUP => 0 ),
+        outputdir => tempdir( CLEANUP => 1 ),
     );
     $params = process_options(%args);
     $self = Devel::Git::MultiBisect::AllCommits->new($params);
@@ -326,7 +326,7 @@ SKIP: {
         verbose => 0,
         # Until development is complete, we will want to be able to inspect
         # files created in the outputdir.
-        outputdir => tempdir( CLEANUP => 0 ),
+        outputdir => tempdir( CLEANUP => 1 ),
     );
     $params = process_options(%args);
     $target_args = [ File::Spec->catdir( qw| t 001_load.t | ) ];
@@ -455,7 +455,7 @@ SKIP: {
         verbose => 0,
         # Until development is complete, we will want to be able to inspect
         # files created in the outputdir.
-        outputdir => tempdir( CLEANUP => 0 ),
+        outputdir => tempdir( CLEANUP => 1 ),
     );
     $params = process_options(%args);
     $target_args = [
@@ -721,7 +721,7 @@ SKIP: {
         last => $good_last,
         # Until development is complete, we will want to be able to inspect
         # files created in the outputdir.
-        outputdir => tempdir( CLEANUP => 0 ),
+        outputdir => tempdir( CLEANUP => 1 ),
     );
     $params = process_options(%args);
 
